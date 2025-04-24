@@ -214,70 +214,94 @@
 </div>
 
 <script>
-  let currentUser = null;
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+}
 
-  function login() {
-    const username = document.getElementById("username").value.trim();
-    if (!username) return alert("Please enter a username.");
-    currentUser = username;
-    localStorage.setItem("fitnessAppUser", username);
-    document.getElementById("userDisplay").textContent = username;
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("appContainer").style.display = "block";
-    initApp();
-  }
+function addLogEntry() {
+  const exercise = document.getElementById("exercise").value;
+  const sets = +document.getElementById("sets").value;
+  const reps = +document.getElementById("reps").value;
+  const weight = +document.getElementById("weight").value;
+  const goal = +document.getElementById("goal").value;
+  const date = new Date().toISOString().split('T')[0];
+  if (!exercise || !sets || !reps || !weight) return alert("Please fill in all fields.");
+  const log = JSON.parse(localStorage.getItem(`trainingLog_${currentUser}`)) || [];
+  log.push({ exercise, sets, reps, weight, date, goal });
+  localStorage.setItem(`trainingLog_${currentUser}`, JSON.stringify(log));
+  renderLog();
+}
 
-  function showTab(tabId) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-    document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-  }
+function renderLog() {
+  const log = JSON.parse(localStorage.getItem(`trainingLog_${currentUser}`)) || [];
+  const tbody = document.getElementById("logBody");
+  tbody.innerHTML = '';
+  log.forEach((entry, index) => {
+    const progress = entry.goal ? `${Math.min(100, Math.round((entry.weight / entry.goal) * 100))}%` : '-';
+    tbody.innerHTML += `<tr>
+      <td>${entry.exercise}</td>
+      <td>${entry.sets}</td>
+      <td>${entry.reps}</td>
+      <td>${entry.weight}</td>
+      <td>${entry.date}</td>
+      <td>${progress}</td>
+      <td><button onclick="removeLogEntry(${index})">❌</button></td>
+    </tr>`;
+  });
+}
 
-  function initApp() {
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark-mode');
-    }
-    renderLog?.();
-    updateLogChart?.();
-    renderWeights?.();
-    updateWeightChart?.();
-    renderCardio();
-  }
+function removeLogEntry(index) {
+  const log = JSON.parse(localStorage.getItem(`trainingLog_${currentUser}`)) || [];
+  log.splice(index, 1);
+  localStorage.setItem(`trainingLog_${currentUser}`, JSON.stringify(log));
+  renderLog();
+}
 
-  function addCardioEntry() {
-    const type = document.getElementById("cardioType").value;
-    const duration = +document.getElementById("cardioDuration").value;
-    const distance = +document.getElementById("cardioDistance").value;
-    const notes = document.getElementById("cardioNotes").value;
-    const date = new Date().toISOString().split('T')[0];
-    if (!type || !duration || !distance) return alert("Please fill in all required fields.");
-    const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-    log.push({ date, type, duration, distance, notes });
-    localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
-    renderCardio();
-  }
+function renderWeights() {
+  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  const weightBody = document.getElementById("weightBody");
+  weightBody.innerHTML = '';
+  weights.forEach((entry, index) => {
+    weightBody.innerHTML += `<tr>
+      <td>${entry.date}</td>
+      <td>${entry.weight}</td>
+      <td><button onclick="removeWeightEntry(${index})">❌</button></td>
+    </tr>`;
+  });
+}
 
-  function renderCardio() {
-    const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-    const body = document.getElementById("cardioBody");
-    body.innerHTML = '';
-    log.forEach(entry => {
-      body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance}</td><td>${entry.notes || ''}</td></tr>`;
-    });
-  }
+function removeWeightEntry(index) {
+  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  log.splice(index, 1);
+  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
+  renderWeights();
+}
 
-  window.onload = () => {
-    const savedUser = localStorage.getItem("fitnessAppUser");
-    if (savedUser) {
-      currentUser = savedUser;
-      document.getElementById("userDisplay").textContent = savedUser;
-      document.getElementById("loginContainer").style.display = "none";
-      document.getElementById("appContainer").style.display = "block";
-      initApp();
-    }
-  }
+function renderCardio() {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  const body = document.getElementById("cardioBody");
+  body.innerHTML = '';
+  log.forEach((entry, index) => {
+    body.innerHTML += `<tr>
+      <td>${entry.date}</td>
+      <td>${entry.type}</td>
+      <td>${entry.duration}</td>
+      <td>${entry.distance}</td>
+      <td>${entry.notes || ''}</td>
+      <td><button onclick="removeCardioEntry(${index})">❌</button></td>
+    </tr>`;
+  });
+}
+
+function removeCardioEntry(index) {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  log.splice(index, 1);
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
+  renderCardio();
+}
 </script>
+
 
 </body>
 </html>
