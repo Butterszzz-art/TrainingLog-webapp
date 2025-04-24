@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker App</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; margin: 0; max-width: 800px; margin: auto; }
+    input, button { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    canvas { margin-top: 30px; max-width: 100%; }
+    .tabs { display: flex; margin-bottom: 20px; }
+    .tab { flex: 1; padding: 10px; text-align: center; background: #eee; cursor: pointer; border: 1px solid #ccc; }
+    .tab.active { background: #ddd; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    @media (max-width: 600px) {
+      th, td { font-size: 12px; padding: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fitness Tracker</h1>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('logTab')">Training Log</div>
+    <div class="tab" onclick="showTab('weightTab')">Bodyweight</div>
+  </div>
+
+  <div id="logTab" class="tab-content active">
+    <h2>Resistance Exercise Log</h2>
+    <input type="text" id="exercise" placeholder="Exercise">
+    <input type="number" id="sets" placeholder="Sets" min="1">
+    <input type="number" id="reps" placeholder="Reps" min="1">
+    <input type="number" id="weight" placeholder="Weight (kg)" min="0">
+    <button onclick="addLogEntry()">Add to Log</button>
+    <table>
+      <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+    <canvas id="logChart"></canvas>
+  </div>
+
+  <div id="weightTab" class="tab-content">
+    <h2>Bodyweight Tracker</h2>
+    <input type="number" id="bodyweight" placeholder="Bodyweight (kg)" min="0">
+    <button onclick="addWeightEntry()">Add Weight</button>
+    <table>
+      <thead><tr><th>Date</th><th>Weight (kg)</th></tr></thead>
+      <tbody id="weightBody"></tbody>
+    </table>
+    <canvas id="weightChart"></canvas>
+  </div>
+
+  <script>
+    let logChart, weightChart;
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Training Log Functions
+    function getLog() {
+      return JSON.parse(localStorage.getItem('trainingLog')) || [];
+    }
+
+    function saveLog(log) {
+      localStorage.setItem('trainingLog', JSON.stringify(log));
+    }
+
+    function addLogEntry() {
+      const exercise = document.getElementById("exercise").value;
+      const sets = +document.getElementById("sets").value;
+      const reps = +document.getElementById("reps").value;
+      const weight = +document.getElementById("weight").value;
+      const date = new Date().toISOString().split('T')[0];
+      if (!exercise || !sets || !reps || !weight) return alert("Fill all fields");
+      const log = getLog();
+      log.push({ exercise, sets, reps, weight, date });
+      saveLog(log);
+      renderLog();
+      updateLogChart();
+    }
+
+    function renderLog() {
+      const log = getLog();
+      const logBody = document.getElementById("logBody");
+      logBody.innerHTML = '';
+      log.forEach(entry => {
+        logBody.innerHTML += `<tr><td>${entry.exercise}</td><td>${entry.sets}</td><td>${entry.reps}</td><td>${entry.weight}</td><td>${entry.date}</td></tr>`;
+      });
+    }
+
+    function updateLogChart() {
+      const log = getLog();
+      const grouped = {};
+      log.forEach(({ exercise, weight, date }) => {
+        if (!grouped[exercise]) grouped[exercise] = {};
+        if (!grouped[exercise][date]) grouped[exercise][date] = [];
+        grouped[exercise][date].push(weight);
+      });
+
+      const datasets = Object.entries(grouped).map(([exercise, dates]) => {
+        const sorted = Object.entries(dates).sort(([a],[b]) => a.localeCompare(b));
+        return {
+          label: exercise,
+          data: sorted.map(([d, w]) => ({ x: d, y: w.reduce((a, b) => a + b) / w.length })),
+          borderWidth: 2,
+          fill: false
+        };
+      });
+
+      const ctx = document.getElementById("logChart").getContext("2d");
+      if (logChart) logChart.destroy();
+      logChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+          responsive: true,
+          scales: {
+            x: { type: 'time', time: { unit: 'day' }, title: { display: true, text: 'Date' } },
+            y: { title: { display: true, text: 'Weight (kg)' } }
+          },
+          plugins: {
+            title: { display: true, text: 'Training Progress' }
+          }
+        }
+      });
+    }
+
+    // Bodyweight Tracker Functions
+    function getWeights() {
+      return JSON.parse(localStorage.getItem('bodyweightLog')) || [];
+    }
+
+    function saveWeights(weights) {
+      localStorage.setItem('bodyweightLog', JSON.stringify(weights));
+    }
+
+    function addWeightEntry() {
+      const weight = +document.getElementById("bodyweight").value;
+      const date = new Date().toISOString().split('T')[0];
+      if (!weight) return alert("Enter a weight");
+      const log = getWeights();
+      log.push({ weight, date });
+      saveWeights(log);
+      renderWeights();
+      updateWeightChart();
+    }
+
+    function renderWeights() {
+      const weights = getWeights();
+      const weightBody = document.getElementById("weightBody");
+      weightBody.innerHTML = '';
+      weights.forEach(entry => {
+        weightBody.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td></tr>`;
+      });
+    }
+
+    function updateWeightChart() {
+      const log = getWeights();
+      const sorted = log.sort((a, b) => a.date.localeCompare(b.date));
+      const ctx = document.getElementById("weightChart").getContext("2d");
+      if (weightChart) weightChart.destroy();
+      weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sorted.map(e => e.date),
+          datasets: [{
+            label: "Bodyweight (kg)",
+            data: sorted.map(e => e.weight),
+            borderWidth: 2,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { title: { display: true, text: 'Weight (kg)' } }
+          },
+          plugins: {
+            title: { display: true, text: 'Bodyweight Over Time' }
+          }
+        }
+      });
+    }
+
+    // Init
+    window.onload = () => {
+      renderLog();
+      updateLogChart();
+      renderWeights();
+      updateWeightChart();
+    }
+  </script>
+</body>
+</html>
