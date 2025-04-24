@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fitness Tracker App</title>
+
 <style>
   :root {
     --bg-color: #f9f9fb;
@@ -145,6 +152,23 @@
     }
   }
 </style>
+
+  </head>
+<body>
+
+<div id="loginContainer">
+  <h2>Login to your Tracker</h2>
+  <input type="text" id="username" placeholder="Enter username">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="appContainer">
+  <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
+  <!-- Tabs, Inputs, Tables will go here (copy yours into here) -->
+</div>
+
+</body>
+</html>
 
 <script>
 let currentUser = null;
