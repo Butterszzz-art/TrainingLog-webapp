@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bodyweight Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; max-width: 700px; margin: auto; }
+    input, button { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    canvas { margin-top: 30px; max-width: 100%; }
+    #loginBox, #app { display: none; }
+    nav a { margin-right: 10px; display: inline-block; margin-bottom: 10px; }
+    @media (max-width: 600px) {
+      th, td { font-size: 12px; padding: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginBox">
+    <h2>Login to Track Bodyweight</h2>
+    <input type="text" id="usernameInput" placeholder="Enter your username">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="app">
+    <h1>Welcome, <span id="userDisplay"></span> 👋</h1>
+    <nav>
+      <a href="index.html">← Back to Training Log</a>
+      <button onclick="logout()">Logout</button>
+    </nav>
+
+    <h2>Enter Bodyweight</h2>
+    <input type="number" id="weight" placeholder="Weight (kg)" min="0">
+    <button onclick="addEntry()">Add Weight</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Weight (kg)</th>
+        </tr>
+      </thead>
+      <tbody id="weightBody"></tbody>
+    </table>
+
+    <canvas id="weightChart"></canvas>
+  </div>
+
+  <script>
+    let chart;
+    let currentUser = null;
+
+    function login() {
+      const username = document.getElementById("usernameInput").value.trim();
+      if (!username) return alert("Enter a username");
+      currentUser = username;
+      localStorage.setItem("currentUser", currentUser);
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("userDisplay").textContent = currentUser;
+      const log = getLog();
+      renderLog(log);
+      updateChart(log);
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      location.reload();
+    }
+
+    function getLog() {
+      return JSON.parse(localStorage.getItem(`bodyweight_${currentUser}`)) || [];
+    }
+
+    function saveLog(log) {
+      localStorage.setItem(`bodyweight_${currentUser}`, JSON.stringify(log));
+    }
+
+    function addEntry() {
+      const weight = +document.getElementById("weight").value;
+      const date = new Date().toISOString().split('T')[0];
+      if (!weight) return alert("Enter a weight");
+      const log = getLog();
+      log.push({ weight, date });
+      saveLog(log);
+      renderLog(log);
+      updateChart(log);
+    }
+
+    function renderLog(log) {
+      const weightBody = document.getElementById("weightBody");
+      weightBody.innerHTML = '';
+      log.forEach(entry => {
+        weightBody.innerHTML += `<tr>
+          <td>${entry.date}</td>
+          <td>${entry.weight}</td
