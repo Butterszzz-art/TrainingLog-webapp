@@ -1,69 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fitness Tracker</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-
-<div id="loginContainer">
-  <h2>Login to your Tracker</h2>
-  <input type="text" id="username" placeholder="Enter username">
-  <button onclick="login()">Login</button>
-</div>
-
-<div id="appContainer" style="display:none;">
-  <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
-  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-
-  <div class="tabs">
-    <button onclick="showTab('logTab')">Training Log</button>
-    <button onclick="showTab('weightTab')">Bodyweight</button>
-    <button onclick="showTab('cardioTab')">Cardio</button>
-  </div>
-
-  <div id="logTab" class="tab-content active">
-    <h2>Resistance Exercise Log</h2>
-    <input type="text" id="exercise" placeholder="Exercise">
-    <input type="number" id="sets" placeholder="Sets" min="1">
-    <input type="number" id="reps" placeholder="Reps" min="1">
-    <input type="number" id="weight" placeholder="Weight (kg)" min="0">
-    <input type="number" id="goal" placeholder="Target Weight (kg)">
-    <button onclick="addLogEntry()">Add to Log</button>
-    <button onclick="completeWorkout()">Complete Workout</button>
-    <table>
-      <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th></tr></thead>
-      <tbody id="logBody"></tbody>
-    </table>
-    <div id="workoutsContainer"></div>
-  </div>
-
-  <div id="weightTab" class="tab-content">
-    <h2>Bodyweight Tracker</h2>
-    <input type="number" id="bodyweight" placeholder="Weight (kg)" min="0">
-    <button onclick="addWeightEntry()">Add Weight</button>
-    <table>
-      <thead><tr><th>Date</th><th>Weight (kg)</th><th>Remove</th></tr></thead>
-      <tbody id="weightBody"></tbody>
-    </table>
-  </div>
-
-  <div id="cardioTab" class="tab-content">
-    <h2>Cardio Tracker</h2>
-    <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
-    <input type="number" id="cardioDuration" placeholder="Duration (min)">
-    <input type="number" id="cardioDistance" placeholder="Distance (km)">
-    <input type="text" id="cardioNotes" placeholder="Notes (optional)">
-    <button onclick="addCardioEntry()">Add Cardio</button>
-    <table>
-      <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Notes</th><th>Remove</th></tr></thead>
-      <tbody id="cardioBody"></tbody>
-    </table>
-    <div id="cardioSessionsContainer"></div>
-  </div>
-</div>
+<style>
+  :root {
+    --bg-color: #f9f9fb;
+    --text-color: #222;
+    --primary: #007bff;
+    --danger: #dc3545;
+    --card-bg: #fff;
+    --border-color: #ddd;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 20px;
+    margin: 0;
+    max-width: 900px;
+    margin: auto;
+  }
+  h1, h2 {
+    margin-top: 0;
+    color: var(--primary);
+  }
+  input, button, select {
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+  }
+  button {
+    background-color: var(--primary);
+    color: #fff;
+    border: none;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+  }
+  th, td {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+  }
+  th {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+  .tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: #eaeaea;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.3s;
+    font-weight: bold;
+  }
+  .tab.active {
+    background: var(--primary);
+    color: white;
+  }
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  .export-btn, .toggle-btn, .float-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .float-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 22px;
+    border-radius: 50%;
+    padding: 15px 20px;
+    box-shadow: var(--shadow);
+  }
+  .float-btn:hover {
+    background-color: #0056b3;
+  }
+  .dark-mode {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+  .dark-mode table, .dark-mode th, .dark-mode td {
+    border-color: #333;
+  }
+  .highlight-pr {
+    background-color: #fff3cd !important;
+  }
+  #loginContainer {
+    max-width: 400px;
+    margin: auto;
+    padding-top: 50px;
+  }
+  #appContainer {
+    display: none;
+  }
+  .remove-btn {
+    background-color: var(--danger);
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .remove-btn:hover {
+    background-color: #c82333;
+  }
+  @media (max-width: 600px) {
+    th, td {
+      font-size: 12px;
+      padding: 6px;
+    }
+  }
+</style>
 
 <script>
 let currentUser = null;
@@ -79,115 +160,5 @@ function login() {
   initApp();
 }
 
-function initApp() {
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark-mode');
-  }
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-}
-
-function toggleDarkMode() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-}
-
-function addLogEntry() {
-  const exercise = document.getElementById("exercise").value;
-  const sets = +document.getElementById("sets").value;
-  const reps = +document.getElementById("reps").value;
-  const weight = +document.getElementById("weight").value;
-  const goal = +document.getElementById("goal").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!exercise || !sets || !reps || !weight) return alert("Please fill in all fields.");
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  workouts[workouts.length - 1].log.push({ exercise, sets, reps, weight, goal, date });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function completeWorkout() {
-  const date = new Date().toISOString().split('T')[0];
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function renderWorkouts() {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const container = document.getElementById("workoutsContainer");
-  container.innerHTML = '';
-  workouts.forEach((workout, index) => {
-    const details = workout.log.map(entry => `
-      <tr>
-        <td>${entry.exercise}</td>
-        <td>${entry.sets}</td>
-        <td>${entry.reps}</td>
-        <td>${entry.weight}</td>
-        <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}</td>
-      </tr>`).join('');
-    container.innerHTML += `
-      <div style="margin-bottom: 20px;">
-        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
-        <div id="workoutDetails${index}" style="display: none;">
-          <table><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th></tr></thead><tbody>${details}</tbody></table>
-        </div>
-      </div>`;
-  });
-}
-
-function toggleWorkoutDetails(index) {
-  const el = document.getElementById(`workoutDetails${index}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function renderWeights() {
-  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  const weightBody = document.getElementById("weightBody");
-  weightBody.innerHTML = '';
-  weights.forEach((entry, index) => {
-    weightBody.innerHTML += `<tr>
-      <td>${entry.date}</td>
-      <td>${entry.weight}</td>
-      <td><button onclick="removeWeightEntry(${index})">❌</button></td>
-    </tr>`;
-  });
-}
-
-function removeWeightEntry(index) {
-  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  log.splice(index, 1);
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
-  renderWeights();
-}
-
-function renderCardio() {
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  const body = document.getElementById("cardioBody");
-  body.innerHTML = '';
-  log.forEach((entry, index) => {
-    body.innerHTML += `<tr>
-      <td>${entry.date}</td>
-      <td>${entry.type}</td>
-      <td>${entry.duration}</td>
-      <td>${entry.distance}</td>
-      <td>${entry.notes || ''}</td>
-      <td><button onclick="removeCardioEntry(${index})">❌</button></td>
-    </tr>`;
-  });
-}
-
-function removeCardioEntry(index) {
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  log.splice(index, 1);
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
-  renderCardio();
-}
+//... existing JS code continues
 </script>
-
-</body>
-</html>
