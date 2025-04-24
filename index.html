@@ -46,6 +46,32 @@
     <div class="tab" onclick="showTab('cardioTab')">Cardio</div>
   </div>
 
+  <!-- Training Log Tab Content -->
+  <div id="logTab" class="tab-content active">
+    <h2>Resistance Exercise Log</h2>
+    <input type="text" id="exercise" placeholder="Exercise">
+    <input type="number" id="sets" placeholder="Sets" min="1">
+    <input type="number" id="reps" placeholder="Reps" min="1">
+    <input type="number" id="weight" placeholder="Weight (kg)" min="0">
+    <input type="number" id="goal" placeholder="Target Weight (kg)">
+    <button onclick="addLogEntry()">Add to Log</button>
+    <table>
+      <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Bodyweight Tab Content -->
+  <div id="weightTab" class="tab-content">
+    <h2>Bodyweight Tracker</h2>
+    <input type="number" id="bodyweight" placeholder="Weight (kg)" min="0">
+    <button onclick="addWeightEntry()">Add Weight</button>
+    <table>
+      <thead><tr><th>Date</th><th>Weight (kg)</th></tr></thead>
+      <tbody id="weightBody"></tbody>
+    </table>
+  </div>
+
   <!-- Cardio Tab Content -->
   <div id="cardioTab" class="tab-content">
     <h2>Cardio Tracker</h2>
