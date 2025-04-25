@@ -238,6 +238,18 @@ function showTab(tabId) {
   document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
 }
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+window.onload = () => {
+  const savedUser = localStorage.getItem("fitnessAppUser");
+  if (savedUser) {
+    currentUser = savedUser;
+    document.getElementById("userDisplay").textContent = savedUser;
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("appContainer").style.display = "block";
+    initApp();
+  }
+};
+</script>
 </body>
 </html>
