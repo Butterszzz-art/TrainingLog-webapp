@@ -127,7 +127,7 @@
     <div class="tab" onclick="showTab('cardioTab')">Cardio</div>
     <div class="tab" onclick="showTab('macroTab')">Macros</div>
   </div>
-  <!-- Existing Tabs... -->
+  <!-- Macro Tab -->
   <div id="macroTab" class="tab-content">
     <h2>Macronutrient Tracker</h2>
     <input type="number" id="protein" placeholder="Protein (g)" min="0">
@@ -136,6 +136,7 @@
     <button onclick="calculateCalories()">Calculate Calories</button>
     <h3>Total Calories: <span id="totalCalories">0</span> kcal</h3>
   </div>
+  <!-- Bodyweight Tab -->
   <div id="weightTab" class="tab-content">
     <h2>Bodyweight Tracker</h2>
     <input type="number" id="initialWeight" placeholder="Initial Weight (kg)" min="0">
@@ -149,6 +150,24 @@
   </div>
 </div>
 <script>
+let currentUser = null;
+
+function login() {
+  const username = document.getElementById("username").value.trim();
+  if (!username) return alert("Please enter a username.");
+  currentUser = username;
+  document.getElementById("userDisplay").textContent = username;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+}
+
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+}
+
 function calculateCalories() {
   const protein = +document.getElementById("protein").value || 0;
   const carbs = +document.getElementById("carbs").value || 0;
@@ -163,7 +182,7 @@ function estimateCalories() {
   const avgCals = +document.getElementById("avgCalories").value;
   if (!start || !current || !avgCals) return alert("Fill all fields");
   const weightDiff = start - current;
-  const days = 30; // Assuming monthly weight loss
+  const days = 30;
   const caloriesBurned = weightDiff * 7700;
   const maintenance = Math.round(avgCals + (caloriesBurned / days));
   const loss = maintenance - 500;
