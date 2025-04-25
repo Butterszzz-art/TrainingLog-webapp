@@ -102,6 +102,9 @@
 </div>
 
 <div id="appContainer" style="display:none;">
+  <div style="text-align: right; margin-bottom: 10px;" id="logoutSection">
+  <button onclick="logout()">Logout</button>
+</div>
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
 
   <div class="tabs">
@@ -225,13 +228,20 @@ function renderWorkouts() {
         <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}</td>
         <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
       </tr>`).join('');
-    container.innerHTML += `
-      <div style="margin-bottom: 20px;">
-        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
-        <div id="workoutDetails${index}" style="display: none;">
-          <table><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr></thead><tbody>${rows}</tbody></table>
-        </div>
-      </div>`;
+   container.innerHTML += `
+  <div style="margin-bottom: 20px;">
+    <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
+    <div id="workoutDetails${index}" style="display: none;">
+      <table>
+        <thead>
+          <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
+    </div>
+  </div>`;
+
   });
 }
 
@@ -331,6 +341,20 @@ function calculateCalories() {
   const total = (protein * 4) + (carbs * 4) + (fats * 9);
   document.getElementById("totalCalories").textContent = total;
 }
+  function logout() {
+  localStorage.removeItem("fitnessAppUser");
+  location.reload();
+}
+
+function removeWorkout(index) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (confirm("Are you sure you want to delete this workout?")) {
+    workouts.splice(index, 1);
+    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+    renderWorkouts();
+  }
+}
+
 </script>
 </body>
 </html>
