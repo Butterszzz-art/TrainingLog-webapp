@@ -274,8 +274,9 @@ function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
   container.innerHTML = '';
+
   workouts.forEach((workout, index) => {
-    const rows = workout.log.map(entry => `
+    const rows = workout.log.map((entry, entryIndex) => `
       <tr>
         <td>${entry.exercise}</td>
         <td>${entry.sets}</td>
@@ -283,6 +284,47 @@ function renderWorkouts() {
         <td>${entry.weight}</td>
         <td>${entry.date}</td>
         <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}</td>
+        <td><button onclick="removeLogEntry(${index}, ${entryIndex})" class="remove-btn">❌</button></td>
+      </tr>
+    `).join('');
+
+    container.innerHTML += `
+      <div style="margin-bottom: 20px;">
+        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; font-weight: bold; text-align: left;">
+          ${workout.title}
+        </button>
+        <div id="workoutDetails${index}" style="display: none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Exercise</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Weight</th>
+                <th>Date</th>
+                <th>Goal Progress</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function removeLogEntry(workoutIndex, entryIndex) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (workouts[workoutIndex]) {
+    workouts[workoutIndex].log.splice(entryIndex, 1);
+    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+    renderWorkouts();
+  }
+}
+
+
+
       </tr>`).join('');
     container.innerHTML += `
       <div style="margin-bottom: 20px;">
