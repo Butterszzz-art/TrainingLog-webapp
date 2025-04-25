@@ -93,46 +93,6 @@
       border-radius: 8px;
       box-shadow: var(--shadow);
     }
-    .export-btn, .toggle-btn, .float-btn {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .float-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      font-size: 22px;
-      border-radius: 50%;
-      padding: 15px 20px;
-      box-shadow: var(--shadow);
-    }
-    .float-btn:hover {
-      background-color: #0056b3;
-    }
-    .dark-mode {
-      background-color: #121212;
-      color: #f0f0f0;
-    }
-    .dark-mode table, .dark-mode th, .dark-mode td {
-      border-color: #333;
-    }
-    .highlight-pr {
-      background-color: #fff3cd !important;
-    }
-    #loginContainer {
-      max-width: 400px;
-      margin: auto;
-      padding-top: 50px;
-    }
-    #appContainer {
-      display: none;
-    }
     .remove-btn {
       background-color: var(--danger);
       border: none;
@@ -154,24 +114,18 @@
   </style>
 </head>
 <body>
-
 <div id="loginContainer">
   <h2>Login to your Tracker</h2>
   <input type="text" id="username" placeholder="Enter username">
   <button onclick="login()">Login</button>
 </div>
-
-<div id="appContainer">
+<div id="appContainer" style="display:none;">
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
-  <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-
   <div class="tabs">
     <div class="tab active" onclick="showTab('logTab')">Training Log</div>
     <div class="tab" onclick="showTab('weightTab')">Bodyweight</div>
     <div class="tab" onclick="showTab('cardioTab')">Cardio</div>
   </div>
-
-  <!-- Training Log Tab -->
   <div id="logTab" class="tab-content active">
     <h2>Resistance Exercise Log</h2>
     <input type="text" id="exercise" placeholder="Exercise">
@@ -181,14 +135,8 @@
     <input type="number" id="goal" placeholder="Target Weight (kg)">
     <button onclick="addLogEntry()">Add to Log</button>
     <button onclick="completeWorkout()">Complete Workout</button>
-    <table>
-      <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th></tr></thead>
-      <tbody id="logBody"></tbody>
-    </table>
     <div id="workoutsContainer"></div>
   </div>
-
-  <!-- Bodyweight Tab -->
   <div id="weightTab" class="tab-content">
     <h2>Bodyweight Tracker</h2>
     <input type="number" id="bodyweight" placeholder="Weight (kg)">
@@ -198,8 +146,6 @@
       <tbody id="weightBody"></tbody>
     </table>
   </div>
-
-  <!-- Cardio Tab -->
   <div id="cardioTab" class="tab-content">
     <h2>Cardio Tracker</h2>
     <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
@@ -212,12 +158,29 @@
       <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Notes</th><th>Remove</th></tr></thead>
       <tbody id="cardioBody"></tbody>
     </table>
-    <div id="cardioSessionsContainer"></div>
   </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+let currentUser = null;
+
+function login() {
+  const username = document.getElementById("username").value.trim();
+  if (!username) return alert("Please enter a username.");
+  currentUser = username;
+  localStorage.setItem("fitnessAppUser", username);
+  document.getElementById("userDisplay").textContent = username;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+  initApp();
+}
+
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
 function addLogEntry() {
   const exercise = document.getElementById("exercise").value;
   const sets = +document.getElementById("sets").value;
@@ -241,40 +204,10 @@ function completeWorkout() {
   renderWorkouts();
 }
 
-function addWeightEntry() {
-  const weight = +document.getElementById("bodyweight").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!weight) return alert("Enter a weight");
-  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  weights.push({ weight, date });
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(weights));
-  renderWeights();
-}
-
-function addCardioEntry() {
-  const type = document.getElementById("cardioType").value;
-  const duration = +document.getElementById("cardioDuration").value;
-  const distance = +document.getElementById("cardioDistance").value;
-  const notes = document.getElementById("cardioNotes").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!type || !duration || !distance) return alert("Please fill in all required fields.");
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.push({ type, duration, distance, notes, date });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
-  renderCardio();
-}
-</script>
-<script>
-function toggleDarkMode() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-}
-
 function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
   container.innerHTML = '';
-
   workouts.forEach((workout, index) => {
     const rows = workout.log.map((entry, entryIndex) => `
       <tr>
@@ -287,7 +220,6 @@ function renderWorkouts() {
         <td><button onclick="removeLogEntry(${index}, ${entryIndex})" class="remove-btn">❌</button></td>
       </tr>
     `).join('');
-
     container.innerHTML += `
       <div style="margin-bottom: 20px;">
         <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; font-weight: bold; text-align: left;">
@@ -297,21 +229,19 @@ function renderWorkouts() {
           <table>
             <thead>
               <tr>
-                <th>Exercise</th>
-                <th>Sets</th>
-                <th>Reps</th>
-                <th>Weight</th>
-                <th>Date</th>
-                <th>Goal Progress</th>
-                <th>Remove</th>
+                <th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
-      </div>
-    `;
+      </div>`;
   });
+}
+
+function toggleWorkoutDetails(index) {
+  const el = document.getElementById(`workoutDetails${index}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function removeLogEntry(workoutIndex, entryIndex) {
@@ -323,22 +253,14 @@ function removeLogEntry(workoutIndex, entryIndex) {
   }
 }
 
-
-
-      </tr>`).join('');
-    container.innerHTML += `
-      <div style="margin-bottom: 20px;">
-        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; font-weight: bold; text-align: left;">${workout.title}</button>
-        <div id="workoutDetails${index}" style="display: none;">
-          <table><thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th></tr></thead><tbody>${rows}</tbody></table>
-        </div>
-      </div>`;
-  });
-}
-
-function toggleWorkoutDetails(index) {
-  const el = document.getElementById(`workoutDetails${index}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+function addWeightEntry() {
+  const weight = +document.getElementById("bodyweight").value;
+  const date = new Date().toISOString().split('T')[0];
+  if (!weight) return alert("Enter a weight");
+  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  weights.push({ weight, date });
+  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(weights));
+  renderWeights();
 }
 
 function renderWeights() {
@@ -359,6 +281,27 @@ function removeWeightEntry(index) {
   weights.splice(index, 1);
   localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(weights));
   renderWeights();
+}
+
+function addCardioEntry() {
+  const type = document.getElementById("cardioType").value;
+  const duration = +document.getElementById("cardioDuration").value;
+  const distance = +document.getElementById("cardioDistance").value;
+  const notes = document.getElementById("cardioNotes").value;
+  const date = new Date().toISOString().split('T')[0];
+  if (!type || !duration || !distance) return alert("Please fill in all required fields.");
+  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  cardio.push({ type, duration, distance, notes, date });
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
+  renderCardio();
+}
+
+function completeCardioSession() {
+  const date = new Date().toISOString().split('T')[0];
+  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  cardio.push({ date, type: "Cardio Session", duration: 0, distance: 0, notes: "Completed session" });
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
+  renderCardio();
 }
 
 function renderCardio() {
@@ -384,38 +327,12 @@ function removeCardioEntry(index) {
   renderCardio();
 }
 
-function completeCardioSession() {
-  const date = new Date().toISOString().split('T')[0];
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.push({ date, type: "Cardio Session", duration: 0, distance: 0, notes: "Completed session" });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
-  renderCardio();
-}
-
 function initApp() {
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark-mode');
-  }
   renderWorkouts();
   renderWeights();
   renderCardio();
 }
-</script>
 
-  <script>
-function showTab(tabId) {
-  // Remove "active" from all tabs and contents
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-
-  // Add "active" to selected tab and content
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-  document.getElementById(tabId)?.classList.add('active');
-}
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
 window.onload = () => {
   const savedUser = localStorage.getItem("fitnessAppUser");
   if (savedUser) {
