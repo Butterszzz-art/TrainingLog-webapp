@@ -125,224 +125,55 @@
     <div class="tab active" onclick="showTab('logTab')">Training Log</div>
     <div class="tab" onclick="showTab('weightTab')">Bodyweight</div>
     <div class="tab" onclick="showTab('cardioTab')">Cardio</div>
+    <div class="tab" onclick="showTab('macroTab')">Macros</div>
   </div>
-  <div id="logTab" class="tab-content active">
-    <h2>Resistance Exercise Log</h2>
-    <input type="text" id="exercise" placeholder="Exercise">
-    <input type="number" id="sets" placeholder="Sets">
-    <input type="number" id="reps" placeholder="Reps">
-    <input type="number" id="weight" placeholder="Weight (kg)">
-    <input type="number" id="goal" placeholder="Target Weight (kg)">
-    <button onclick="addLogEntry()">Add to Log</button>
-    <button onclick="completeWorkout()">Complete Workout</button>
-    <div id="workoutsContainer"></div>
+  <!-- Existing Tabs... -->
+  <div id="macroTab" class="tab-content">
+    <h2>Macronutrient Tracker</h2>
+    <input type="number" id="protein" placeholder="Protein (g)" min="0">
+    <input type="number" id="carbs" placeholder="Carbohydrates (g)" min="0">
+    <input type="number" id="fats" placeholder="Fats (g)" min="0">
+    <button onclick="calculateCalories()">Calculate Calories</button>
+    <h3>Total Calories: <span id="totalCalories">0</span> kcal</h3>
   </div>
   <div id="weightTab" class="tab-content">
     <h2>Bodyweight Tracker</h2>
-    <input type="number" id="bodyweight" placeholder="Weight (kg)">
-    <button onclick="addWeightEntry()">Add Weight</button>
+    <input type="number" id="initialWeight" placeholder="Initial Weight (kg)" min="0">
+    <input type="number" id="currentWeight" placeholder="Current Weight (kg)" min="0">
+    <input type="number" id="avgCalories" placeholder="Average Daily Calories" min="0">
+    <button onclick="estimateCalories()">Estimate Maintenance & Goal Calories</button>
     <table>
-      <thead><tr><th>Date</th><th>Weight (kg)</th><th>Remove</th></tr></thead>
-      <tbody id="weightBody"></tbody>
-    </table>
-  </div>
-  <div id="cardioTab" class="tab-content">
-    <h2>Cardio Tracker</h2>
-    <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
-    <input type="number" id="cardioDuration" placeholder="Duration (min)">
-    <input type="number" id="cardioDistance" placeholder="Distance (km)">
-    <input type="text" id="cardioNotes" placeholder="Notes (optional)">
-    <button onclick="addCardioEntry()">Add Cardio</button>
-    <button onclick="completeCardioSession()">Complete Cardio Session</button>
-    <table>
-      <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Notes</th><th>Remove</th></tr></thead>
-      <tbody id="cardioBody"></tbody>
+      <thead><tr><th>Scenario</th><th>Estimated Calories</th></tr></thead>
+      <tbody id="calorieEstimateTable"></tbody>
     </table>
   </div>
 </div>
 <script>
-let currentUser = null;
-
-function login() {
-  const username = document.getElementById("username").value.trim();
-  if (!username) return alert("Please enter a username.");
-  currentUser = username;
-  localStorage.setItem("fitnessAppUser", username);
-  document.getElementById("userDisplay").textContent = username;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-  initApp();
+function calculateCalories() {
+  const protein = +document.getElementById("protein").value || 0;
+  const carbs = +document.getElementById("carbs").value || 0;
+  const fats = +document.getElementById("fats").value || 0;
+  const calories = (protein * 4) + (carbs * 4) + (fats * 9);
+  document.getElementById("totalCalories").textContent = calories;
 }
 
-function showTab(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
-  document.getElementById(tabId).classList.add('active');
+function estimateCalories() {
+  const start = +document.getElementById("initialWeight").value;
+  const current = +document.getElementById("currentWeight").value;
+  const avgCals = +document.getElementById("avgCalories").value;
+  if (!start || !current || !avgCals) return alert("Fill all fields");
+  const weightDiff = start - current;
+  const days = 30; // Assuming monthly weight loss
+  const caloriesBurned = weightDiff * 7700;
+  const maintenance = Math.round(avgCals + (caloriesBurned / days));
+  const loss = maintenance - 500;
+  const gain = maintenance + 500;
+  document.getElementById("calorieEstimateTable").innerHTML = `
+    <tr><td>Maintenance</td><td>${maintenance} kcal</td></tr>
+    <tr><td>Weight Loss (-500)</td><td>${loss} kcal</td></tr>
+    <tr><td>Weight Gain (+500)</td><td>${gain} kcal</td></tr>
+  `;
 }
-
-function addLogEntry() {
-  const exercise = document.getElementById("exercise").value;
-  const sets = +document.getElementById("sets").value;
-  const reps = +document.getElementById("reps").value;
-  const weight = +document.getElementById("weight").value;
-  const goal = +document.getElementById("goal").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!exercise || !sets || !reps || !weight) return alert("Please fill in all fields.");
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  workouts[workouts.length - 1].log.push({ exercise, sets, reps, weight, goal, date });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function completeWorkout() {
-  const date = new Date().toISOString().split('T')[0];
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function renderWorkouts() {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const container = document.getElementById("workoutsContainer");
-  container.innerHTML = '';
-  workouts.forEach((workout, index) => {
-    const rows = workout.log.map((entry, entryIndex) => `
-      <tr>
-        <td>${entry.exercise}</td>
-        <td>${entry.sets}</td>
-        <td>${entry.reps}</td>
-        <td>${entry.weight}</td>
-        <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}</td>
-        <td><button onclick="removeLogEntry(${index}, ${entryIndex})" class="remove-btn">❌</button></td>
-      </tr>
-    `).join('');
-    container.innerHTML += `
-      <div style="margin-bottom: 20px;">
-        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; font-weight: bold; text-align: left;">
-          ${workout.title}
-        </button>
-        <div id="workoutDetails${index}" style="display: none;">
-          <table>
-            <thead>
-              <tr>
-                <th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>`;
-  });
-}
-
-function toggleWorkoutDetails(index) {
-  const el = document.getElementById(`workoutDetails${index}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function removeLogEntry(workoutIndex, entryIndex) {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (workouts[workoutIndex]) {
-    workouts[workoutIndex].log.splice(entryIndex, 1);
-    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-    renderWorkouts();
-  }
-}
-
-function addWeightEntry() {
-  const weight = +document.getElementById("bodyweight").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!weight) return alert("Enter a weight");
-  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  weights.push({ weight, date });
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(weights));
-  renderWeights();
-}
-
-function renderWeights() {
-  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  const tbody = document.getElementById("weightBody");
-  tbody.innerHTML = '';
-  weights.forEach((entry, i) => {
-    tbody.innerHTML += `<tr>
-      <td>${entry.date}</td>
-      <td>${entry.weight}</td>
-      <td><button onclick="removeWeightEntry(${i})" class="remove-btn">❌</button></td>
-    </tr>`;
-  });
-}
-
-function removeWeightEntry(index) {
-  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  weights.splice(index, 1);
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(weights));
-  renderWeights();
-}
-
-function addCardioEntry() {
-  const type = document.getElementById("cardioType").value;
-  const duration = +document.getElementById("cardioDuration").value;
-  const distance = +document.getElementById("cardioDistance").value;
-  const notes = document.getElementById("cardioNotes").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!type || !duration || !distance) return alert("Please fill in all required fields.");
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.push({ type, duration, distance, notes, date });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
-  renderCardio();
-}
-
-function completeCardioSession() {
-  const date = new Date().toISOString().split('T')[0];
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.push({ date, type: "Cardio Session", duration: 0, distance: 0, notes: "Completed session" });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
-  renderCardio();
-}
-
-function renderCardio() {
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  const tbody = document.getElementById("cardioBody");
-  tbody.innerHTML = '';
-  cardio.forEach((entry, i) => {
-    tbody.innerHTML += `<tr>
-      <td>${entry.date}</td>
-      <td>${entry.type}</td>
-      <td>${entry.duration}</td>
-      <td>${entry.distance}</td>
-      <td>${entry.notes || ''}</td>
-      <td><button onclick="removeCardioEntry(${i})" class="remove-btn">❌</button></td>
-    </tr>`;
-  });
-}
-
-function removeCardioEntry(index) {
-  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.splice(index, 1);
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(cardio));
-  renderCardio();
-}
-
-function initApp() {
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-}
-
-window.onload = () => {
-  const savedUser = localStorage.getItem("fitnessAppUser");
-  if (savedUser) {
-    currentUser = savedUser;
-    document.getElementById("userDisplay").textContent = savedUser;
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("appContainer").style.display = "block";
-    initApp();
-  }
-};
 </script>
 </body>
 </html>
