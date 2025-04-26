@@ -95,12 +95,12 @@
 </head>
 <body>
 
-<div id="loginContainer"> 
-  <h2>Login or Register</h2>
-  <input type="text" id="username" placeholder="Enter username" />
-  <input type="password" id="password" placeholder="Enter password" />
+<div id="loginContainer">
+  <h2>Login to Your Fitness Tracker</h2>
+  <input type="text" id="username" placeholder="Enter Username">
+  <input type="password" id="password" placeholder="Enter Password">
   <button onclick="startLogin()">Login</button>
-  <button onclick="startSignup()" style="margin-top:5px; background:#28a745;">Signup</button>
+  <button onclick="startSignup()">Sign Up</button>
 </div>
 
 
@@ -220,10 +220,11 @@
 </div>
 
 <script>
-  const airtableApiKey = '
-pathZwfK2z58ohjBy'; // replace with your Airtable API key
+  const airtableApiKey = 'pathZwfK2z58ohjBy'; // replace with your Airtable API key
 const airtableBaseId = 'appmjr4IgnEH72K1b'; // replace with your Airtable base ID
 const airtableTableName = 'Users';     // replace with your Airtable table name (example: "Users")
+
+let currentUser = null;
 
 async function startLogin() {
   const username = document.getElementById("username").value.trim();
@@ -248,13 +249,9 @@ async function startLogin() {
 
   localStorage.setItem("fitnessAppUser", username);
   currentUser = username;
-  document.getElementById("userDisplay").textContent = username;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-  showTab('logTab');
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
+  alert("Login successful! Redirecting...");
+  // Here you would normally redirect to your app page
+  // window.location.href = 'your-app.html';
 }
 
 async function startSignup() {
@@ -307,7 +304,6 @@ async function createUser(username, password) {
     })
   });
 }
-
   let currentUser = null;
 
 // ===== USER LOGIN / LOGOUT =====
