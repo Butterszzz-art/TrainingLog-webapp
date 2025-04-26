@@ -103,8 +103,9 @@
 
 <div id="appContainer" style="display:none;">
   <div style="text-align: right; margin-bottom: 10px;" id="logoutSection">
-  <button onclick="logout()">Logout</button>
-</div>
+    <button onclick="logout()">Logout</button>
+  </div>
+  
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
 
   <div class="tabs">
@@ -116,11 +117,14 @@
 
   <div id="logTab" class="tab-content active">
     <h2>Resistance Exercise Log</h2>
+    <button onclick="showTemplateList()">Load a Template</button>
+    <div id="templateList" style="display:none; margin-top:10px;"></div>
     <input type="text" id="exercise" placeholder="Exercise">
     <input type="number" id="sets" placeholder="Sets">
     <input type="number" id="reps" placeholder="Reps">
     <input type="number" id="weight" placeholder="Weight (kg)">
-    <input type="number" id="goal" placeholder="Target Weight (kg)">
+    <input type="number" id="goal" placeholder="Target Weight Goal (kg)">
+    <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)">
     <button onclick="addLogEntry()">Add to Log</button>
     <button onclick="completeWorkout()">Complete Workout</button>
     <div id="workoutsContainer"></div>
@@ -167,8 +171,9 @@
 </div>
 
 <script>
-let currentUser = null;
+  let currentUser = null;
 
+// ===== USER LOGIN / LOGOUT =====
 function login() {
   const username = document.getElementById("username").value.trim();
   if (!username) return alert("Please enter a username.");
@@ -195,28 +200,28 @@ function showTab(tabId) {
   document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
 }
 
-// ========== TRAINING LOG FUNCTIONS ==========
-
+// ===== TRAINING LOG & TEMPLATES =====
 function addLogEntry() {
-  const exercise = document.getElementById("exercise").value;
+  const exercise = document.getElementById("exercise").value.trim();
   const sets = +document.getElementById("sets").value;
   const weight = +document.getElementById("weight").value;
   const goal = +document.getElementById("goal").value;
+  const repGoal = +document.getElementById("repGoal").value;
   const date = new Date().toISOString().split('T')[0];
 
-  if (!exercise || !sets || !weight) return alert("Fill exercise, sets, and weight");
+  if (!exercise || !sets) return alert("Fill Exercise and Sets at minimum.");
 
   const repsArray = [];
   for (let i = 0; i < sets; i++) {
     const reps = +prompt(`Enter reps for set ${i + 1}:`);
-    if (!reps && reps !== 0) return alert("All rep fields must be filled");
+    if (reps < 0 || isNaN(reps)) return alert("Invalid reps entered.");
     repsArray.push(reps);
   }
 
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   if (!workouts.length) workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  
-  workouts[workouts.length - 1].log.push({ exercise, sets, repsArray, weight, goal, date });
+
+  workouts[workouts.length - 1].log.push({ exercise, sets, repsArray, weight, goal, repGoal, date });
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   renderWorkouts();
 }
@@ -239,11 +244,12 @@ function renderWorkouts() {
         <td>${entry.exercise}</td>
         <td>${entry.sets}</td>
         <td>${entry.repsArray.join(', ')}</td>
-        <td>${entry.weight}</td>
+        <td>${entry.weight ? entry.weight + ' kg' : '-'}</td>
         <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}</td>
+        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
         <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
       </tr>`).join('');
+
     container.innerHTML += `
     <div style="margin-bottom: 20px;">
       <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
@@ -254,10 +260,26 @@ function renderWorkouts() {
           </thead>
           <tbody>${rows}</tbody>
         </table>
+        <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} kg</p>
         <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
       </div>
     </div>`;
   });
+}
+
+function toggleWorkoutDetails(index) {
+  const el = document.getElementById(`workoutDetails${index}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function calculateWorkoutVolume(workout) {
+  let total = 0;
+  workout.log.forEach(entry => {
+    if (entry.repsArray) {
+      total += entry.repsArray.reduce((a, b) => a + b, 0) * (entry.weight || 0);
+    }
+  });
+  return total;
 }
 
 function removeLogEntry(workoutIndex, entryIndex) {
@@ -269,20 +291,57 @@ function removeLogEntry(workoutIndex, entryIndex) {
 
 function removeWorkout(index) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (confirm("Are you sure you want to delete this workout?")) {
+  if (confirm("Delete this entire workout?")) {
     workouts.splice(index, 1);
     localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
     renderWorkouts();
   }
 }
 
-function toggleWorkoutDetails(index) {
-  const el = document.getElementById(`workoutDetails${index}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+// ====== TEMPLATES ======
+function showTemplateList() {
+  const container = document.getElementById('templateList');
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  container.innerHTML = '<h4>Templates:</h4>';
+  templates.forEach((template, index) => {
+    container.innerHTML += `
+      <button onclick="loadTemplate(${index})">${template.name}</button>
+      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
+    `;
+  });
+  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
+  container.style.display = 'block';
 }
 
-// ========== BODYWEIGHT FUNCTIONS ==========
+function saveTemplate() {
+  const name = prompt("Name your template:");
+  if (!name) return;
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (!workouts.length) return alert("No current workout to save.");
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  templates.push({ name, data: workouts[workouts.length - 1] });
+  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
+  showTemplateList();
+}
 
+function loadTemplate(index) {
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  const template = templates[index];
+  if (!template) return;
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts.push({...template.data, date: new Date().toISOString().split('T')[0]});
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+
+function deleteTemplate(index) {
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  templates.splice(index, 1);
+  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
+  showTemplateList();
+}
+
+// ===== BODYWEIGHT TRACKER =====
 function addWeightEntry() {
   const weight = +document.getElementById("currentWeightInput").value;
   const date = new Date().toISOString().split('T')[0];
@@ -312,7 +371,7 @@ function removeWeightEntry(index) {
 function estimateCalories() {
   const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
   const avgCals = +document.getElementById("avgCalories").value;
-  if (log.length < 7) return alert("Log at least 7 days of weight for accurate estimate.");
+  if (log.length < 7) return alert("Need at least 7 days of weight entries.");
   const weightDiff = log[0].weight - log[log.length - 1].weight;
   const caloriesBurned = weightDiff * 7700;
   const maintenance = Math.round(avgCals + (caloriesBurned / log.length));
@@ -323,10 +382,9 @@ function estimateCalories() {
   `;
 }
 
-// ========== CARDIO FUNCTIONS ==========
-
+// ===== CARDIO TRACKER =====
 function addCardioEntry() {
-  const type = document.getElementById("cardioType").value;
+  const type = document.getElementById("cardioType").value.trim();
   const duration = +document.getElementById("cardioDuration").value;
   const distance = document.getElementById("cardioDistance").value;
   const notes = document.getElementById("cardioNotes").value;
@@ -362,8 +420,7 @@ function removeCardioEntry(index) {
   renderCardio();
 }
 
-// ========== MACRONUTRIENT FUNCTIONS ==========
-
+// ===== MACROS =====
 function calculateCalories() {
   const protein = +document.getElementById("protein").value || 0;
   const carbs = +document.getElementById("carbs").value || 0;
@@ -371,6 +428,8 @@ function calculateCalories() {
   const total = (protein * 4) + (carbs * 4) + (fats * 9);
   document.getElementById("totalCalories").textContent = total;
 }
+
 </script>
+
 </body>
 </html>
