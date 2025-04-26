@@ -224,13 +224,12 @@
   
 let currentUser = null;
   
-const airtableApiKey = 'pathZwfK2z58ohjBy';
-const airtableBaseId = 'appmjr4IgnEH72K1b';
-const airtableTableName = 'Users';
+const airtableApiKey = 'pathZwfK2z58ohjBy'; // ✅ your real Airtable API key
+const airtableBaseId = 'appmjr4IgnEH72K1b'; // ✅ your real Base ID
+const airtableTableName = 'Users';          // ✅ your table name
+let currentUser = null;
 
-
-
-
+// START LOGIN PROCESS
 async function startLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -240,25 +239,40 @@ async function startLogin() {
     return;
   }
 
-  const userRecord = await fetchUser(username);
+  try {
+    const userRecord = await fetchUser(username);
 
-  if (!userRecord) {
-    alert("User not found.");
-    return;
+    if (!userRecord) {
+      alert("User not found.");
+      return;
+    }
+
+    if (userRecord.fields.Password !== password) {
+      alert("Incorrect password.");
+      return;
+    }
+
+    // SUCCESS
+    currentUser = username;
+    localStorage.setItem("fitnessAppUser", username);
+
+    document.getElementById("userDisplay").textContent = username;
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("appContainer").style.display = "block";
+    
+    showTab('logTab');
+    renderWorkouts();
+    renderWeights();
+    renderCardio();
+    renderCrossfitWorkouts();
+
+  } catch (error) {
+    console.error('Login error:', error);
+    alert("An error occurred during login.");
   }
-
-  if (userRecord.fields.Password !== password) {
-    alert("Incorrect password.");
-    return;
-  }
-
-  localStorage.setItem("fitnessAppUser", username);
-  currentUser = username;
-  alert("Login successful! Redirecting...");
-  // Here you would normally redirect to your app page
-  // window.location.href = 'your-app.html';
 }
 
+// START SIGNUP PROCESS
 async function startSignup() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -268,17 +282,24 @@ async function startSignup() {
     return;
   }
 
-  const existingUser = await fetchUser(username);
+  try {
+    const existingUser = await fetchUser(username);
 
-  if (existingUser) {
-    alert("Username already exists. Please choose another one.");
-    return;
+    if (existingUser) {
+      alert("Username already exists. Please choose another one.");
+      return;
+    }
+
+    await createUser(username, password);
+    alert("Account created successfully! You can now log in.");
+    
+  } catch (error) {
+    console.error('Signup error:', error);
+    alert("An error occurred during signup.");
   }
-
-  await createUser(username, password);
-  alert("Account created! You can now log in.");
 }
 
+// FETCH USER FROM AIRTABLE
 async function fetchUser(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${airtableTableName}?filterByFormula={Username}='${username}'`;
 
@@ -292,6 +313,7 @@ async function fetchUser(username) {
   return data.records[0];
 }
 
+// CREATE USER IN AIRTABLE
 async function createUser(username, password) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${airtableTableName}`;
 
@@ -310,20 +332,12 @@ async function createUser(username, password) {
   });
 }
 
-
+// LOGOUT
 function logout() {
   localStorage.removeItem("fitnessAppUser");
   location.reload();
 }
-
-
-function showTab(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-}
-
+  
 // ===== TRAINING LOG & TEMPLATES =====
 function addLogEntry() {
   const exercise = document.getElementById("exercise").value.trim();
