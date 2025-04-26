@@ -95,11 +95,14 @@
 </head>
 <body>
 
-<div id="loginContainer">
-  <h2>Login to your Tracker</h2>
+<div id="loginContainer"> 
+  <h2>Login or Register</h2>
   <input type="text" id="username" placeholder="Enter username" />
-  <button onclick="login()">Login</button>
+  <input type="password" id="password" placeholder="Enter password" />
+  <button onclick="startLogin()">Login</button>
+  <button onclick="startSignup()" style="margin-top:5px; background:#28a745;">Signup</button>
 </div>
+
 
 <div id="appContainer" style="display:none;">
   <div style="text-align: right; margin-bottom: 10px;" id="logoutSection">
@@ -130,6 +133,9 @@
     <button onclick="addLogEntry()">Add to Log</button>
     <button onclick="completeWorkout()">Complete Workout</button>
     <div id="workoutsContainer"></div>
+    <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
+<button onclick="loadTemplate()">Load a Saved Template</button>
+
   </div>
 
   <div id="weightTab" class="tab-content">
@@ -191,8 +197,117 @@
     <h3>Total Calories: <span id="totalCalories">0</span> kcal</h3>
   </div>
 </div>
+  
+<div id="templateManager" style="display:none; margin-top: 20px;">
+  <h3>Workout Templates</h3>
+
+  <input type="text" id="newTemplateName" placeholder="Template Name" />
+  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
+
+  <h4 style="margin-top:20px;">Load / Manage Templates</h4>
+  <select id="templateSelect" onchange="showTemplateOptions()">
+    <option value="">Select Template...</option>
+  </select>
+  <div id="templateActions" style="display:none; margin-top: 10px;">
+    <button onclick="loadSelectedTemplate()">Load Template</button>
+    <input type="text" id="editTemplateName" placeholder="Rename template">
+    <button onclick="renameTemplate()">Rename</button>
+    <button onclick="deleteTemplate()">🗑️ Delete</button>
+    <button onclick="favoriteTemplate()">⭐ Favorite</button>
+    <input type="text" id="shareWithUser" placeholder="Send to Username">
+    <button onclick="sendTemplate()">Send</button>
+  </div>
+</div>
 
 <script>
+  const airtableApiKey = '
+pathZwfK2z58ohjBy'; // replace with your Airtable API key
+const airtableBaseId = 'appmjr4IgnEH72K1b'; // replace with your Airtable base ID
+const airtableTableName = 'Users';     // replace with your Airtable table name (example: "Users")
+
+async function startLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!username || !password) {
+    alert("Please fill in both username and password.");
+    return;
+  }
+
+  const userRecord = await fetchUser(username);
+
+  if (!userRecord) {
+    alert("User not found.");
+    return;
+  }
+
+  if (userRecord.fields.Password !== password) {
+    alert("Incorrect password.");
+    return;
+  }
+
+  localStorage.setItem("fitnessAppUser", username);
+  currentUser = username;
+  document.getElementById("userDisplay").textContent = username;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+  showTab('logTab');
+  renderWorkouts();
+  renderWeights();
+  renderCardio();
+}
+
+async function startSignup() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!username || !password) {
+    alert("Please fill in both username and password.");
+    return;
+  }
+
+  const existingUser = await fetchUser(username);
+
+  if (existingUser) {
+    alert("Username already exists. Please choose another one.");
+    return;
+  }
+
+  await createUser(username, password);
+  alert("Account created! You can now log in.");
+}
+
+async function fetchUser(username) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${airtableTableName}?filterByFormula={Username}='${username}'`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`
+    }
+  });
+
+  const data = await response.json();
+  return data.records[0];
+}
+
+async function createUser(username, password) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${airtableTableName}`;
+
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: {
+        Username: username,
+        Password: password
+      }
+    })
+  });
+}
+
   let currentUser = null;
 
 // ===== USER LOGIN / LOGOUT =====
@@ -287,6 +402,19 @@ function renderWorkouts() {
         <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} kg</p>
         <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
       </div>
+      <div id="templateManager" style="display:none; margin-top: 20px;">
+  <h3>Workout Templates</h3>
+
+  <input type="text" id="newTemplateName" placeholder="Template Name" />
+  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
+
+  <h4 style="margin-top:20px;">Load Existing Template</h4>
+  <select id="templateSelect">
+    <option value="">Select Template...</option>
+  </select>
+  <button onclick="loadSelectedTemplate()">Load Selected Template</button>
+</div>
+
     </div>`;
   });
 }
@@ -631,6 +759,151 @@ function loadCrossfitTemplate() {
   const template = crossfitTemplates[index];
   crossfitEntries = JSON.parse(JSON.stringify(template.workout)); // Deep copy
   renderCrossfitEntries();
+}
+async function saveWorkoutAsTemplate() {
+  const templateName = document.getElementById("newTemplateName").value.trim();
+  if (!templateName) return alert("Enter a template name.");
+
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (workouts.length === 0) return alert("No workouts to save.");
+
+  const latestWorkout = workouts[workouts.length - 1];
+
+  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: {
+        Username: currentUser,
+        TemplateName: templateName,
+        TemplateData: JSON.stringify(latestWorkout)
+      }
+    })
+  });
+
+  alert("Template saved!");
+  document.getElementById("newTemplateName").value = '';
+  loadTemplateDropdown(); // Refresh the dropdown
+}
+
+
+  alert("Template saved!");
+}
+
+async function loadTemplateDropdown() {
+  const select = document.getElementById("templateSelect");
+  select.innerHTML = '<option value="">Select Template...</option>';
+
+  const response = await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates?filterByFormula={Username}='${currentUser}'`, {
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`
+    }
+  });
+
+  const data = await response.json();
+  const templates = data.records;
+
+  templates.forEach((template, index) => {
+    const option = document.createElement("option");
+    option.value = JSON.stringify(template.fields.TemplateData);
+    option.textContent = template.fields.TemplateName;
+    select.appendChild(option);
+  });
+}
+
+async function loadSelectedTemplate() {
+  const select = document.getElementById("templateSelect");
+  const selected = select.value;
+  if (!selected) return alert("Please select a template!");
+
+  const template = JSON.parse(selected);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts.push(template);
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  
+  renderWorkouts();
+  alert("Template loaded!");
+}
+
+function showTemplateOptions() {
+  const selected = document.getElementById("templateSelect").value;
+  document.getElementById("templateActions").style.display = selected ? 'block' : 'none';
+}
+async function renameTemplate() {
+  const newName = document.getElementById("editTemplateName").value.trim();
+  if (!newName) return alert("Enter a new name.");
+
+  const recordId = document.getElementById("templateSelect").selectedOptions[0].dataset.recordId;
+
+  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: { TemplateName: newName }
+    })
+  });
+
+  alert("Template renamed!");
+  loadTemplateDropdown();
+}
+async function deleteTemplate() {
+  const recordId = document.getElementById("templateSelect").selectedOptions[0].dataset.recordId;
+  if (!confirm("Are you sure you want to delete this template?")) return;
+
+  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${airtableApiKey}` }
+  });
+
+  alert("Template deleted!");
+  loadTemplateDropdown();
+}
+async function favoriteTemplate() {
+  const recordId = document.getElementById("templateSelect").selectedOptions[0].dataset.recordId;
+
+  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: { Favorite: true }
+    })
+  });
+
+  alert("Template favorited!");
+  loadTemplateDropdown();
+}
+async function sendTemplate() {
+  const otherUser = document.getElementById("shareWithUser").value.trim();
+  if (!otherUser) return alert("Enter username to share with.");
+
+  const templateData = document.getElementById("templateSelect").value;
+  const parsedTemplate = JSON.parse(templateData);
+
+  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${airtableApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: {
+        Username: otherUser,
+        TemplateName: parsedTemplate.title + " (Shared)",
+        TemplateData: JSON.stringify(parsedTemplate)
+      }
+    })
+  });
+
+  alert("Template sent!");
 }
 
 </script>
