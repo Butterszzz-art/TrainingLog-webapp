@@ -99,9 +99,10 @@
   <h2>Login to Your Fitness Tracker</h2>
   <input type="text" id="username" placeholder="Enter Username">
   <input type="password" id="password" placeholder="Enter Password">
-  <button onclick="startLogin()">Login</button>
-  <button onclick="startSignup()">Sign Up</button>
+  <button onclick="startLogin()">Login</button>  <!-- StartLogin for login -->
+  <button onclick="startSignup()">Sign Up</button> <!-- StartSignup for signup -->
 </div>
+
 
 
 <div id="appContainer" style="display:none;">
@@ -221,12 +222,14 @@
 
 <script>
   
+let currentUser = null;
+  
 const airtableApiKey = 'pathZwfK2z58ohjBy';
 const airtableBaseId = 'appmjr4IgnEH72K1b';
 const airtableTableName = 'Users';
 
 
-let currentUser = null;
+
 
 async function startLogin() {
   const username = document.getElementById("username").value.trim();
@@ -307,27 +310,12 @@ async function createUser(username, password) {
   });
 }
 
-// ===== USER LOGIN / LOGOUT =====
-function login() {
-  const username = document.getElementById("username").value.trim();
-  if (!username) return alert("Please enter a username.");
-  currentUser = username;
-  localStorage.setItem("fitnessAppUser", username);
-  document.getElementById("userDisplay").textContent = username;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-  showTab('logTab');
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-  renderCrossfitWorkouts();
-
-}
 
 function logout() {
   localStorage.removeItem("fitnessAppUser");
   location.reload();
 }
+
 
 function showTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
