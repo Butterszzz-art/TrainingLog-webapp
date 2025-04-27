@@ -305,7 +305,7 @@ async function fetchUser(username) {
 
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`
+      Authorization: `Bearer ${airtableToken}`
     }
   });
 
@@ -320,7 +320,7 @@ async function createUser(username, password) {
   await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`,
+      Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -771,7 +771,7 @@ async function saveWorkoutAsTemplate() {
   await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`,
+      Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -798,7 +798,7 @@ async function loadTemplateDropdown() {
 
   const response = await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates?filterByFormula={Username}='${currentUser}'`, {
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`
+      Authorization: `Bearer ${airtableToken}`
     }
   });
 
@@ -840,7 +840,7 @@ async function renameTemplate() {
   await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
     method: 'PATCH',
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`,
+      Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -857,7 +857,7 @@ async function deleteTemplate() {
 
   await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${airtableApiKey}` }
+    headers: { Authorization: `Bearer ${airtableToken}` }
   });
 
   alert("Template deleted!");
@@ -869,7 +869,7 @@ async function favoriteTemplate() {
   await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates/${recordId}`, {
     method: 'PATCH',
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`,
+      Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -890,7 +890,7 @@ async function sendTemplate() {
   await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${airtableApiKey}`,
+      Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
