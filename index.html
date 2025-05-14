@@ -223,10 +223,16 @@
 <script>
 
   document.addEventListener("DOMContentLoaded", () => {
-  // your existing JavaScript code goes here
-});
 
-  
+    // Add your showTab function first
+  function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.getElementById(tabId)?.classList.add('active');
+    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
+  }
+
+    
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
 
@@ -301,15 +307,6 @@ async function startSignup() {
   }
 }
   
-// server.js
-
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
 
 // === Your Airtable Info ===
 const airtableToken = 'patr3gW1ao7pMiHH2'; // your real Airtable token
@@ -1013,16 +1010,6 @@ async function saveWorkoutAsTemplate() {
   alert("Template saved!");
 }
 
-// server.js
-
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 // === Your Airtable Info ===
 const airtableToken = 'patr3gW1ao7pMiHH2'; // your real Airtable token
 const airtableBaseId = 'appmjr4IgnEH72K1b'; // your real Base ID
@@ -1183,7 +1170,8 @@ async function favoriteTemplate() {
   alert("Template favorited!");
   loadTemplateDropdown();
 }
-
+  
+});
 
 </script>
 </body>
