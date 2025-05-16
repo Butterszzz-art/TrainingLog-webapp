@@ -222,6 +222,12 @@
 
 <script>
   
+const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
+const airtableBaseId = 'appmjr4IgnEH72K1b/tblwDxtPzJwuk1xNI';
+const usersTableName = 'Users';
+const templatesTableName = 'Templates';
+
+  
 // Make tab switching available globally
   
 window.showTab = function(tabId) {
@@ -904,6 +910,20 @@ function loadCrossfitTemplate() {
   const template = crossfitTemplates[index];
   crossfitEntries = JSON.parse(JSON.stringify(template.workout)); // Deep copy
   renderCrossfitEntries();
+}
+    
+// Restore logged in user and show app if already logged in
+const savedUser = localStorage.getItem("fitnessAppUser");
+if (savedUser) {
+  currentUser = savedUser;
+  document.getElementById("userDisplay").textContent = savedUser;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+  showTab("logTab");
+  renderWorkouts();
+  renderWeights();
+  renderCardio();
+  renderCrossfitWorkouts();
 }
 
 </script>
