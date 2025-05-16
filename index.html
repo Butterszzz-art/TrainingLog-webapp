@@ -905,38 +905,6 @@ function loadCrossfitTemplate() {
   crossfitEntries = JSON.parse(JSON.stringify(template.workout)); // Deep copy
   renderCrossfitEntries();
 }
-async function saveWorkoutAsTemplate() {
-  const templateName = document.getElementById("newTemplateName").value.trim();
-  if (!templateName) return alert("Enter a template name.");
-
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (workouts.length === 0) return alert("No workouts to save.");
-
-  const latestWorkout = workouts[workouts.length - 1];
-
-  await fetch(`https://api.airtable.com/v0/${airtableBaseId}/Templates`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${airtableToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      fields: {
-        Username: currentUser,
-        TemplateName: templateName,
-        TemplateData: JSON.stringify(latestWorkout)
-      }
-    })
-  });
-
-  alert("Template saved!");
-  document.getElementById("newTemplateName").value = '';
-  loadTemplateDropdown(); // Refresh the dropdown
-}
-
-
-  alert("Template saved!");
-}
 
 </script>
 </body>
