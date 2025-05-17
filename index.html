@@ -876,35 +876,6 @@ function loadCrossfitTemplate() {
   renderCrossfitEntries();
 }
     
-// Restore logged in user and show app if already logged in
-const savedUser = localStorage.getItem("fitnessAppUser");
-if (savedUser) {
-  currentUser = savedUser;
-  document.getElementById("userDisplay").textContent = savedUser;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-  showTab("logTab");
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-  renderCrossfitWorkouts();
-}
-    
-  
-// Restore logged in user and show app if already logged in
-const savedUser = localStorage.getItem("fitnessAppUser");
-if (savedUser) {
-  currentUser = savedUser;
-  document.getElementById("userDisplay").textContent = savedUser;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-  showTab("logTab");
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-  renderCrossfitWorkouts();
-}
-
 // ✅ Make functions global
 window.startLogin = startLogin;
 window.startSignup = startSignup;
