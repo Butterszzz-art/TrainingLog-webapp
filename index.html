@@ -891,8 +891,41 @@ if (savedUser) {
 }
     
   
-});
-  
+// Restore logged in user and show app if already logged in
+const savedUser = localStorage.getItem("fitnessAppUser");
+if (savedUser) {
+  currentUser = savedUser;
+  document.getElementById("userDisplay").textContent = savedUser;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+  showTab("logTab");
+  renderWorkouts();
+  renderWeights();
+  renderCardio();
+  renderCrossfitWorkouts();
+}
+
+// ✅ Make functions global
+window.startLogin = startLogin;
+window.startSignup = startSignup;
+window.logout = logout;
+window.addLogEntry = addLogEntry;
+window.completeWorkout = completeWorkout;
+window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
+window.loadTemplate = loadTemplate;
+window.addWeightEntry = addWeightEntry;
+window.estimateCalories = estimateCalories;
+window.addCardioEntry = addCardioEntry;
+window.completeCardioSession = completeCardioSession;
+window.calculateCalories = calculateCalories;
+window.showTemplateList = showTemplateList;
+window.loadSelectedTemplate = loadSelectedTemplate;
+window.sendTemplate = sendTemplate;
+window.removeWorkout = removeWorkout;
+window.removeLogEntry = removeLogEntry;
+
+}); // closing DOMContentLoaded
+
 </script>
 </body>
 </html>
