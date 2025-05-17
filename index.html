@@ -227,23 +227,6 @@ const airtableBaseId = 'appmjr4IgnEH72K1b/tblwDxtPzJwuk1xNI';
 const usersTableName = 'Users';
 const templatesTableName = 'Templates';
 
-  
-// Make tab switching available globally
-  
-window.showTab = function(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-};
-
-  document.addEventListener("DOMContentLoaded", () => {
-
-    // Add your showTab function first
-    
-const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
-let currentUser = null;
-
 // LOGIN
 async function startLogin() {
   const username = document.getElementById("username").value.trim();
@@ -314,7 +297,22 @@ async function startSignup() {
     alert("Error connecting to server.");
   }
 }
+    
+// Make tab switching available globally
   
+window.showTab = function(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById(tabId)?.classList.add('active');
+  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
+};
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+    // Add your showTab function first
+    
+const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
+let currentUser = null;
 
 
 // === Airtable Functions ===
@@ -892,7 +890,7 @@ if (savedUser) {
   renderCrossfitWorkouts();
 }
     
-  function logout() {
+function logout() {
     localStorage.removeItem("fitnessAppUser");
     location.reload();
   }
