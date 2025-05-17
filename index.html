@@ -923,7 +923,19 @@ window.loadSelectedTemplate = loadSelectedTemplate;
 window.sendTemplate = sendTemplate;
 window.removeWorkout = removeWorkout;
 window.removeLogEntry = removeLogEntry;
-
+    
+  const savedUser = localStorage.getItem("fitnessAppUser");
+  if (savedUser) {
+    currentUser = savedUser;
+    document.getElementById("userDisplay").textContent = savedUser;
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("appContainer").style.display = "block";
+    showTab("logTab");
+    renderWorkouts();
+    renderWeights();
+    renderCardio();
+    renderCrossfitWorkouts();
+  }
 }); // closing DOMContentLoaded
 
 </script>
