@@ -477,23 +477,33 @@ function addLogEntry() {
     repsArray.push(reps);
   }
 
-  // Get existing workouts
+  // Fetch current workouts
   let workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
 
-  // Make sure a workout exists to push the log into
-  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
+  // If no workouts exist yet, create one
+  if (workouts.length === 0) {
     workouts.push({ title: `Workout on ${date}`, date, log: [] });
   }
 
-  // Add the entry to the last workout
+  // Add log to the last workout
   workouts[workouts.length - 1].log.push({
     exercise, sets, repsArray, weight, goal, repGoal, date
   });
 
-  // Save and update UI
+  // ✅ Save updated workouts
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+
+  // ✅ Re-render
   renderWorkouts();
-}
+
+document.getElementById("exercise").value = '';
+document.getElementById("sets").value = '';
+document.getElementById("weight").value = '';
+document.getElementById("goal").value = '';
+document.getElementById("repGoal").value = '';
+
+  }
+
 
 
 
@@ -539,7 +549,7 @@ function renderWorkouts() {
   
 // Automatically expand the last workout
 if (index === workouts.length - 1) {
-  setTimeout(() => toggleWorkoutDetails(index), 0);
+setTimeout(() => toggleWorkoutDetails(workouts.length - 1), 0);
 }
 
   <input type="text" id="newTemplateName" placeholder="Template Name" />
