@@ -462,31 +462,39 @@ function addLogEntry() {
   const repGoal = +document.getElementById("repGoal").value;
   const date = new Date().toISOString().split('T')[0];
 
-  if (!exercise || !sets) return alert("Fill Exercise and Sets at minimum.");
+  if (!exercise || !sets) {
+    alert("Fill Exercise and Sets at minimum.");
+    return;
+  }
 
   const repsArray = [];
   for (let i = 0; i < sets; i++) {
     const reps = +prompt(`Enter reps for set ${i + 1}:`);
-    if (reps < 0 || isNaN(reps)) return alert("Invalid reps entered.");
+    if (reps < 0 || isNaN(reps)) {
+      alert("Invalid reps entered.");
+      return;
+    }
     repsArray.push(reps);
   }
 
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  // Get existing workouts
+  let workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
 
-  if (!workouts.length || !workouts[workouts.length - 1].log) {
+  // Make sure a workout exists to push the log into
+  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
     workouts.push({ title: `Workout on ${date}`, date, log: [] });
   }
 
+  // Add the entry to the last workout
   workouts[workouts.length - 1].log.push({
     exercise, sets, repsArray, weight, goal, repGoal, date
   });
 
-  // ✅ Save back to localStorage
+  // Save and update UI
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-
-  // ✅ Re-render the workouts to update the UI
   renderWorkouts();
 }
+
 
 
 function completeWorkout() {
@@ -528,6 +536,11 @@ function renderWorkouts() {
       </div>
       <div id="templateManager" style="display:none; margin-top: 20px;">
   <h3>Workout Templates</h3>
+  
+// Automatically expand the last workout
+if (index === workouts.length - 1) {
+  setTimeout(() => toggleWorkoutDetails(index), 0);
+}
 
   <input type="text" id="newTemplateName" placeholder="Template Name" />
   <button onclick="saveWorkoutAsTemplate()">Save Template</button>
