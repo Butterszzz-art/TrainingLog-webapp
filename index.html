@@ -296,7 +296,68 @@ async function startSignup() {
     alert("Error connecting to server.");
   }
 }
-    
+  
+function renderWorkouts() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const container = document.getElementById("workoutsContainer");
+  container.innerHTML = '';
+  workouts.forEach((workout, index) => {
+    const rows = workout.log.map((entry, i) => `
+      <tr>
+        <td>${entry.exercise}</td>
+        <td>${entry.sets}</td>
+        <td>${entry.repsArray.join(', ')}</td>
+        <td>${entry.weight ? entry.weight + ' kg' : '-'}</td>
+        <td>${entry.date}</td>
+        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
+        <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
+      </tr>`).join('');
+        
+// after container.innerHTML += ... block
+if (index === workouts.length - 1) {
+  setTimeout(() => toggleWorkoutDetails(index), 0);
+}
+
+    container.innerHTML += `
+    <div style="margin-bottom: 20px;">
+      <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
+      <div id="workoutDetails${index}" style="display: none;">
+        <table>
+          <thead>
+            <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} kg</p>
+        <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
+      </div>
+      <div id="templateManager" style="display:none; margin-top: 20px;">
+  <h3>Workout Templates</h3>
+  
+
+
+  <input type="text" id="newTemplateName2" placeholder="Template Name" />
+  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
+
+  <h4 style="margin-top:20px;">Load Existing Template</h4>
+  <select id="templateSelect">
+    <option value="">Select Template...</option>
+  </select>
+  <button onclick="loadSelectedTemplate()">Load Selected Template</button>
+</div>
+
+    </div>`;
+  });
+  
+  window.renderWorkouts = renderWorkouts;
+}
+
+function toggleWorkoutDetails(index) {
+  const el = document.getElementById(`workoutDetails${index}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleWorkoutDetails = toggleWorkoutDetails;  
+  
 // Make tab switching available globally
   
 window.showTab = function(tabId) {
@@ -888,65 +949,21 @@ window.removeLogEntry = removeLogEntry;
     renderCardio();
     renderCrossfitWorkouts();
   }
+
+const savedUser = localStorage.getItem("fitnessAppUser");
+  if (savedUser) {
+    currentUser = savedUser;
+    document.getElementById("userDisplay").textContent = savedUser;
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("appContainer").style.display = "block";
+    showTab("logTab");
+
+    // ✅ This now works because renderWorkouts is global
+    renderWorkouts();
+  }
     
 }); // closing DOMContentLoaded
 
-function renderWorkouts() {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const container = document.getElementById("workoutsContainer");
-  container.innerHTML = '';
-  workouts.forEach((workout, index) => {
-    const rows = workout.log.map((entry, i) => `
-      <tr>
-        <td>${entry.exercise}</td>
-        <td>${entry.sets}</td>
-        <td>${entry.repsArray.join(', ')}</td>
-        <td>${entry.weight ? entry.weight + ' kg' : '-'}</td>
-        <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
-        <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
-      </tr>`).join('');
-    
-window.renderWorkouts = renderWorkouts;
-window.toggleWorkoutDetails = toggleWorkoutDetails;
-
-    
-// after container.innerHTML += ... block
-if (index === workouts.length - 1) {
-  setTimeout(() => toggleWorkoutDetails(index), 0);
-}
-
-    container.innerHTML += `
-    <div style="margin-bottom: 20px;">
-      <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
-      <div id="workoutDetails${index}" style="display: none;">
-        <table>
-          <thead>
-            <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} kg</p>
-        <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
-      </div>
-      <div id="templateManager" style="display:none; margin-top: 20px;">
-  <h3>Workout Templates</h3>
-  
-
-
-  <input type="text" id="newTemplateName2" placeholder="Template Name" />
-  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
-
-  <h4 style="margin-top:20px;">Load Existing Template</h4>
-  <select id="templateSelect">
-    <option value="">Select Template...</option>
-  </select>
-  <button onclick="loadSelectedTemplate()">Load Selected Template</button>
-</div>
-
-    </div>`;
-  });
-}
   
 window.renderWorkouts = renderWorkouts;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
