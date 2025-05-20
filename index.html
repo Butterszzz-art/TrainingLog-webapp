@@ -307,13 +307,12 @@ window.showTab = function(tabId) {
   document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
 };
 
+const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
+let currentUser = null;
+  
   document.addEventListener("DOMContentLoaded", () => {
 
     // Add your showTab function first
-    
-const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
-let currentUser = null;
-
 
 // === Airtable Functions ===
 
