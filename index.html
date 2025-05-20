@@ -254,7 +254,7 @@ async function startLogin() {
       document.getElementById("appContainer").style.display = "block";
 
       showTab('logTab');
-      renderWorkouts();
+window.renderWorkouts(); // call the global function after assigning it
       renderWeights();
       renderCardio();
       renderCrossfitWorkouts();
@@ -529,6 +529,15 @@ function renderWorkouts() {
         <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
         <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
       </tr>`).join('');
+    
+window.renderWorkouts = renderWorkouts;
+window.toggleWorkoutDetails = toggleWorkoutDetails;
+
+    
+// after container.innerHTML += ... block
+if (index === workouts.length - 1) {
+  setTimeout(() => toggleWorkoutDetails(index), 0);
+}
 
     container.innerHTML += `
     <div style="margin-bottom: 20px;">
@@ -546,12 +555,9 @@ function renderWorkouts() {
       <div id="templateManager" style="display:none; margin-top: 20px;">
   <h3>Workout Templates</h3>
   
-// Automatically expand the last workout
-if (index === workouts.length - 1) {
-setTimeout(() => toggleWorkoutDetails(workouts.length - 1), 0);
-}
 
-  <input type="text" id="newTemplateName" placeholder="Template Name" />
+
+  <input type="text" id="newTemplateName2" placeholder="Template Name" />
   <button onclick="saveWorkoutAsTemplate()">Save Template</button>
 
   <h4 style="margin-top:20px;">Load Existing Template</h4>
