@@ -202,7 +202,6 @@
 <div id="templateManager" style="display:none; margin-top: 20px;">
   <h3>Workout Templates</h3>
 
-  <input type="text" id="newTemplateName" placeholder="Template Name" />
   <button onclick="saveWorkoutAsTemplate()">Save Template</button>
 
   <h4 style="margin-top:20px;">Load / Manage Templates</h4>
@@ -940,6 +939,9 @@ window.removeLogEntry = removeLogEntry;
     renderCrossfitWorkouts();
   }
 }); // closing DOMContentLoaded
+  
+window.renderWorkouts = renderWorkouts;
+window.toggleWorkoutDetails = toggleWorkoutDetails;
 
 </script>
 </body>
