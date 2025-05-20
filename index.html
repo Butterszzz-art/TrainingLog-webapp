@@ -472,11 +472,15 @@ function addLogEntry() {
   }
 
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) workouts.push({ title: `Workout on ${date}`, date, log: [] });
 
-  workouts[workouts.length - 1].log.push({ exercise, sets, repsArray, weight, goal, repGoal, date });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
+if (!workouts.length || !workouts[workouts.length - 1].log) {
+  workouts.push({ title: `Workout on ${date}`, date, log: [] });
+}
+
+workouts[workouts.length - 1].log.push({
+  exercise, sets, repsArray, weight, goal, repGoal, date
+});
+
 }
 
 function completeWorkout() {
