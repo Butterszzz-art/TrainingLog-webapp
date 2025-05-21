@@ -450,6 +450,136 @@ function calculateWorkoutVolume(workout) {
   });
   return total;
 }  
+
+function removeLogEntry(workoutIndex, entryIndex) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts[workoutIndex].log.splice(entryIndex, 1);
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+
+function removeWorkout(index) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (confirm("Delete this entire workout?")) {
+    workouts.splice(index, 1);
+    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+    renderWorkouts();
+  }
+}
+
+function addWeightEntry() {
+  const weight = +document.getElementById("currentWeightInput").value;
+  const date = new Date().toISOString().split('T')[0];
+  if (!weight) return alert("Enter weight");
+  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  log.push({ weight, date });
+  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
+  renderWeights();
+}
+
+function renderWeights() {
+  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  const body = document.getElementById("weightBody");
+  body.innerHTML = '';
+  log.forEach((entry, index) => {
+    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
+  });
+}
+
+function removeWeightEntry(index) {
+  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  log.splice(index, 1);
+  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
+  renderWeights();
+}
+
+function estimateCalories() {
+  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  const avgCals = +document.getElementById("avgCalories").value;
+  if (log.length < 7) return alert("Need at least 7 days of weight entries.");
+  const weightDiff = log[0].weight - log[log.length - 1].weight;
+  const caloriesBurned = weightDiff * 7700;
+  const maintenance = Math.round(avgCals + (caloriesBurned / log.length));
+  document.getElementById("calorieEstimateTable").innerHTML = `
+    <tr><td>Maintenance</td><td>${maintenance} kcal</td></tr>
+    <tr><td>Weight Loss (-500)</td><td>${maintenance - 500} kcal</td></tr>
+    <tr><td>Weight Gain (+500)</td><td>${maintenance + 500} kcal</td></tr>
+  `;
+}
+
+// ===== CARDIO TRACKER =====
+function addCardioEntry() {
+  const type = document.getElementById("cardioType").value.trim();
+  const duration = +document.getElementById("cardioDuration").value;
+  const distance = document.getElementById("cardioDistance").value;
+  const notes = document.getElementById("cardioNotes").value;
+  const date = new Date().toISOString().split('T')[0];
+  if (!type || !duration) return alert("Type and Duration are required");
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  log.push({ date, type, duration, distance, notes });
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
+  renderCardio();
+}
+
+function completeCardioSession() {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  const date = new Date().toISOString().split('T')[0];
+  log.push({ date, type: 'Session Complete', duration: 0, distance: 0, notes: '' });
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
+  renderCardio();
+}
+
+function renderCardio() {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  const body = document.getElementById("cardioBody");
+  body.innerHTML = '';
+  log.forEach((entry, index) => {
+    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
+  });
+}
+
+function removeCardioEntry(index) {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  log.splice(index, 1);
+  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
+  renderCardio();
+}
+
+// ===== MACROS =====
+function calculateCalories() {
+  const protein = +document.getElementById("protein").value || 0;
+  const carbs = +document.getElementById("carbs").value || 0;
+  const fats = +document.getElementById("fats").value || 0;
+  const total = (protein * 4) + (carbs * 4) + (fats * 9);
+  document.getElementById("totalCalories").textContent = total;
+}
+// ========= CROSSFIT TRACKER =========
+
+let crossfitExercises = [];
+
+function addCrossfitExercise() {
+  const container = document.getElementById('cfExercisesContainer');
+  const index = crossfitExercises.length;
+
+  container.innerHTML += `
+    <div style="border:1px solid #ccc; padding:10px; margin-top:10px;">
+      <input type="text" placeholder="Exercise Name" id="cfExerciseName${index}">
+      <input type="number" placeholder="Sets" id="cfExerciseSets${index}">
+      <input type="number" placeholder="Reps per Set" id="cfExerciseReps${index}">
+      <input type="number" placeholder="Weight per Set (optional)" id="cfExerciseWeight${index}">
+      <button onclick="removeCrossfitExercise(${index})" class="remove-btn" style="margin-top:5px;">❌ Remove</button>
+    </div>
+  `;
+  
+  crossfitExercises.push(index);
+}
+
+function removeCrossfitExercise(index) {
+  const exerciseDiv = document.getElementById(`cfExerciseName${index}`).parentNode;
+  exerciseDiv.remove();
+  crossfitExercises = crossfitExercises.filter(i => i !== index);
+}  
+
   
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -589,22 +719,6 @@ function showTemplateOptions() {
 }
 
 
-function removeLogEntry(workoutIndex, entryIndex) {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts[workoutIndex].log.splice(entryIndex, 1);
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function removeWorkout(index) {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (confirm("Delete this entire workout?")) {
-    workouts.splice(index, 1);
-    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-    renderWorkouts();
-  }
-}
-
 // ====== TEMPLATES ======
 function showTemplateList() {
   const container = document.getElementById('templateList');
@@ -649,118 +763,7 @@ function deleteTemplate(index) {
 }
 
 // ===== BODYWEIGHT TRACKER =====
-function addWeightEntry() {
-  const weight = +document.getElementById("currentWeightInput").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!weight) return alert("Enter weight");
-  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  log.push({ weight, date });
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
-  renderWeights();
-}
 
-function renderWeights() {
-  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  const body = document.getElementById("weightBody");
-  body.innerHTML = '';
-  log.forEach((entry, index) => {
-    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
-  });
-}
-
-function removeWeightEntry(index) {
-  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  log.splice(index, 1);
-  localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
-  renderWeights();
-}
-
-function estimateCalories() {
-  const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  const avgCals = +document.getElementById("avgCalories").value;
-  if (log.length < 7) return alert("Need at least 7 days of weight entries.");
-  const weightDiff = log[0].weight - log[log.length - 1].weight;
-  const caloriesBurned = weightDiff * 7700;
-  const maintenance = Math.round(avgCals + (caloriesBurned / log.length));
-  document.getElementById("calorieEstimateTable").innerHTML = `
-    <tr><td>Maintenance</td><td>${maintenance} kcal</td></tr>
-    <tr><td>Weight Loss (-500)</td><td>${maintenance - 500} kcal</td></tr>
-    <tr><td>Weight Gain (+500)</td><td>${maintenance + 500} kcal</td></tr>
-  `;
-}
-
-// ===== CARDIO TRACKER =====
-function addCardioEntry() {
-  const type = document.getElementById("cardioType").value.trim();
-  const duration = +document.getElementById("cardioDuration").value;
-  const distance = document.getElementById("cardioDistance").value;
-  const notes = document.getElementById("cardioNotes").value;
-  const date = new Date().toISOString().split('T')[0];
-  if (!type || !duration) return alert("Type and Duration are required");
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  log.push({ date, type, duration, distance, notes });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
-  renderCardio();
-}
-
-function completeCardioSession() {
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  const date = new Date().toISOString().split('T')[0];
-  log.push({ date, type: 'Session Complete', duration: 0, distance: 0, notes: '' });
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
-  renderCardio();
-}
-
-function renderCardio() {
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  const body = document.getElementById("cardioBody");
-  body.innerHTML = '';
-  log.forEach((entry, index) => {
-    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
-  });
-}
-
-function removeCardioEntry(index) {
-  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  log.splice(index, 1);
-  localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
-  renderCardio();
-}
-
-// ===== MACROS =====
-function calculateCalories() {
-  const protein = +document.getElementById("protein").value || 0;
-  const carbs = +document.getElementById("carbs").value || 0;
-  const fats = +document.getElementById("fats").value || 0;
-  const total = (protein * 4) + (carbs * 4) + (fats * 9);
-  document.getElementById("totalCalories").textContent = total;
-}
-// ========= CROSSFIT TRACKER =========
-
-let crossfitExercises = [];
-
-function addCrossfitExercise() {
-  const container = document.getElementById('cfExercisesContainer');
-  const index = crossfitExercises.length;
-
-  container.innerHTML += `
-    <div style="border:1px solid #ccc; padding:10px; margin-top:10px;">
-      <input type="text" placeholder="Exercise Name" id="cfExerciseName${index}">
-      <input type="number" placeholder="Sets" id="cfExerciseSets${index}">
-      <input type="number" placeholder="Reps per Set" id="cfExerciseReps${index}">
-      <input type="number" placeholder="Weight per Set (optional)" id="cfExerciseWeight${index}">
-      <button onclick="removeCrossfitExercise(${index})" class="remove-btn" style="margin-top:5px;">❌ Remove</button>
-    </div>
-  `;
-  
-  crossfitExercises.push(index);
-}
-
-function removeCrossfitExercise(index) {
-  const exerciseDiv = document.getElementById(`cfExerciseName${index}`).parentNode;
-  exerciseDiv.remove();
-  crossfitExercises = crossfitExercises.filter(i => i !== index);
-}
 
 function saveCrossfitWorkout() {
   const name = document.getElementById('cfWorkoutName').value.trim();
