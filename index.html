@@ -128,7 +128,6 @@
     <input type="text" id="exercise" placeholder="Exercise">
     <input type="number" id="sets" placeholder="Sets">
     <input type="number" id="reps" placeholder="Reps">
-    <input type="number" id="weight" placeholder="Weight (kg)">
     <input type="number" id="goal" placeholder="Target Weight Goal (kg)">
     <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)">
     <button onclick="addLogEntry()">Add to Log</button>
@@ -136,10 +135,14 @@
     <div id="workoutsContainer"></div>
     <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
 <button onclick="loadTemplate()">Load a Saved Template</button>
-<select id="weightUnit">
-  <option value="kg">kg</option>
-  <option value="lbs">lbs</option>
-</select>
+<div style="display: flex; gap: 8px;">
+  <input type="number" id="weight" placeholder="Weight" style="flex: 1;">
+  <select id="weightUnit" style="width: 80px;">
+    <option value="kg">kg</option>
+    <option value="lbs">lbs</option>
+  </select>
+</div>
+
 
   </div>
 
@@ -313,7 +316,7 @@ function renderWorkouts() {
        <td>
   ${entry.repsArray.map((rep, i) => `Set ${i + 1}: ${rep}`).join('<br>')}
 </td>
-<td>${entry.weight ? entry.weight + (entry.unit === 'lbs' ? ' lbs' : ' kg') : '-'}</td>
+<td>${entry.weight ? entry.weight + ' ' + (entry.unit || 'kg') : '-'}</td>
         <td>${entry.date}</td>
         <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
         <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
@@ -382,9 +385,10 @@ function addLogEntry() {
   const goal = +document.getElementById("goal").value;
   const repGoal = +document.getElementById("repGoal").value;
   const date = new Date().toISOString().split('T')[0];
-const unit = document.getElementById("weightUnit").value;
 const rawWeight = +document.getElementById("weight").value;
-const weight = unit === 'lbs' ? Math.round(rawWeight * 0.453592 * 100) / 100 : rawWeight;
+const weight = +document.getElementById("weight").value;
+const unit = document.getElementById("weightUnit").value;
+
 
 
 
