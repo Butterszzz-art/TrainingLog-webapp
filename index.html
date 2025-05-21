@@ -965,11 +965,26 @@ const savedUser = localStorage.getItem("fitnessAppUser");
 }); // closing DOMContentLoaded
 
   
-window.renderWorkouts = renderWorkouts;
+window.startLogin = startLogin;
+window.startSignup = startSignup;
+window.logout = logout;
+window.addLogEntry = addLogEntry;
+window.completeWorkout = completeWorkout;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
-window.removeWorkout = removeWorkout;
-window.removeLogEntry = removeLogEntry;
-window.toggleWorkoutDetails = toggleWorkoutDetails; // if you use it in HTML
+window.loadTemplate = loadTemplate;
+window.addWeightEntry = addWeightEntry;
+window.estimateCalories = estimateCalories;
+window.addCardioEntry = addCardioEntry;
+window.completeCardioSession = completeCardioSession;
+window.calculateCalories = calculateCalories;
+window.showTemplateList = showTemplateList;
+window.loadSelectedTemplate = loadSelectedTemplate;
+window.sendTemplate = sendTemplate;
+window.renderWorkouts = renderWorkouts;
+window.toggleWorkoutDetails = toggleWorkoutDetails;
+window.removeWorkout = removeWorkout;               // ✅ Add this
+window.removeLogEntry = removeLogEntry;             // ✅ Add this
+
 
 
 
