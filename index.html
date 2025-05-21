@@ -128,6 +128,12 @@
     <input type="text" id="exercise" placeholder="Exercise">
     <input type="number" id="sets" placeholder="Sets">
     <input type="number" id="reps" placeholder="Reps">
+    <input type="number" id="weight" placeholder="Weight" style="flex: 1;">
+    <div style="display: flex; gap: 8px;">
+  <select id="weightUnit" style="width: 80px;">
+    <option value="kg">kg</option>
+    <option value="lbs">lbs</option>
+  </select>
     <input type="number" id="goal" placeholder="Target Weight Goal (kg)">
     <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)">
     <button onclick="addLogEntry()">Add to Log</button>
@@ -136,7 +142,6 @@
     <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
 <button onclick="loadTemplate()">Load a Saved Template</button>
 <div style="display: flex; gap: 8px;">
-  <input type="number" id="weight" placeholder="Weight" style="flex: 1;">
   <select id="weightUnit" style="width: 80px;">
     <option value="kg">kg</option>
     <option value="lbs">lbs</option>
@@ -304,63 +309,6 @@ async function startSignup() {
   }
 }
   
-function renderWorkouts() {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const container = document.getElementById("workoutsContainer");
-  container.innerHTML = '';
-  workouts.forEach((workout, index) => {
-    const rows = workout.log.map((entry, i) => `
-      <tr>
-        <td>${entry.exercise}</td>
-        <td>${entry.sets}</td>
-       <td>
-  ${entry.repsArray.map((rep, i) => `Set ${i + 1}: ${rep}`).join('<br>')}
-</td>
-<td>${entry.weight ? entry.weight + ' ' + (entry.unit || 'kg') : '-'}</td>
-        <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
-        <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
-      </tr>`).join('');
-        
-// after container.innerHTML += ... block
-if (index === workouts.length - 1) {
-  setTimeout(() => toggleWorkoutDetails(index), 0);
-}
-
-    container.innerHTML += `
-    <div style="margin-bottom: 20px;">
-      <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
-      <div id="workoutDetails${index}" style="display: none;">
-        <table>
-          <thead>
-            <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} kg</p>
-        <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
-      </div>
-      <div id="templateManager" style="display:none; margin-top: 20px;">
-  <h3>Workout Templates</h3>
-  
-
-
-  <input type="text" id="newTemplateName2" placeholder="Template Name" />
-  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
-
-  <h4 style="margin-top:20px;">Load Existing Template</h4>
-  <select id="templateSelect">
-    <option value="">Select Template...</option>
-  </select>
-  <button onclick="loadSelectedTemplate()">Load Selected Template</button>
-</div>
-
-    </div>`;
-  });
-  
-  window.renderWorkouts = renderWorkouts;
-}
-
 function toggleWorkoutDetails(index) {
   const el = document.getElementById(`workoutDetails${index}`);
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -378,19 +326,60 @@ window.showTab = function(tabId) {
 
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
+  
+function renderWorkouts() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const container = document.getElementById("workoutsContainer");
+  container.innerHTML = '';
+  workouts.forEach((workout, index) => {
+    const rows = workout.log.map((entry, i) => `
+      <tr>
+        <td>${entry.exercise}</td>
+        <td>${entry.sets}</td>
+        <td>
+          ${entry.repsArray.map((rep, i) => `Set ${i + 1}: ${rep}`).join('<br>')}
+        </td>
+        <td>
+          ${entry.weightsArray?.length
+            ? entry.weightsArray.map((w, i) => `Set ${i + 1}: ${w} ${entry.unit || 'kg'}`).join('<br>')
+            : (entry.weight ? entry.weight + ' ' + (entry.unit || 'kg') : '-')}
+        </td>
+        <td>${entry.date}</td>
+        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
+        <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
+      </tr>`).join('');
 
+    container.innerHTML += `
+      <div style="margin-bottom: 20px;">
+        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
+        <div id="workoutDetails${index}" style="display: none;">
+          <table>
+            <thead>
+              <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.unit || 'kg'}</p>
+          <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
+        </div>
+      </div>`;
+    
+    if (index === workouts.length - 1) {
+      setTimeout(() => toggleWorkoutDetails(index), 0);
+    }
+  });
+
+  // 🔁 Make it globally available
+  window.renderWorkouts = renderWorkouts;
+}
+  
 function addLogEntry() {
   const exercise = document.getElementById("exercise").value.trim();
   const sets = +document.getElementById("sets").value;
   const goal = +document.getElementById("goal").value;
   const repGoal = +document.getElementById("repGoal").value;
+  const unit = document.getElementById("weightUnit").value; // 'kg' or 'lbs'
   const date = new Date().toISOString().split('T')[0];
-const rawWeight = +document.getElementById("weight").value;
-const weight = +document.getElementById("weight").value;
-const unit = document.getElementById("weightUnit").value;
-
-
-
 
   if (!exercise || !sets) {
     alert("Fill Exercise and Sets at minimum.");
@@ -398,41 +387,46 @@ const unit = document.getElementById("weightUnit").value;
   }
 
   const repsArray = [];
+  const weightsArray = [];
+
   for (let i = 0; i < sets; i++) {
     const reps = +prompt(`Enter reps for set ${i + 1}:`);
-    if (reps < 0 || isNaN(reps)) {
-      alert("Invalid reps entered.");
+    const weight = +prompt(`Enter weight for set ${i + 1} (${unit}):`);
+    if (isNaN(reps) || isNaN(weight)) {
+      alert("Invalid input.");
       return;
     }
     repsArray.push(reps);
+    weightsArray.push(weight);
   }
 
-  // Fetch current workouts
-  let workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
 
-  // If no workouts exist yet, create one
-  if (workouts.length === 0) {
+  if (!workouts.length) {
     workouts.push({ title: `Workout on ${date}`, date, log: [] });
   }
 
-  // Add log to the last workout
   workouts[workouts.length - 1].log.push({
-  exercise, sets, repsArray, weight, goal, repGoal, date, unit
-});
+    exercise,
+    sets,
+    repsArray,
+    weightsArray,
+    goal,
+    repGoal,
+    unit,
+    date
+  });
 
-  // ✅ Save updated workouts
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-
-  // ✅ Re-render
   renderWorkouts();
 
-document.getElementById("exercise").value = '';
-document.getElementById("sets").value = '';
-document.getElementById("weight").value = '';
-document.getElementById("goal").value = '';
-document.getElementById("repGoal").value = '';
-
-  }
+  // Optional: clear inputs
+  document.getElementById("exercise").value = '';
+  document.getElementById("sets").value = '';
+  document.getElementById("weight").value = '';
+  document.getElementById("goal").value = '';
+  document.getElementById("repGoal").value = '';
+}
 
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
