@@ -427,6 +427,29 @@ function completeWorkout() {
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   renderWorkouts();
 }
+
+// LOGOUT
+function logout() {
+  localStorage.removeItem("fitnessAppUser");
+  location.reload();
+}
+  
+// ===== TRAINING LOG & TEMPLATES =====
+
+function toggleWorkoutDetails(index) {
+  const el = document.getElementById(`workoutDetails${index}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function calculateWorkoutVolume(workout) {
+  let total = 0;
+  workout.log.forEach(entry => {
+    if (entry.repsArray) {
+      total += entry.repsArray.reduce((a, b) => a + b, 0) * (entry.weight || 0);
+    }
+  });
+  return total;
+}  
   
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -565,28 +588,6 @@ function showTemplateOptions() {
   document.getElementById("templateActions").style.display = selected ? 'block' : 'none';
 }
 
-// LOGOUT
-function logout() {
-  localStorage.removeItem("fitnessAppUser");
-  location.reload();
-}
-  
-// ===== TRAINING LOG & TEMPLATES =====
-
-function toggleWorkoutDetails(index) {
-  const el = document.getElementById(`workoutDetails${index}`);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function calculateWorkoutVolume(workout) {
-  let total = 0;
-  workout.log.forEach(entry => {
-    if (entry.repsArray) {
-      total += entry.repsArray.reduce((a, b) => a + b, 0) * (entry.weight || 0);
-    }
-  });
-  return total;
-}
 
 function removeLogEntry(workoutIndex, entryIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
@@ -952,6 +953,8 @@ window.renderWorkouts = renderWorkouts;
 window.toggleWorkoutDetails = toggleWorkoutDetails;
 window.removeWorkout = removeWorkout;               // ✅ Add this
 window.removeLogEntry = removeLogEntry;             // ✅ Add this
+window.calculateWorkoutVolume = calculateWorkoutVolume;
+window.logout = logout;
 
 
 
