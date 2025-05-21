@@ -369,6 +369,64 @@ window.showTab = function(tabId) {
 
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
+
+function addLogEntry() {
+  const exercise = document.getElementById("exercise").value.trim();
+  const sets = +document.getElementById("sets").value;
+  const weight = +document.getElementById("weight").value;
+  const goal = +document.getElementById("goal").value;
+  const repGoal = +document.getElementById("repGoal").value;
+  const date = new Date().toISOString().split('T')[0];
+
+  if (!exercise || !sets) {
+    alert("Fill Exercise and Sets at minimum.");
+    return;
+  }
+
+  const repsArray = [];
+  for (let i = 0; i < sets; i++) {
+    const reps = +prompt(`Enter reps for set ${i + 1}:`);
+    if (reps < 0 || isNaN(reps)) {
+      alert("Invalid reps entered.");
+      return;
+    }
+    repsArray.push(reps);
+  }
+
+  // Fetch current workouts
+  let workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+
+  // If no workouts exist yet, create one
+  if (workouts.length === 0) {
+    workouts.push({ title: `Workout on ${date}`, date, log: [] });
+  }
+
+  // Add log to the last workout
+  workouts[workouts.length - 1].log.push({
+    exercise, sets, repsArray, weight, goal, repGoal, date
+  });
+
+  // ✅ Save updated workouts
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+
+  // ✅ Re-render
+  renderWorkouts();
+
+document.getElementById("exercise").value = '';
+document.getElementById("sets").value = '';
+document.getElementById("weight").value = '';
+document.getElementById("goal").value = '';
+document.getElementById("repGoal").value = '';
+
+  }
+
+function completeWorkout() {
+  const date = new Date().toISOString().split('T')[0];
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts.push({ title: `Workout on ${date}`, date, log: [] });
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
   
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -514,67 +572,6 @@ function logout() {
 }
   
 // ===== TRAINING LOG & TEMPLATES =====
-function addLogEntry() {
-  const exercise = document.getElementById("exercise").value.trim();
-  const sets = +document.getElementById("sets").value;
-  const weight = +document.getElementById("weight").value;
-  const goal = +document.getElementById("goal").value;
-  const repGoal = +document.getElementById("repGoal").value;
-  const date = new Date().toISOString().split('T')[0];
-
-  if (!exercise || !sets) {
-    alert("Fill Exercise and Sets at minimum.");
-    return;
-  }
-
-  const repsArray = [];
-  for (let i = 0; i < sets; i++) {
-    const reps = +prompt(`Enter reps for set ${i + 1}:`);
-    if (reps < 0 || isNaN(reps)) {
-      alert("Invalid reps entered.");
-      return;
-    }
-    repsArray.push(reps);
-  }
-
-  // Fetch current workouts
-  let workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-
-  // If no workouts exist yet, create one
-  if (workouts.length === 0) {
-    workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  }
-
-  // Add log to the last workout
-  workouts[workouts.length - 1].log.push({
-    exercise, sets, repsArray, weight, goal, repGoal, date
-  });
-
-  // ✅ Save updated workouts
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-
-  // ✅ Re-render
-  renderWorkouts();
-
-document.getElementById("exercise").value = '';
-document.getElementById("sets").value = '';
-document.getElementById("weight").value = '';
-document.getElementById("goal").value = '';
-document.getElementById("repGoal").value = '';
-
-  }
-
-
-
-
-function completeWorkout() {
-  const date = new Date().toISOString().split('T')[0];
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
 
 function toggleWorkoutDetails(index) {
   const el = document.getElementById(`workoutDetails${index}`);
