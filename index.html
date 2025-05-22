@@ -331,58 +331,84 @@ function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
   container.innerHTML = '';
-  workouts.forEach((workout, index) => {
-    const rows = workout.log.map((entry, i) => `
-      <tr>
-        <td>${entry.exercise}</td>
-        <td>${entry.sets}</td>
-        <td>
-          ${entry.repsArray.map((rep, i) => `Set ${i + 1}: ${rep}`).join('<br>')}
-        </td>
-        <td>
-          ${entry.weightsArray?.length
-            ? entry.weightsArray.map((w, i) => `Set ${i + 1}: ${w} ${entry.unit || 'kg'}`).join('<br>')
-            : (entry.weight ? entry.weight + ' ' + (entry.unit || 'kg') : '-')}
-        </td>
-        <td>${entry.date}</td>
-        <td>${entry.goal ? Math.min(100, Math.round((entry.weight / entry.goal) * 100)) + '%' : '-'}<br>${entry.repGoal ? `(Rep Goal: ${entry.repGoal})` : ''}</td>
-        <td><button onclick="removeLogEntry(${index}, ${i})" class="remove-btn">❌</button></td>
-      </tr>`).join('');
+
+  workouts.forEach((workout, workoutIndex) => {
+    let rows = '';
+
+    workout.log.forEach((entry, entryIndex) => {
+      const sets = entry.sets;
+      const repsArray = entry.repsArray || [];
+      const weightsArray = entry.weightsArray || [];
+      const unit = entry.unit || 'kg';
+
+      // Compose rows for each set under one exercise row
+      rows += repsArray.map((rep, setIndex) => {
+        const weight = weightsArray[setIndex] ?? '-';
+
+        return `
+          <tr>
+            ${setIndex === 0 ? `<td rowspan="${sets}">${entry.exercise}</td>
+                                <td rowspan="${sets}">${sets}</td>` : ''}
+            <td>Set ${setIndex + 1}: ${rep}</td>
+            <td>Set ${setIndex + 1}: ${weight} ${unit}</td>
+            ${setIndex === 0 ? `<td rowspan="${sets}">${entry.date}</td>
+                                <td rowspan="${sets}">
+                                  ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}
+                                  ${entry.repGoal ? `<br>(Rep Goal: ${entry.repGoal})` : ''}
+                                </td>
+                                <td rowspan="${sets}">
+                                  <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button>
+                                </td>` : ''}
+          </tr>
+        `;
+      }).join('');
+    });
 
     container.innerHTML += `
       <div style="margin-bottom: 20px;">
-        <button onclick="toggleWorkoutDetails(${index})" style="width: 100%; text-align: left; font-weight: bold;">${workout.title}</button>
-        <div id="workoutDetails${index}" style="display: none;">
+        <button onclick="toggleWorkoutDetails(${workoutIndex})" style="width: 100%; text-align: left; font-weight: bold;">
+          ${workout.title}
+        </button>
+        <div id="workoutDetails${workoutIndex}" style="display: none; margin-top: 10px;">
           <table>
             <thead>
-              <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th>Date</th><th>Goal Progress</th><th>Remove</th></tr>
+              <tr>
+                <th>Exercise</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Weight</th>
+                <th>Date</th>
+                <th>Goal Progress</th>
+                <th>Remove</th>
+              </tr>
             </thead>
-            <tbody>${rows}</tbody>
+            <tbody>
+              ${rows}
+            </tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.unit || 'kg'}</p>
-          <button class="remove-btn" onclick="removeWorkout(${index})">Delete Workout</button>
+          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
+          <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
-      </div>`;
-    
-    if (index === workouts.length - 1) {
-      setTimeout(() => toggleWorkoutDetails(index), 0);
-    }
+      </div>
+    `;
   });
 
-  // 🔁 Make it globally available
+  // Ensure toggle & render are globally available
   window.renderWorkouts = renderWorkouts;
+  window.toggleWorkoutDetails = toggleWorkoutDetails;
 }
+
   
 function addLogEntry() {
   const exercise = document.getElementById("exercise").value.trim();
   const sets = +document.getElementById("sets").value;
   const goal = +document.getElementById("goal").value;
   const repGoal = +document.getElementById("repGoal").value;
-  const unit = document.getElementById("weightUnit").value; // 'kg' or 'lbs'
+  const unit = document.getElementById("weightUnit").value || 'kg';
   const date = new Date().toISOString().split('T')[0];
 
-  if (!exercise || !sets) {
-    alert("Fill Exercise and Sets at minimum.");
+  if (!exercise || !sets || isNaN(sets) || sets < 1) {
+    alert("Please enter a valid exercise and number of sets.");
     return;
   }
 
@@ -390,43 +416,48 @@ function addLogEntry() {
   const weightsArray = [];
 
   for (let i = 0; i < sets; i++) {
-    const reps = +prompt(`Enter reps for set ${i + 1}:`);
-    const weight = +prompt(`Enter weight for set ${i + 1} (${unit}):`);
+    const reps = +prompt(`Set ${i + 1} - Enter reps:`);
+    const weight = +prompt(`Set ${i + 1} - Enter weight (${unit}):`);
     if (isNaN(reps) || isNaN(weight)) {
-      alert("Invalid input.");
+      alert("Invalid input for reps or weight.");
       return;
     }
     repsArray.push(reps);
     weightsArray.push(weight);
   }
 
+  // Get existing workouts from localStorage
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
 
-  if (!workouts.length) {
+  // If no workouts exist yet, create a new one
+  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
     workouts.push({ title: `Workout on ${date}`, date, log: [] });
   }
 
+  // Add new entry to the last workout
   workouts[workouts.length - 1].log.push({
     exercise,
     sets,
     repsArray,
     weightsArray,
-    goal,
-    repGoal,
     unit,
-    date
+    date,
+    goal,
+    repGoal
   });
 
+  // Save and render
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   renderWorkouts();
 
-  // Optional: clear inputs
+  // Clear form fields
   document.getElementById("exercise").value = '';
   document.getElementById("sets").value = '';
   document.getElementById("weight").value = '';
   document.getElementById("goal").value = '';
   document.getElementById("repGoal").value = '';
 }
+
 
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
