@@ -340,6 +340,8 @@ function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
   renderWorkouts();
 }
 
+
+
   
 function generateSetInputs(setCount) {
   const container = document.getElementById("setInputsContainer");
@@ -430,7 +432,7 @@ function renderWorkouts() {
       const weightsArray = entry.weightsArray || [];
       const unit = entry.unit || 'kg';
 
-      // Compose rows for each set under one exercise row
+      // Combine sets into rows with editable inputs
       rows += repsArray.map((rep, setIndex) => {
         const weight = weightsArray[setIndex] ?? '-';
 
@@ -438,8 +440,16 @@ function renderWorkouts() {
           <tr>
             ${setIndex === 0 ? `<td rowspan="${sets}">${entry.exercise}</td>
                                 <td rowspan="${sets}">${sets}</td>` : ''}
-            <td>Set ${setIndex + 1}: ${rep}</td>
-            <td>Set ${setIndex + 1}: ${weight} ${unit}</td>
+
+            <td>
+              <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${setIndex})">
+            </td>
+
+            <td>
+              <input type="number" value="${weight}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${setIndex})">
+              <span style="font-size:12px;">(${unit})</span>
+            </td>
+
             ${setIndex === 0 ? `<td rowspan="${sets}">${entry.date}</td>
                                 <td rowspan="${sets}">
                                   ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}
@@ -448,24 +458,6 @@ function renderWorkouts() {
                                 <td rowspan="${sets}">
                                   <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button>
                                 </td>` : ''}
-                                <td>
-  ${entry.repsArray.map((rep, i) => `
-    <div>
-      Set ${i + 1}: 
- <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${i})">
-    </div>
-  `).join('')}
-</td>
-<td>
-  ${entry.weightsArray.map((w, i) => `
-    <div>
-      Set ${i + 1}: 
- <input type="number" value="${w}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${i})">
-    </div>
-  `).join('')}
-  <span style="font-size:12px;">(${entry.unit})</span>
-</td>
-
           </tr>
         `;
       }).join('');
@@ -493,14 +485,15 @@ function renderWorkouts() {
               ${rows}
             </tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
+          <p style="font-weight:bold; margin-top:10px;">
+            Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}
+          </p>
           <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
       </div>
     `;
   });
 
-  // Ensure toggle & render are globally available
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
 }
