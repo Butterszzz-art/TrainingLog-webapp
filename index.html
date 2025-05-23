@@ -586,6 +586,159 @@ function addSetToLog(workoutIndex, entryIndex) {
 }
 window.addSetToLog = addSetToLog;
 
+async function saveTemplate(username, templateName, templateData) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}`;
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${airtableToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: {
+        Username: username,
+        TemplateName: templateName,
+        TemplateData: JSON.stringify(templateData)
+      }
+    })
+  });
+}
+
+async function fetchTemplates(username) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${airtableToken}` }
+  });
+  const data = await response.json();
+  return data.records.map(record => ({
+    id: record.id,
+    name: record.fields.TemplateName,
+    data: JSON.parse(record.fields.TemplateData)
+  }));
+}
+
+
+
+// LOAD TEMPLATE DROPDOWN
+async function loadTemplateDropdown() {
+  const select = document.getElementById("templateSelect");
+  select.innerHTML = '<option value="">Select Template...</option>';
+
+  try {
+    const response = await fetch(`${serverUrl}/getTemplates?username=${currentUser}`);
+    const result = await response.json();
+
+    result.templates.forEach(template => {
+      const option = document.createElement("option");
+      option.value = JSON.stringify(template.templateData);
+      option.textContent = template.templateName;
+      option.dataset.recordId = template.recordId;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Load templates error:', error);
+    alert("Error loading templates.");
+  }
+}
+
+// LOAD SELECTED TEMPLATE
+async function loadSelectedTemplate() {
+  const select = document.getElementById("templateSelect");
+  const selected = select.value;
+  if (!selected) return alert("Please select a template!");
+
+  const template = JSON.parse(selected);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts.push(template);
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+
+  renderWorkouts();
+  alert("Template loaded!");
+}
+
+// SEND TEMPLATE TO ANOTHER USER
+async function sendTemplate() {
+  const otherUser = document.getElementById("shareWithUser").value.trim();
+  if (!otherUser) return alert("Enter username to share with.");
+
+  const select = document.getElementById("templateSelect");
+  const templateData = JSON.parse(select.value);
+
+  try {
+    const response = await fetch(`${serverUrl}/sendTemplate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fromUser: currentUser,
+        toUser: otherUser,
+        templateName: templateData.title + " (Shared)",
+        templateData
+      })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("Template sent successfully!");
+    } else {
+      alert(result.message || "Failed to send template.");
+    }
+  } catch (error) {
+    console.error('Send template error:', error);
+    alert("Error sending template.");
+  }
+}
+
+// Show template actions if one is selected
+function showTemplateOptions() {
+  const selected = document.getElementById("templateSelect").value;
+  document.getElementById("templateActions").style.display = selected ? 'block' : 'none';
+}
+
+
+// ====== TEMPLATES ======
+function showTemplateList() {
+  const container = document.getElementById('templateList');
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  container.innerHTML = '<h4>Templates:</h4>';
+  templates.forEach((template, index) => {
+    container.innerHTML += `
+      <button onclick="loadTemplate(${index})">${template.name}</button>
+      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
+    `;
+  });
+  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
+  container.style.display = 'block';
+}
+
+function saveTemplate() {
+  const name = prompt("Name your template:");
+  if (!name) return;
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (!workouts.length) return alert("No current workout to save.");
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  templates.push({ name, data: workouts[workouts.length - 1] });
+  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
+  showTemplateList();
+}
+
+function loadTemplate(index) {
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  const template = templates[index];
+  if (!template) return;
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts.push({...template.data, date: new Date().toISOString().split('T')[0]});
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+
+function deleteTemplate(index) {
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  templates.splice(index, 1);
+  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
+  showTemplateList();
+}
+
+  
   
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
@@ -777,157 +930,6 @@ async function createUser(username, password) {
   });
 }
 
-async function saveTemplate(username, templateName, templateData) {
-  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}`;
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${airtableToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      fields: {
-        Username: username,
-        TemplateName: templateName,
-        TemplateData: JSON.stringify(templateData)
-      }
-    })
-  });
-}
-
-async function fetchTemplates(username) {
-  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${airtableToken}` }
-  });
-  const data = await response.json();
-  return data.records.map(record => ({
-    id: record.id,
-    name: record.fields.TemplateName,
-    data: JSON.parse(record.fields.TemplateData)
-  }));
-}
-
-
-
-// LOAD TEMPLATE DROPDOWN
-async function loadTemplateDropdown() {
-  const select = document.getElementById("templateSelect");
-  select.innerHTML = '<option value="">Select Template...</option>';
-
-  try {
-    const response = await fetch(`${serverUrl}/getTemplates?username=${currentUser}`);
-    const result = await response.json();
-
-    result.templates.forEach(template => {
-      const option = document.createElement("option");
-      option.value = JSON.stringify(template.templateData);
-      option.textContent = template.templateName;
-      option.dataset.recordId = template.recordId;
-      select.appendChild(option);
-    });
-  } catch (error) {
-    console.error('Load templates error:', error);
-    alert("Error loading templates.");
-  }
-}
-
-// LOAD SELECTED TEMPLATE
-async function loadSelectedTemplate() {
-  const select = document.getElementById("templateSelect");
-  const selected = select.value;
-  if (!selected) return alert("Please select a template!");
-
-  const template = JSON.parse(selected);
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push(template);
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-
-  renderWorkouts();
-  alert("Template loaded!");
-}
-
-// SEND TEMPLATE TO ANOTHER USER
-async function sendTemplate() {
-  const otherUser = document.getElementById("shareWithUser").value.trim();
-  if (!otherUser) return alert("Enter username to share with.");
-
-  const select = document.getElementById("templateSelect");
-  const templateData = JSON.parse(select.value);
-
-  try {
-    const response = await fetch(`${serverUrl}/sendTemplate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fromUser: currentUser,
-        toUser: otherUser,
-        templateName: templateData.title + " (Shared)",
-        templateData
-      })
-    });
-
-    const result = await response.json();
-    if (result.success) {
-      alert("Template sent successfully!");
-    } else {
-      alert(result.message || "Failed to send template.");
-    }
-  } catch (error) {
-    console.error('Send template error:', error);
-    alert("Error sending template.");
-  }
-}
-
-// Show template actions if one is selected
-function showTemplateOptions() {
-  const selected = document.getElementById("templateSelect").value;
-  document.getElementById("templateActions").style.display = selected ? 'block' : 'none';
-}
-
-
-// ====== TEMPLATES ======
-function showTemplateList() {
-  const container = document.getElementById('templateList');
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  container.innerHTML = '<h4>Templates:</h4>';
-  templates.forEach((template, index) => {
-    container.innerHTML += `
-      <button onclick="loadTemplate(${index})">${template.name}</button>
-      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
-    `;
-  });
-  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
-  container.style.display = 'block';
-}
-
-function saveTemplate() {
-  const name = prompt("Name your template:");
-  if (!name) return;
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) return alert("No current workout to save.");
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  templates.push({ name, data: workouts[workouts.length - 1] });
-  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
-  showTemplateList();
-}
-
-function loadTemplate(index) {
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  const template = templates[index];
-  if (!template) return;
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({...template.data, date: new Date().toISOString().split('T')[0]});
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function deleteTemplate(index) {
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  templates.splice(index, 1);
-  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
-  showTemplateList();
-}
 
 // ===== BODYWEIGHT TRACKER =====
 
