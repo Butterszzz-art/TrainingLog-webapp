@@ -460,19 +460,20 @@ function addLogEntry() {
     return;
   }
 
-  const repsArray = [];
-  const weightsArray = [];
+ const repsArray = [];
+const weightsArray = [];
 
-  for (let i = 0; i < sets; i++) {
-    const reps = +prompt(`Set ${i + 1} - Enter reps:`);
-    const weight = +prompt(`Set ${i + 1} - Enter weight (${unit}):`);
-    if (isNaN(reps) || isNaN(weight)) {
-      alert("Invalid input for reps or weight.");
-      return;
-    }
-    repsArray.push(reps);
-    weightsArray.push(weight);
+for (let i = 0; i < sets; i++) {
+  const reps = +document.getElementById(`reps_${i}`).value;
+  const weight = +document.getElementById(`weight_${i}`).value;
+  if (isNaN(reps) || isNaN(weight)) {
+    alert("Please enter valid reps and weight for all sets.");
+    return;
   }
+  repsArray.push(reps);
+  weightsArray.push(weight);
+}
+
 
   // Get existing workouts from localStorage
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
