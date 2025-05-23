@@ -122,27 +122,27 @@
 
   </div>
 
-  <div id="trainingLogForm">
-    <button onclick="showTemplateList()">Load a Template</button>
+ <div id="logTab" class="tab-content active">
+  <h2>Resistance Exercise Log</h2>
 
-    <input type="text" id="exercise" placeholder="Exercise" />
-    <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
+  <button onclick="showTemplateList()">Load a Template</button>
+  <input type="text" id="exercise" placeholder="Exercise" />
+  <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
+  <div id="setInputsContainer"></div>
+  <input type="number" id="goal" placeholder="Target Weight Goal (kg/lbs)" />
+  <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)" />
+  <select id="weightUnit">
+    <option value="kg">kg</option>
+    <option value="lbs">lbs</option>
+  </select>
+  <button onclick="addLogEntry()">Add to Log</button>
+  <button onclick="completeWorkout()">Complete Workout</button>
+  <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
+  <button onclick="loadTemplate()">Load a Saved Template</button>
 
-    <div id="setInputsContainer"></div>
-
-    <input type="number" id="goal" placeholder="Target Weight Goal (kg/lbs)" />
-    <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)" />
-
-    <select id="weightUnit">
-      <option value="kg">kg</option>
-      <option value="lbs">lbs</option>
-    </select>
-
-    <button onclick="addLogEntry()">Add to Log</button>
-    <button onclick="completeWorkout()">Complete Workout</button>
-    <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
-    <button onclick="loadTemplate()">Load a Saved Template</button>
-  </div>
+  <!-- 🧠 Logbook Display -->
+  <div id="workoutsContainer"></div>
+</div>
 
 
   </div>
