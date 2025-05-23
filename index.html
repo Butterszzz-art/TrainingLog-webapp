@@ -493,8 +493,14 @@ function renderWorkouts() {
           <tr>
             ${setIndex === 0 ? `<td rowspan="${sets}">${entry.exercise}</td>
                                 <td rowspan="${sets}">${sets}</td>` : ''}
-            <td>Set ${setIndex + 1}: ${rep}</td>
-            <td>Set ${setIndex + 1}: ${weight} ${unit}</td>
+           <td>
+  <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${setIndex})" />
+</td>
+<td>
+  <input type="number" value="${weight}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${setIndex})" />
+  <span style="font-size:12px;">(${unit})</span>
+</td>
+
             ${setIndex === 0 ? `
               <td rowspan="${sets}">${entry.date}</td>
               <td rowspan="${sets}">
@@ -541,6 +547,20 @@ function renderWorkouts() {
 
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
+}
+  
+function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const entry = workouts[workoutIndex].log[entryIndex];
+
+  if (type === 'rep') {
+    entry.repsArray[setIndex] = +value;
+  } else if (type === 'weight') {
+    entry.weightsArray[setIndex] = +value;
+  }
+
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
 }
 
 function addSetToLog(workoutIndex, entryIndex) {
