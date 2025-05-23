@@ -126,7 +126,8 @@
     <button onclick="showTemplateList()">Load a Template</button>
     <div id="templateList" style="display:none; margin-top:10px;"></div>
     <input type="text" id="exercise" placeholder="Exercise">
-    <input type="number" id="sets" placeholder="Sets">
+   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)">
+<div id="setInputsContainer"></div>
     <input type="number" id="reps" placeholder="Reps">
     <input type="number" id="weight" placeholder="Weight" style="flex: 1;">
     <div style="display: flex; gap: 8px;">
@@ -327,6 +328,35 @@ window.showTab = function(tabId) {
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
   
+function editSetValue(workoutIndex, setIndex, type, value) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const entry = workouts[workoutIndex].log.find((e, i) => i === setIndex);
+
+  if (type === 'rep') {
+    workouts[workoutIndex].log[setIndex].repsArray[setIndex] = +value;
+  } else {
+    workouts[workoutIndex].log[setIndex].weightsArray[setIndex] = +value;
+  }
+
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+  
+function generateSetInputs(setCount) {
+  const container = document.getElementById("setInputsContainer");
+  container.innerHTML = '';
+  for (let i = 0; i < setCount; i++) {
+    container.innerHTML += `
+      <div style="margin-bottom:8px;">
+        <label>Set ${i + 1} Reps:</label>
+        <input type="number" id="reps_${i}" required>
+        <label>Weight:</label>
+        <input type="number" id="weight_${i}" required>
+      </div>
+    `;
+  }
+}
+  
 function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
@@ -359,6 +389,24 @@ function renderWorkouts() {
                                 <td rowspan="${sets}">
                                   <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button>
                                 </td>` : ''}
+                                <td>
+  ${entry.repsArray.map((rep, i) => `
+    <div>
+      Set ${i + 1}: 
+      <input type="number" value="${rep}" onchange="editSetValue(${index}, ${i}, 'rep', this.value)">
+    </div>
+  `).join('')}
+</td>
+<td>
+  ${entry.weightsArray.map((w, i) => `
+    <div>
+      Set ${i + 1}: 
+      <input type="number" value="${w}" onchange="editSetValue(${index}, ${i}, 'weight', this.value)">
+    </div>
+  `).join('')}
+  <span style="font-size:12px;">(${entry.unit})</span>
+</td>
+
           </tr>
         `;
       }).join('');
