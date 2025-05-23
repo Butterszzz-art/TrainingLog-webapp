@@ -150,8 +150,6 @@ select {
 <div id="logTab" class="tab-content active">
   <h2>Resistance Exercise Log</h2>
 
-  <button onclick="showTemplateList()">Load a Template</button>
-
   <input type="text" id="exercise" placeholder="Exercise" />
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
 
@@ -176,8 +174,6 @@ select {
 
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
-
-  <div id="templateList" style="margin-top: 20px;"></div>
 
 </div>
 
@@ -244,26 +240,6 @@ select {
   </div>
 </div>
   
-<div id="templateManager" style="display:none; margin-top: 20px;">
-  <h3>Workout Templates</h3>
-
-  <button onclick="saveWorkoutAsTemplate()">Save Template</button>
-
-  <h4 style="margin-top:20px;">Load / Manage Templates</h4>
-  <select id="templateSelect" onchange="showTemplateOptions()">
-    <option value="">Select Template...</option>
-  </select>
-  <div id="templateActions" style="display:none; margin-top: 10px;">
-    <button onclick="loadSelectedTemplate()">Load Template</button>
-    <input type="text" id="editTemplateName" placeholder="Rename template">
-    <button onclick="renameTemplate()">Rename</button>
-    <button onclick="deleteTemplate()">🗑️ Delete</button>
-    <button onclick="favoriteTemplate()">⭐ Favorite</button>
-    <input type="text" id="shareWithUser" placeholder="Send to Username">
-    <button onclick="sendTemplate()">Send</button>
-  </div>
-</div>
-
 <script>
   
 const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
