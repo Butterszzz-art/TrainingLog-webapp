@@ -92,16 +92,19 @@
       background-color: #c82333;
     }
     .add-set-btn {
-  background-color: #007bff;
+  background-color: #28a745;
   color: white;
-  padding: 6px 12px;
   border: none;
+  margin-top: 4px;
+  padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 12px;
 }
 .add-set-btn:hover {
-  background-color: #0056b3;
+  background-color: #218838;
 }
+
 
   </style>
 </head>
@@ -483,12 +486,11 @@ function renderWorkouts() {
     let rows = '';
 
     workout.log.forEach((entry, entryIndex) => {
-      const sets = entry.sets;
+      const sets = entry.sets || entry.repsArray?.length || 0;
       const repsArray = entry.repsArray || [];
       const weightsArray = entry.weightsArray || [];
       const unit = entry.unit || 'kg';
 
-      // Combine sets into rows with editable inputs
       rows += repsArray.map((rep, setIndex) => {
         const weight = weightsArray[setIndex] ?? '-';
 
@@ -496,24 +498,18 @@ function renderWorkouts() {
           <tr>
             ${setIndex === 0 ? `<td rowspan="${sets}">${entry.exercise}</td>
                                 <td rowspan="${sets}">${sets}</td>` : ''}
-
-            <td>
-              <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${setIndex})">
-            </td>
-
-            <td>
-              <input type="number" value="${weight}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${setIndex})">
-              <span style="font-size:12px;">(${unit})</span>
-            </td>
-
-            ${setIndex === 0 ? `<td rowspan="${sets}">${entry.date}</td>
-                                <td rowspan="${sets}">
-                                  ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}
-                                  ${entry.repGoal ? `<br>(Rep Goal: ${entry.repGoal})` : ''}
-                                </td>
-                                <td rowspan="${sets}">
-                                  <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button>
-                                </td>` : ''}
+            <td>Set ${setIndex + 1}: ${rep}</td>
+            <td>Set ${setIndex + 1}: ${weight} ${unit}</td>
+            ${setIndex === 0 ? `
+              <td rowspan="${sets}">${entry.date}</td>
+              <td rowspan="${sets}">
+                ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}
+                ${entry.repGoal ? `<br>(Rep Goal: ${entry.repGoal})` : ''}
+              </td>
+              <td rowspan="${sets}">
+                <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button><br>
+                <button onclick="addSetToLog(${workoutIndex}, ${entryIndex})" class="add-set-btn">➕ Add Set</button>
+              </td>` : ''}
           </tr>
         `;
       }).join('');
@@ -534,16 +530,14 @@ function renderWorkouts() {
                 <th>Weight</th>
                 <th>Date</th>
                 <th>Goal Progress</th>
-                <th>Remove</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               ${rows}
             </tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">
-            Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}
-          </p>
+          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
           <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
       </div>
@@ -553,6 +547,19 @@ function renderWorkouts() {
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
 }
+
+function addSetToLog(workoutIndex, entryIndex) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const entry = workouts[workoutIndex].log[entryIndex];
+
+  entry.repsArray.push(0);        // default value
+  entry.weightsArray.push(0);     // default value
+  entry.sets = entry.repsArray.length;
+
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+window.addSetToLog = addSetToLog;
 
   
 function completeWorkout() {
