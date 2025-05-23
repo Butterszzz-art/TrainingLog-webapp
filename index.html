@@ -91,6 +91,18 @@
     .remove-btn:hover {
       background-color: #c82333;
     }
+    .add-set-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-set-btn:hover {
+  background-color: #0056b3;
+}
+
   </style>
 </head>
 <body>
@@ -120,32 +132,41 @@
 
   </div>
 
- <div id="logTab" class="tab-content active">
+<div id="logTab" class="tab-content active">
   <h2>Resistance Exercise Log</h2>
 
   <button onclick="showTemplateList()">Load a Template</button>
 
   <input type="text" id="exercise" placeholder="Exercise" />
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
+
+  <!-- Set controls -->
+  <div id="setControls" style="margin: 10px 0;">
+    <button onclick="addNewSet()" class="add-set-btn">➕ Add Set</button>
+  </div>
+
+  <!-- Dynamically generated inputs will appear here -->
   <div id="setInputsContainer"></div>
 
+  <!-- Optional goals -->
   <input type="number" id="goal" placeholder="Target Weight Goal (kg/lbs)" />
   <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)" />
 
+  <!-- Unit selector -->
   <select id="weightUnit">
     <option value="kg">kg</option>
     <option value="lbs">lbs</option>
   </select>
 
+  <!-- Action buttons -->
   <button onclick="addLogEntry()">Add to Log</button>
   <button onclick="completeWorkout()">Complete Workout</button>
   <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
   <button onclick="loadTemplate()">Load a Saved Template</button>
 
-  <!-- ⬇️ Logbook display goes at the bottom -->
+  <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
 </div>
-
 
 
   </div>
@@ -343,20 +364,55 @@ function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
 
 
   
+let currentSetCount = 0;
+
 function generateSetInputs(setCount) {
+  currentSetCount = setCount;
   const container = document.getElementById("setInputsContainer");
   container.innerHTML = '';
   for (let i = 0; i < setCount; i++) {
-    container.innerHTML += `
-      <div style="margin-bottom:8px;">
-        <label>Set ${i + 1} Reps:</label>
-        <input type="number" id="reps_${i}" required>
-        <label>Weight:</label>
-        <input type="number" id="weight_${i}" required>
-      </div>
-    `;
+    container.innerHTML += getSetInputHTML(i);
   }
 }
+
+function addNewSet() {
+  const container = document.getElementById("setInputsContainer");
+  container.innerHTML += getSetInputHTML(currentSetCount);
+  currentSetCount++;
+  document.getElementById("sets").value = currentSetCount;
+}
+
+function getSetInputHTML(i) {
+  return `
+    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+      <label style="min-width: 60px;">Set ${i + 1}</label>
+      <input type="number" id="reps_${i}" placeholder="Reps" style="width: 80px;" />
+      <input type="number" id="weight_${i}" placeholder="Weight" style="width: 100px;" />
+      <button onclick="removeSet(${i})" style="background-color: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px;">❌</button>
+    </div>
+  `;
+}
+
+function removeSet(indexToRemove) {
+  currentSetCount--;
+  const reps = [];
+  const weights = [];
+
+  for (let i = 0; i < currentSetCount + 1; i++) {
+    if (i !== indexToRemove) {
+      reps.push(document.getElementById(`reps_${i}`).value);
+      weights.push(document.getElementById(`weight_${i}`).value);
+    }
+  }
+
+  generateSetInputs(currentSetCount);
+  for (let i = 0; i < currentSetCount; i++) {
+    document.getElementById(`reps_${i}`).value = reps[i];
+    document.getElementById(`weight_${i}`).value = weights[i];
+  }
+  document.getElementById("sets").value = currentSetCount;
+}
+
   
 function addLogEntry() {
   const exercise = document.getElementById("exercise").value.trim();
