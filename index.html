@@ -176,6 +176,9 @@ select {
 
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
+
+  <div id="templateList" style="margin-top: 20px;"></div>
+
 </div>
 
 
@@ -586,23 +589,16 @@ function addSetToLog(workoutIndex, entryIndex) {
 }
 window.addSetToLog = addSetToLog;
 
-async function saveTemplate(username, templateName, templateData) {
-  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}`;
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${airtableToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      fields: {
-        Username: username,
-        TemplateName: templateName,
-        TemplateData: JSON.stringify(templateData)
-      }
-    })
-  });
+function saveWorkoutAsTemplate() {
+  const name = prompt("Enter a name for this template:");
+  if (!name) return;
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (!workouts.length) return alert("No workout to save.");
+  const template = workouts[workouts.length - 1];
+  saveTemplate(currentUser, name, template);
+  alert("Template saved!");
 }
+
 
 async function fetchTemplates(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
@@ -710,16 +706,6 @@ function showTemplateList() {
   container.style.display = 'block';
 }
 
-function saveTemplate() {
-  const name = prompt("Name your template:");
-  if (!name) return;
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) return alert("No current workout to save.");
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  templates.push({ name, data: workouts[workouts.length - 1] });
-  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
-  showTemplateList();
-}
 
 function loadTemplate(index) {
   const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
@@ -737,9 +723,7 @@ function deleteTemplate(index) {
   localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
   showTemplateList();
 }
-
-  
-  
+ 
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
