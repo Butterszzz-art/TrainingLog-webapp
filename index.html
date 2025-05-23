@@ -425,19 +425,50 @@ function addLogEntry() {
     return;
   }
 
- const repsArray = [];
-const weightsArray = [];
+  const repsArray = [];
+  const weightsArray = [];
 
-for (let i = 0; i < sets; i++) {
-  const reps = +document.getElementById(`reps_${i}`).value;
-  const weight = +document.getElementById(`weight_${i}`).value;
-  if (isNaN(reps) || isNaN(weight)) {
-    alert("Please enter valid reps and weight for all sets.");
-    return;
+  for (let i = 0; i < sets; i++) {
+    const reps = +document.getElementById(`reps_${i}`).value;
+    const weight = +document.getElementById(`weight_${i}`).value;
+    if (isNaN(reps) || isNaN(weight)) {
+      alert("Please enter valid reps and weight for all sets.");
+      return;
+    }
+    repsArray.push(reps);
+    weightsArray.push(weight);
   }
-  repsArray.push(reps);
-  weightsArray.push(weight);
+
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
+    workouts.push({ title: `Workout on ${date}`, date, log: [] });
+  }
+
+  workouts[workouts.length - 1].log.push({
+    exercise,
+    sets,
+    repsArray,
+    weightsArray,
+    unit,
+    date,
+    goal,
+    repGoal
+  });
+
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+
+  // ✅ Clear form inputs
+  document.getElementById("exercise").value = '';
+  document.getElementById("sets").value = '';
+  document.getElementById("goal").value = '';
+  document.getElementById("repGoal").value = '';
+  document.getElementById("setInputsContainer").innerHTML = '';
+
+  // ✅ Reset set counter
+  currentSetCount = 0;
 }
+
 
 
   // Get existing workouts from localStorage
