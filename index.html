@@ -469,39 +469,6 @@ function addLogEntry() {
   currentSetCount = 0;
 }
 
-
-
-  // Get existing workouts from localStorage
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-
-  // If no workouts exist yet, create a new one
-  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
-    workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  }
-
-  // Add new entry to the last workout
-  workouts[workouts.length - 1].log.push({
-    exercise,
-    sets,
-    repsArray,
-    weightsArray,
-    unit,
-    date,
-    goal,
-    repGoal
-  });
-
-  // Save and render
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-
-  // Clear form fields
-  document.getElementById("exercise").value = '';
-  document.getElementById("sets").value = '';
-  document.getElementById("weight").value = '';
-  document.getElementById("goal").value = '';
-  document.getElementById("repGoal").value = '';
-}
   
 function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
