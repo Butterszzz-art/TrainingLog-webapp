@@ -323,19 +323,20 @@ window.showTab = function(tabId) {
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
   
-function editSetValue(workoutIndex, setIndex, type, value) {
+function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const entry = workouts[workoutIndex].log.find((e, i) => i === setIndex);
+  const entry = workouts[workoutIndex].log[entryIndex];
 
   if (type === 'rep') {
-    workouts[workoutIndex].log[setIndex].repsArray[setIndex] = +value;
-  } else {
-    workouts[workoutIndex].log[setIndex].weightsArray[setIndex] = +value;
+    entry.repsArray[setIndex] = +value;
+  } else if (type === 'weight') {
+    entry.weightsArray[setIndex] = +value;
   }
 
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   renderWorkouts();
 }
+
   
 function generateSetInputs(setCount) {
   const container = document.getElementById("setInputsContainer");
@@ -448,7 +449,7 @@ function renderWorkouts() {
   ${entry.repsArray.map((rep, i) => `
     <div>
       Set ${i + 1}: 
-      <input type="number" value="${rep}" onchange="editSetValue(${index}, ${i}, 'rep', this.value)">
+ <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${i})">
     </div>
   `).join('')}
 </td>
@@ -456,7 +457,7 @@ function renderWorkouts() {
   ${entry.weightsArray.map((w, i) => `
     <div>
       Set ${i + 1}: 
-      <input type="number" value="${w}" onchange="editSetValue(${index}, ${i}, 'weight', this.value)">
+ <input type="number" value="${w}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${i})">
     </div>
   `).join('')}
   <span style="font-size:12px;">(${entry.unit})</span>
