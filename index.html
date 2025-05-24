@@ -573,11 +573,6 @@ function addSetToLog(workoutIndex, entryIndex) {
 }
 window.addSetToLog = addSetToLog;
 
-const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
-const airtableBaseId = 'appmjr4IgnEH72K1b/tblwDxtPzJwuk1xNI';
-const templatesTableName = 'Templates';
-let currentUser = null;
-const serverUrl = 'https://traininglog-backend.onrender.com'; // or your own
 
 // Save a workout template to Airtable
 async function saveTemplate(username, templateName, templateData) {
