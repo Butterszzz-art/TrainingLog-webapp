@@ -291,6 +291,9 @@ window.renderWorkouts(); // call the global function after assigning it
     console.error('Login error:', error);
     alert("Error connecting to server.");
   }
+
+  await loadTemplateDropdown(); // ✅ Load templates after login
+
 }
 
 // SIGNUP
@@ -701,38 +704,6 @@ function showTemplateOptions() {
 }
 
 
-// ====== TEMPLATES ======
-function showTemplateList() {
-  const container = document.getElementById('templateList');
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  container.innerHTML = '<h4>Templates:</h4>';
-  templates.forEach((template, index) => {
-    container.innerHTML += `
-      <button onclick="loadTemplate(${index})">${template.name}</button>
-      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
-    `;
-  });
-  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
-  container.style.display = 'block';
-}
-
-
-function loadTemplate(index) {
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  const template = templates[index];
-  if (!template) return;
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({...template.data, date: new Date().toISOString().split('T')[0]});
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
-
-function deleteTemplate(index) {
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  templates.splice(index, 1);
-  localStorage.setItem(`templates_${currentUser}`, JSON.stringify(templates));
-  showTemplateList();
-}
  
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
