@@ -176,7 +176,7 @@ select {
   <button onclick="completeWorkout()">Complete Workout</button>
   <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
   <button onclick="loadTemplateDropdown()">Load a Saved Template</button>
-
+  
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
 
@@ -570,17 +570,32 @@ function addSetToLog(workoutIndex, entryIndex) {
 }
 window.addSetToLog = addSetToLog;
 
-function saveWorkoutAsTemplate() {
-  const name = prompt("Enter a name for this template:");
-  if (!name) return;
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  if (!workouts.length) return alert("No workout to save.");
-  const template = workouts[workouts.length - 1];
-  saveTemplate(currentUser, name, template);
-  alert("Template saved!");
+const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
+const airtableBaseId = 'appmjr4IgnEH72K1b/tblwDxtPzJwuk1xNI';
+const templatesTableName = 'Templates';
+let currentUser = null;
+const serverUrl = 'https://traininglog-backend.onrender.com'; // or your own
+
+// Save a workout template to Airtable
+async function saveTemplate(username, templateName, templateData) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}`;
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${airtableToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fields: {
+        Username: username,
+        TemplateName: templateName,
+        TemplateData: JSON.stringify(templateData)
+      }
+    })
+  });
 }
 
-
+// Fetch templates from Airtable for a user
 async function fetchTemplates(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
@@ -594,41 +609,55 @@ async function fetchTemplates(username) {
   }));
 }
 
-
-
-// LOAD TEMPLATE DROPDOWN
-async function loadLocalTemplate(index) {
+// Populate the dropdown
+async function loadTemplateDropdown() {
   const select = document.getElementById("templateSelect");
   select.innerHTML = '<option value="">Select Template...</option>';
 
   try {
-    const response = await fetch(`${serverUrl}/getTemplates?username=${currentUser}`);
-    const result = await response.json();
-
-    result.templates.forEach(template => {
+    const templates = await fetchTemplates(currentUser);
+    templates.forEach(template => {
       const option = document.createElement("option");
-      option.value = JSON.stringify(template.templateData);
-      option.textContent = template.templateName;
-      option.dataset.recordId = template.recordId;
+      option.value = JSON.stringify(template.data);
+      option.textContent = template.name;
       select.appendChild(option);
     });
   } catch (error) {
-    console.error('Load templates error:', error);
-    alert("Error loading templates.");
+    console.error('Template loading failed:', error);
+    alert("Could not load templates.");
   }
 }
 
-// LOAD SELECTED TEMPLATE
-async function loadSelectedTemplate() {
-  const select = document.getElementById("templateSelect");
-  const selected = select.value;
-  if (!selected) return alert("Please select a template!");
+// Save last workout as template
+function saveWorkoutAsTemplate() {
+  const name = prompt("Enter a name for this template:");
+  if (!name) return;
 
-  const template = JSON.parse(selected);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  if (!workouts.length) return alert("No workout to save.");
+  const template = workouts[workouts.length - 1];
+
+  saveTemplate(currentUser, name, template)
+    .then(() => {
+      alert("Template saved!");
+      loadTemplateDropdown(); // Refresh dropdown
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Failed to save template.");
+    });
+}
+
+// Load selected template into workouts
+function loadSelectedTemplate() {
+  const select = document.getElementById("templateSelect");
+  const value = select.value;
+  if (!value) return;
+
+  const template = JSON.parse(value);
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   workouts.push(template);
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-
   renderWorkouts();
   alert("Template loaded!");
 }
