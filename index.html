@@ -166,11 +166,16 @@ select {
     <option value="lbs">lbs</option>
   </select>
 
+  <select id="templateSelect" onchange="loadSelectedTemplate()" style="margin-top: 10px;">
+  <option value="">Select Template...</option>
+</select>
+
+  
   <!-- Action buttons -->
   <button onclick="addLogEntry()">Add to Log</button>
   <button onclick="completeWorkout()">Complete Workout</button>
   <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
-  <button onclick="loadTemplate()">Load a Saved Template</button>
+  <button onclick="loadTemplateDropdown()">Load a Saved Template</button>
 
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
@@ -592,7 +597,7 @@ async function fetchTemplates(username) {
 
 
 // LOAD TEMPLATE DROPDOWN
-async function loadTemplateDropdown() {
+async function loadLocalTemplate(index)() {
   const select = document.getElementById("templateSelect");
   select.innerHTML = '<option value="">Select Template...</option>';
 
@@ -1087,6 +1092,8 @@ window.logout = logout;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
 window.loadTemplate = loadTemplate;
 window.showTemplateList = showTemplateList;
+window.loadTemplateDropdown = loadTemplateDropdown;
+window.loadSelectedTemplate = loadSelectedTemplate;
 
 
 
