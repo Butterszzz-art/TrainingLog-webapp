@@ -273,7 +273,16 @@ select {
   <p>Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
   <progress id="fatBar" value="0" max="100"></progress>
 </div>
+    
+<p>Energy: <span id="macroEnergy">0</span> kcal</p>
+<p>Protein: <span id="macroProtein">0</span> g</p>
+<p>Carbs: <span id="macroCarbs">0</span> g</p>
+<p>Fat: <span id="macroFat">0</span> g</p>
 
+<div id="macroMealContainer"></div>
+<button onclick="addMacroMeal()">➕ Add Meal</button>
+
+    
 <!-- Target Calculator -->
 <div style="margin-top:20px;">
   <h3>Set Your Macro Targets</h3>
@@ -870,38 +879,66 @@ function getLastExerciseEntry(exerciseName) {
 
 let macroMeals = [];
 
+let macroMeals = [];
+let totalProtein = 0;
+let totalCarbs = 0;
+let totalFats = 0;
+
 function addMacroMeal() {
   const index = macroMeals.length;
   const container = document.getElementById("macroMealContainer");
-  
+
   const mealDiv = document.createElement("div");
   mealDiv.id = `meal${index}`;
   mealDiv.innerHTML = `
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
       <strong>Meal ${index + 1}</strong><br>
-      Protein: <input type="number" id="protein${index}" placeholder="g" />
-      Carbs: <input type="number" id="carbs${index}" placeholder="g" />
-      Fats: <input type="number" id="fats${index}" placeholder="g" />
+      Protein: <input type="number" id="protein${index}" placeholder="g" onchange="updateMacroTotals()" />
+      Carbs: <input type="number" id="carbs${index}" placeholder="g" onchange="updateMacroTotals()" />
+      Fats: <input type="number" id="fats${index}" placeholder="g" onchange="updateMacroTotals()" />
       <button onclick="removeMacroMeal(${index})" class="remove-btn">❌</button>
     </div>
   `;
-  
+
   container.appendChild(mealDiv);
-  macroMeals.push({ index, protein: 0, carbs: 0, fats: 0 });
+  macroMeals.push(index);
+  updateMacroTotals();
 }
 
+function updateMacroTotals() {
+  totalProtein = 0;
+  totalCarbs = 0;
+  totalFats = 0;
+
+  macroMeals.forEach(index => {
+    const protein = +document.getElementById(`protein${index}`)?.value || 0;
+    const carbs = +document.getElementById(`carbs${index}`)?.value || 0;
+    const fats = +document.getElementById(`fats${index}`)?.value || 0;
+
+    totalProtein += protein;
+    totalCarbs += carbs;
+    totalFats += fats;
+  });
+
+  const totalCalories = (totalProtein * 4) + (totalCarbs * 4) + (totalFats * 9);
+
+  document.getElementById("macroEnergy").textContent = `${totalCalories.toFixed(0)}`;
+  document.getElementById("macroProtein").textContent = `${totalProtein.toFixed(1)}`;
+  document.getElementById("macroCarbs").textContent = `${totalCarbs.toFixed(1)}`;
+  document.getElementById("macroFat").textContent = `${totalFats.toFixed(1)}`;
+}
+  
 
 function removeMacroMeal(index) {
-  // Remove the HTML
   const mealDiv = document.getElementById(`meal${index}`);
   if (mealDiv) mealDiv.remove();
 
-  // Remove the data
-  macroMeals[index] = null;
+  // Mark that index as removed
+  macroMeals = macroMeals.filter(i => i !== index);
 
-  // Recalculate totals
-  calculateMacros();
+  updateMacroTotals(); // Refresh totals
 }
+
 
 function calculateMacros() {
   let totalProtein = 0, totalCarbs = 0, totalFats = 0;
