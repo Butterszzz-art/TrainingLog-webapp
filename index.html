@@ -258,7 +258,26 @@ select {
     <input type="number" id="fats" placeholder="Fats (g)">
     <button onclick="calculateCalories()">Calculate Calories</button>
     <h3>Total Calories: <span id="totalCalories">0</span> kcal</h3>
-  </div>
+  
+<div id="macroGoals" style="margin-bottom: 20px;">
+  <h3 style="margin-top:0;">Targets</h3>
+  <div>Energy: <span id="energyDisplay">0 / 3380 kcal</span> <span id="energyPercent">0%</span></div>
+  <progress id="energyProgress" value="0" max="100" style="width:100%;"></progress>
+
+  <div>Protein: <span id="proteinDisplay">0 / 230 g</span> <span id="proteinPercent">0%</span></div>
+  <progress id="proteinProgress" value="0" max="100" style="width:100%;"></progress>
+
+  <div>Carbs: <span id="carbDisplay">0 / 400 g</span> <span id="carbPercent">0%</span></div>
+  <progress id="carbProgress" value="0" max="100" style="width:100%;"></progress>
+
+  <div>Fat: <span id="fatDisplay">0 / 96 g</span> <span id="fatPercent">0%</span></div>
+  <progress id="fatProgress" value="0" max="100" style="width:100%;"></progress>
+</div>
+
+<button onclick="addMacroMeal()">➕ Add Meal</button>
+<div id="macroMealContainer"></div>
+ </div>
+  
 </div>
   
 <script>
@@ -817,6 +836,73 @@ function getLastExerciseEntry(exerciseName) {
   return lastMatch;
 }
 
+let macroMeals = [];
+
+function addMacroMeal() {
+  const index = macroMeals.length;
+  const container = document.getElementById("macroMealContainer");
+  const mealDiv = document.createElement("div");
+  mealDiv.innerHTML = `
+    <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+      <strong>Meal ${index + 1}</strong><br>
+      Protein: <input type="number" id="protein${index}" placeholder="g" />
+      Carbs: <input type="number" id="carbs${index}" placeholder="g" />
+      Fats: <input type="number" id="fats${index}" placeholder="g" />
+      <button onclick="removeMacroMeal(${index})" class="remove-btn">❌</button>
+    </div>
+  `;
+  container.appendChild(mealDiv);
+  macroMeals.push({ protein: 0, carbs: 0, fats: 0 });
+}
+
+function removeMacroMeal(index) {
+  macroMeals[index] = null;
+  calculateMacros();
+}
+
+function calculateMacros() {
+  let totalProtein = 0, totalCarbs = 0, totalFats = 0;
+  macroMeals.forEach((m, i) => {
+    if (!m) return;
+    const p = +document.getElementById(`protein${i}`).value || 0;
+    const c = +document.getElementById(`carbs${i}`).value || 0;
+    const f = +document.getElementById(`fats${i}`).value || 0;
+    m.protein = p;
+    m.carbs = c;
+    m.fats = f;
+    totalProtein += p;
+    totalCarbs += c;
+    totalFats += f;
+  });
+
+  const kcal = (totalProtein * 4) + (totalCarbs * 4) + (totalFats * 9);
+  updateMacroUI(totalProtein, totalCarbs, totalFats, kcal);
+}
+
+function updateMacroUI(p = 0, c = 0, f = 0, kcal = 0) {
+  const goal = { kcal: 3380, protein: 230, carbs: 400, fats: 96 };
+
+  document.getElementById("energyDisplay").textContent = `${kcal} / ${goal.kcal} kcal`;
+  document.getElementById("energyPercent").textContent = Math.round((kcal / goal.kcal) * 100) + "%";
+  document.getElementById("energyProgress").value = Math.min(100, (kcal / goal.kcal) * 100);
+
+  document.getElementById("proteinDisplay").textContent = `${p} / ${goal.protein} g`;
+  document.getElementById("proteinPercent").textContent = Math.round((p / goal.protein) * 100) + "%";
+  document.getElementById("proteinProgress").value = Math.min(100, (p / goal.protein) * 100);
+
+  document.getElementById("carbDisplay").textContent = `${c} / ${goal.carbs} g`;
+  document.getElementById("carbPercent").textContent = Math.round((c / goal.carbs) * 100) + "%";
+  document.getElementById("carbProgress").value = Math.min(100, (c / goal.carbs) * 100);
+
+  document.getElementById("fatDisplay").textContent = `${f} / ${goal.fats} g`;
+  document.getElementById("fatPercent").textContent = Math.round((f / goal.fats) * 100) + "%";
+  document.getElementById("fatProgress").value = Math.min(100, (f / goal.fats) * 100);
+}
+
+// 🔁 Auto-update every second
+setInterval(calculateMacros, 1000);
+
+  
   
 // LOGOUT
 function logout() {
