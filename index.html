@@ -535,7 +535,10 @@ function renderWorkouts() {
               ${rows}
             </tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
+          <p style="font-weight:bold; margin-top:10px;">
+  Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}
+</p>
+
           <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
       </div>
@@ -737,13 +740,21 @@ function toggleWorkoutDetails(index) {
 
 function calculateWorkoutVolume(workout) {
   let total = 0;
+
   workout.log.forEach(entry => {
-    if (entry.repsArray) {
-      total += entry.repsArray.reduce((a, b) => a + b, 0) * (entry.weight || 0);
+    const reps = entry.repsArray || [];
+    const weights = entry.weightsArray || [];
+
+    for (let i = 0; i < reps.length; i++) {
+      const rep = reps[i];
+      const weight = weights[i] || 0;
+      total += rep * weight;
     }
   });
+
   return total;
-}  
+}
+
 
 function removeLogEntry(workoutIndex, entryIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
