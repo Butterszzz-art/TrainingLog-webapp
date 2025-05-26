@@ -472,6 +472,16 @@ function addLogEntry() {
 function renderWorkouts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
+
+  // Track open workout sections BEFORE rendering
+  const openWorkouts = new Set();
+  workouts.forEach((_, index) => {
+    const details = document.getElementById(`workoutDetails${index}`);
+    if (details && details.style.display === 'block') {
+      openWorkouts.add(index);
+    }
+  });
+
   container.innerHTML = '';
 
   workouts.forEach((workout, workoutIndex) => {
@@ -485,19 +495,19 @@ function renderWorkouts() {
 
       rows += repsArray.map((rep, setIndex) => {
         const weight = weightsArray[setIndex] ?? '-';
-
         return `
           <tr>
             ${setIndex === 0 ? `<td rowspan="${sets}">${entry.exercise}</td>
                                 <td rowspan="${sets}">${sets}</td>` : ''}
-           <td>
-  <input type="number" value="${rep}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${setIndex})" />
-</td>
-<td>
-  <input type="number" value="${weight}" onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${setIndex})" />
-  <span style="font-size:12px;">(${unit})</span>
-</td>
-
+            <td>
+              <input type="number" value="${rep}" 
+                     onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'rep', this.value, ${setIndex})" />
+            </td>
+            <td>
+              <input type="number" value="${weight}" 
+                     onchange="editSetValue(${workoutIndex}, ${entryIndex}, 'weight', this.value, ${setIndex})" />
+              <span style="font-size:12px;">(${unit})</span>
+            </td>
             ${setIndex === 0 ? `
               <td rowspan="${sets}">${entry.date}</td>
               <td rowspan="${sets}">
@@ -531,23 +541,25 @@ function renderWorkouts() {
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              ${rows}
-            </tbody>
+            <tbody>${rows}</tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">
-  Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}
-</p>
-
+          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
           <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
       </div>
     `;
   });
 
+  // Restore open sections AFTER rendering
+  openWorkouts.forEach(index => {
+    const el = document.getElementById(`workoutDetails${index}`);
+    if (el) el.style.display = 'block';
+  });
+
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
 }
+
   
 function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
