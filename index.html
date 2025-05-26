@@ -291,6 +291,56 @@ select {
   <button onclick="saveMacroTargets()">Save Targets</button>
 </div>
 
+ <h2>Macro Tracker</h2>
+
+<!-- Progress Bars -->
+<div>
+  <h3>Targets</h3>
+  <p>Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
+  <progress id="calsBar" value="0" max="100"></progress>
+
+  <p>Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
+  <progress id="proteinBar" value="0" max="100"></progress>
+
+  <p>Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
+  <progress id="carbBar" value="0" max="100"></progress>
+
+  <p>Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
+  <progress id="fatBar" value="0" max="100"></progress>
+</div>
+
+<!-- Target Calculator -->
+<div style="margin-top:20px;">
+  <h3>Set Your Macro Targets</h3>
+  <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)">
+  <input type="number" id="macroHeight" placeholder="Height (in)">
+  <select id="macroActivity">
+    <option value="1.2">Sedentary</option>
+    <option value="1.375">Lightly Active</option>
+    <option value="1.55">Moderately Active</option>
+    <option value="1.725">Very Active</option>
+    <option value="1.9">Extremely Active</option>
+  </select>
+  <button onclick="calculateMacroTargets()">Calculate Targets</button>
+</div>
+
+<!-- Slider Config -->
+<div id="macroSliders" style="display:none; margin-top:20px;">
+  <h4>Adjust Macros</h4>
+
+  <label>Protein: <span id="proteinVal">0</span>g</label>
+  <input type="range" id="proteinSlider" min="0" max="300" step="1" oninput="adjustMacros()"><br>
+
+  <label>Fat: <span id="fatVal">0</span>g</label>
+  <input type="range" id="fatSlider" min="0" max="150" step="1" oninput="adjustMacros()"><br>
+
+  <label>Carbs: <span id="carbVal">0</span>g</label>
+  <input type="range" id="carbSlider" min="0" max="400" step="1" oninput="adjustMacros()"><br>
+
+  <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
+  <button onclick="saveSliderMacros()">Save Macros</button>
+</div>
+   
     
  </div>
   
@@ -332,6 +382,7 @@ async function startLogin() {
 
       showTab('logTab');
       window.renderWorkouts(); // ✅ Render workouts
+      renderMacroTargets();
       renderWeights();
       renderCardio();
       renderCrossfitWorkouts();
@@ -981,6 +1032,93 @@ function saveMacroTargets() {
   renderMacroTargets(); // optional: live refresh UI
 }
 
+function calculateMacroTargets() {
+  const weight = +document.getElementById("macroWeight").value;
+  const height = +document.getElementById("macroHeight").value;
+  const activity = +document.getElementById("macroActivity").value;
+
+  if (!weight || !height) return alert("Enter bodyweight and height!");
+
+  const age = 25; // Optional: add age input if needed
+  const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
+  document.getElementById("calTarget").textContent = tdee;
+
+  // Protein range (0.78–2.0g/lb)
+  const proteinMin = Math.round(0.78 * weight);
+  const proteinMax = Math.round(2.0 * weight);
+
+  // Fat range (0.3–0.6g/lb)
+  const fatMin = Math.round(0.3 * weight);
+  const fatMax = Math.round(0.6 * weight);
+
+  // Carbs (based on what's left)
+  const carbMin = Math.round(1.5 * weight);
+  const carbMax = Math.round(3.0 * weight);
+
+  // Show sliders with ranges
+  document.getElementById("macroSliders").style.display = 'block';
+
+  document.getElementById("proteinSlider").min = proteinMin;
+  document.getElementById("proteinSlider").max = proteinMax;
+  document.getElementById("proteinSlider").value = proteinMin;
+
+  document.getElementById("fatSlider").min = fatMin;
+  document.getElementById("fatSlider").max = fatMax;
+  document.getElementById("fatSlider").value = fatMin;
+
+  document.getElementById("carbSlider").min = carbMin;
+  document.getElementById("carbSlider").max = carbMax;
+  document.getElementById("carbSlider").value = carbMin;
+
+  adjustMacros();
+}
+
+function adjustMacros() {
+  const protein = +document.getElementById("proteinSlider").value;
+  const fat = +document.getElementById("fatSlider").value;
+  const carbs = +document.getElementById("carbSlider").value;
+
+  const totalCals = protein * 4 + fat * 9 + carbs * 4;
+  const maxCals = +document.getElementById("calTarget").textContent;
+
+  document.getElementById("proteinVal").textContent = protein;
+  document.getElementById("fatVal").textContent = fat;
+  document.getElementById("carbVal").textContent = carbs;
+  document.getElementById("macroTotalCals").textContent = totalCals;
+
+  document.getElementById("macroTotalCals").style.color = totalCals > maxCals ? "red" : "black";
+}
+
+function saveSliderMacros() {
+  const protein = +document.getElementById("proteinSlider").value;
+  const fat = +document.getElementById("fatSlider").value;
+  const carbs = +document.getElementById("carbSlider").value;
+  const totalCals = protein * 4 + fat * 9 + carbs * 4;
+
+  const targets = { protein, fat, carbs, calories: totalCals };
+  localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targets));
+  alert("Macro targets saved.");
+  renderMacroTargets();
+}
+
+function renderMacroTargets() {
+  const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`)) || { protein: 0, fat: 0, carbs: 0, calories: 0 };
+  
+  document.getElementById("macroProteinTarget").textContent = saved.protein;
+  document.getElementById("macroFatTarget").textContent = saved.fat;
+  document.getElementById("macroCarbsTarget").textContent = saved.carbs;
+  document.getElementById("macroCalsTarget").textContent = saved.calories;
+
+  document.getElementById("macroProteinProgress").textContent = 0;
+  document.getElementById("macroFatProgress").textContent = 0;
+  document.getElementById("macroCarbsProgress").textContent = 0;
+  document.getElementById("macroCalsProgress").textContent = 0;
+
+  document.getElementById("proteinBar").value = 0;
+  document.getElementById("fatBar").value = 0;
+  document.getElementById("carbBar").value = 0;
+  document.getElementById("calsBar").value = 0;
+}
   
   
 // LOGOUT
