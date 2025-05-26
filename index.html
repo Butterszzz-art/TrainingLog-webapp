@@ -576,35 +576,33 @@ window.addSetToLog = addSetToLog;
 
 // Save a workout template to Airtable
 async function saveTemplate(username, templateName, templateData) {
-  const response = await fetch(`${serverUrl}/saveTemplate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username,
-      templateName,
-      templateData
-    })
-  });
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}`;
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${airtableToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fields: {
+          Username: username,
+          TemplateName: templateName,
+          TemplateData: JSON.stringify(templateData)
+        }
+      })
+    });
 
-  const result = await response.json();
-  if (!result.success) {
-    throw new Error(result.message || "Failed to save template");
+    if (!response.ok) {
+      throw new Error(`Airtable API error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('Template saved:', result);
+  } catch (error) {
+    console.error('Error saving template:', error);
+    alert('Failed to save template. Please try again.');
   }
-}
-
-// Fetch templates from Airtable for a user
-async function fetchTemplates(username) {
-  const response = await fetch(`${serverUrl}/getTemplates?username=${username}`);
-  const result = await response.json();
-
-  if (!result.success || !result.templates) {
-    throw new Error("Could not load templates");
-  }
-
-  return result.templates.map(t => ({
-    name: t.templateName,
-    data: t.templateData
-  }));
 }
 
 
@@ -646,6 +644,7 @@ function saveWorkoutAsTemplate() {
       alert("Failed to save template.");
     });
 }
+
 
 // Load selected template into workouts
 function loadSelectedTemplate() {
