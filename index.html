@@ -751,6 +751,31 @@ function completeWorkout() {
   renderWorkouts();
 }
 
+async function saveWorkoutToBackend(workout) {
+  await fetch(`${serverUrl}/saveWorkout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: currentUser,
+      workout
+    })
+  });
+}
+
+async function loadWorkoutsFromBackend() {
+  try {
+    const res = await fetch(`${serverUrl}/getWorkouts?username=${currentUser}`);
+    const data = await res.json();
+    if (data.workouts) {
+      localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(data.workouts));
+      renderWorkouts();
+    }
+  } catch (err) {
+    console.error('Failed to load workouts:', err);
+  }
+}
+  
+  
 // LOGOUT
 function logout() {
   localStorage.removeItem("fitnessAppUser");
