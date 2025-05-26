@@ -604,6 +604,20 @@ async function saveTemplate(username, templateName, templateData) {
     alert('Failed to save template. Please try again.');
   }
 }
+  
+function showTemplateList() {
+  const container = document.getElementById('templateList');
+  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
+  container.innerHTML = '<h4>Templates:</h4>';
+  templates.forEach((template, index) => {
+    container.innerHTML += `
+      <button onclick="loadTemplate(${index})">${template.name}</button>
+      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
+    `;
+  });
+  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
+  container.style.display = 'block';
+}
 
 async function fetchTemplates(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
@@ -620,22 +634,23 @@ async function fetchTemplates(username) {
   
 
 // Populate the dropdown
-async function loadTemplateDropdown() {
+function loadTemplateDropdown() {
   const select = document.getElementById("templateSelect");
   select.innerHTML = '<option value="">Select Template...</option>';
 
-  try {
-    const templates = await fetchTemplates(currentUser);
-    templates.forEach(template => {
-      const option = document.createElement("option");
-      option.value = JSON.stringify(template.data);
-      option.textContent = template.name;
-      select.appendChild(option);
+  fetchTemplates(currentUser)
+    .then(templates => {
+      templates.forEach(template => {
+        const option = document.createElement("option");
+        option.value = JSON.stringify(template.data);
+        option.textContent = template.name;
+        select.appendChild(option);
+      });
+    })
+    .catch(err => {
+      console.error("Template loading failed:", err);
+      alert("Could not load templates.");
     });
-  } catch (error) {
-    console.error('Template loading failed:', error);
-    alert("Could not load templates.");
-  }
 }
 
 // Save last workout as template
