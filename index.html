@@ -605,20 +605,6 @@ async function saveTemplate(username, templateName, templateData) {
   }
 }
   
-function showTemplateList() {
-  const container = document.getElementById('templateList');
-  const templates = JSON.parse(localStorage.getItem(`templates_${currentUser}`)) || [];
-  container.innerHTML = '<h4>Templates:</h4>';
-  templates.forEach((template, index) => {
-    container.innerHTML += `
-      <button onclick="loadTemplate(${index})">${template.name}</button>
-      <button onclick="deleteTemplate(${index})" class="remove-btn">❌</button>
-    `;
-  });
-  container.innerHTML += `<button onclick="saveTemplate()">Save Current as Template</button>`;
-  container.style.display = 'block';
-}
-
 async function fetchTemplates(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
@@ -1113,7 +1099,6 @@ window.removeWorkout = removeWorkout;               // ✅ Add this
 window.removeLogEntry = removeLogEntry;             // ✅ Add this
 window.calculateWorkoutVolume = calculateWorkoutVolume;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
-window.showTemplateList = showTemplateList;
 window.loadTemplateDropdown = loadTemplateDropdown;
 window.loadSelectedTemplate = loadSelectedTemplate;
 
