@@ -1029,14 +1029,7 @@ function removeCardioEntry(index) {
   renderCardio();
 }
 
-// ===== MACROS =====
-function calculateCalories() {
-  const protein = +document.getElementById("protein").value || 0;
-  const carbs = +document.getElementById("carbs").value || 0;
-  const fats = +document.getElementById("fats").value || 0;
-  const total = (protein * 4) + (carbs * 4) + (fats * 9);
-  document.getElementById("totalCalories").textContent = total;
-}
+
 // ========= CROSSFIT TRACKER =========
 
 let crossfitExercises = [];
