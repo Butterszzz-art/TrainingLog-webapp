@@ -280,24 +280,22 @@ async function startLogin() {
       document.getElementById("appContainer").style.display = "block";
 
       showTab('logTab');
-window.renderWorkouts(); // call the global function after assigning it
+      window.renderWorkouts(); // ✅ Render workouts
       renderWeights();
       renderCardio();
       renderCrossfitWorkouts();
-     loadTemplateDropdown(); // ✅ <-- ADD THIS HERE
-
+      loadTemplateDropdown(); // ✅ Load saved templates
     } else {
       alert(result.message || "Login failed.");
     }
   } catch (error) {
     console.error('Login error:', error);
     alert("Error connecting to server.");
+
+    await loadTemplateDropdown(); // ✅ Load templates after login
   }
-
-  
-  await loadTemplateDropdown(); // ✅ Load templates after login
-
 }
+
 
 // SIGNUP
 async function startSignup() {
@@ -1090,17 +1088,19 @@ function loadCrossfitTemplate() {
     
     
   const savedUser = localStorage.getItem("fitnessAppUser");
-  if (savedUser) {
-    currentUser = savedUser;
-    document.getElementById("userDisplay").textContent = savedUser;
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("appContainer").style.display = "block";
-    showTab("logTab");
-    renderWorkouts();
-    renderWeights();
-    renderCardio();
-    renderCrossfitWorkouts();
-  }
+if (savedUser) {
+  currentUser = savedUser;
+  document.getElementById("userDisplay").textContent = savedUser;
+  document.getElementById("loginContainer").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
+  showTab("logTab");
+  renderWorkouts();
+  renderWeights();
+  renderCardio();
+  renderCrossfitWorkouts();
+  loadTemplateDropdown(); // ✅ Needed here too
+}
+
 
     
 }); // closing DOMContentLoaded
