@@ -284,6 +284,8 @@ window.renderWorkouts(); // call the global function after assigning it
       renderWeights();
       renderCardio();
       renderCrossfitWorkouts();
+     loadTemplateDropdown(); // ✅ <-- ADD THIS HERE
+
     } else {
       alert(result.message || "Login failed.");
     }
@@ -292,6 +294,7 @@ window.renderWorkouts(); // call the global function after assigning it
     alert("Error connecting to server.");
   }
 
+  
   await loadTemplateDropdown(); // ✅ Load templates after login
 
 }
