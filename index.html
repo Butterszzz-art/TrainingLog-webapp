@@ -274,8 +274,30 @@ select {
   <progress id="fatProgress" value="0" max="100" style="width:100%;"></progress>
 </div>
 
-<button onclick="addMacroMeal()">➕ Add Meal</button>
+<button onclick="addMacroMeal()">➕ Add Meal</button>   
 <div id="macroMealContainer"></div>
+    
+<h3>Set Your Macro Targets</h3>
+<input type="number" id="bodyWeight" placeholder="Body Weight (lbs)">
+<select id="activityLevel">
+  <option value="13">Sedentary</option>
+  <option value="14">Lightly Active</option>
+  <option value="15">Moderately Active</option>
+  <option value="16">Very Active</option>
+</select>
+<button onclick="generateMacroTargets()">Calculate Targets</button>
+
+<div id="macroTargetsResult"></div>
+<div id="editableMacroTargets" style="display:none;">
+  <h4>Customize Your Targets</h4>
+  <label>Calories: <input type="number" id="targetCalories"></label><br>
+  <label>Protein (g): <input type="number" id="targetProtein"></label><br>
+  <label>Fat (g): <input type="number" id="targetFat"></label><br>
+  <label>Carbs (g): <input type="number" id="targetCarbs"></label><br>
+  <button onclick="saveMacroTargets()">Save Targets</button>
+</div>
+
+    
  </div>
   
 </div>
@@ -841,7 +863,9 @@ let macroMeals = [];
 function addMacroMeal() {
   const index = macroMeals.length;
   const container = document.getElementById("macroMealContainer");
+  
   const mealDiv = document.createElement("div");
+  mealDiv.id = `meal${index}`;
   mealDiv.innerHTML = `
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
       <strong>Meal ${index + 1}</strong><br>
@@ -851,25 +875,40 @@ function addMacroMeal() {
       <button onclick="removeMacroMeal(${index})" class="remove-btn">❌</button>
     </div>
   `;
+  
   container.appendChild(mealDiv);
-  macroMeals.push({ protein: 0, carbs: 0, fats: 0 });
+  macroMeals.push({ index, protein: 0, carbs: 0, fats: 0 });
 }
 
+
 function removeMacroMeal(index) {
+  // Remove the HTML
+  const mealDiv = document.getElementById(`meal${index}`);
+  if (mealDiv) mealDiv.remove();
+
+  // Remove the data
   macroMeals[index] = null;
+
+  // Recalculate totals
   calculateMacros();
 }
 
 function calculateMacros() {
   let totalProtein = 0, totalCarbs = 0, totalFats = 0;
-  macroMeals.forEach((m, i) => {
-    if (!m) return;
-    const p = +document.getElementById(`protein${i}`).value || 0;
-    const c = +document.getElementById(`carbs${i}`).value || 0;
-    const f = +document.getElementById(`fats${i}`).value || 0;
-    m.protein = p;
-    m.carbs = c;
-    m.fats = f;
+
+  macroMeals.forEach((meal, i) => {
+    if (!meal) return;
+
+    const proteinInput = document.getElementById(`protein${i}`);
+    const carbInput = document.getElementById(`carbs${i}`);
+    const fatInput = document.getElementById(`fats${i}`);
+    
+    if (!proteinInput || !carbInput || !fatInput) return;
+
+    const p = +proteinInput.value || 0;
+    const c = +carbInput.value || 0;
+    const f = +fatInput.value || 0;
+
     totalProtein += p;
     totalCarbs += c;
     totalFats += f;
@@ -901,6 +940,52 @@ function updateMacroUI(p = 0, c = 0, f = 0, kcal = 0) {
 
 // 🔁 Auto-update every second
 setInterval(calculateMacros, 1000);
+
+function generateMacroTargets() {
+  const weight = +document.getElementById("bodyWeight").value;
+  const multiplier = +document.getElementById("activityLevel").value;
+
+  if (!weight || !multiplier) return alert("Please enter your weight and activity level.");
+
+  const tdee = weight * multiplier;
+
+  const proteinMin = (0.78 * weight).toFixed(1);
+  const proteinMax = (2.0 * weight).toFixed(1);
+
+  const fatMin = (0.3 * weight).toFixed(1);
+  const fatMax = (0.6 * weight).toFixed(1);
+
+  const carbMin = (1.5 * weight).toFixed(1);
+  const carbMax = (3.0 * weight).toFixed(1);
+
+  document.getElementById("macroTargetsResult").innerHTML = `
+    <h4>Estimated Daily Targets</h4>
+    <p><strong>Calories (TDEE):</strong> ~${tdee} kcal</p>
+    <p><strong>Protein:</strong> ${proteinMin}–${proteinMax}g</p>
+    <p><strong>Fat:</strong> ${fatMin}–${fatMax}g</p>
+    <p><strong>Carbs:</strong> ${carbMin}–${carbMax}g</p>
+  `;
+  
+  // Autofill the target input boxes and show them
+document.getElementById("editableMacroTargets").style.display = 'block';
+document.getElementById("targetCalories").value = Math.round(tdee);
+document.getElementById("targetProtein").value = proteinMax;
+document.getElementById("targetFat").value = fatMax;
+document.getElementById("targetCarbs").value = carbMax;
+}
+
+function saveMacroTargets() {
+  const targets = {
+    calories: +document.getElementById("targetCalories").value,
+    protein: +document.getElementById("targetProtein").value,
+    fat: +document.getElementById("targetFat").value,
+    carbs: +document.getElementById("targetCarbs").value,
+  };
+
+  localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targets));
+  alert("Targets saved!");
+  renderMacroTargets(); // optional: live refresh UI
+}
 
   
   
