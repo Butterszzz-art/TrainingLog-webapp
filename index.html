@@ -248,7 +248,7 @@ select {
 <script>
   
 const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
-const airtableBaseId = 'appmjr4IgnEH72K1b/tblwDxtPzJwuk1xNI';
+const airtableBaseId = 'appmjr4IgnEH72K1b';
 const usersTableName = 'Users';
 const templatesTableName = 'Templates';
 
@@ -605,6 +605,19 @@ async function saveTemplate(username, templateName, templateData) {
   }
 }
 
+async function fetchTemplates(username) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${airtableToken}` }
+  });
+  const data = await response.json();
+  return data.records.map(record => ({
+    id: record.id,
+    name: record.fields.TemplateName,
+    data: JSON.parse(record.fields.TemplateData)
+  }));
+}
+  
 
 // Populate the dropdown
 async function loadTemplateDropdown() {
