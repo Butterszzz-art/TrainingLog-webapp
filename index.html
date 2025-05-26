@@ -253,44 +253,9 @@ select {
 
   <div id="macroTab" class="tab-content">
     
-<div id="macroGoals" style="margin-bottom: 20px;">
-  <h3 style="margin-top:0;">Targets</h3>
-  <div>Energy: <span id="energyDisplay">0 / 3380 kcal</span> <span id="energyPercent">0%</span></div>
-  <progress id="energyProgress" value="0" max="100" style="width:100%;"></progress>
-
-  <div>Protein: <span id="proteinDisplay">0 / 230 g</span> <span id="proteinPercent">0%</span></div>
-  <progress id="proteinProgress" value="0" max="100" style="width:100%;"></progress>
-
-  <div>Carbs: <span id="carbDisplay">0 / 400 g</span> <span id="carbPercent">0%</span></div>
-  <progress id="carbProgress" value="0" max="100" style="width:100%;"></progress>
-
-  <div>Fat: <span id="fatDisplay">0 / 96 g</span> <span id="fatPercent">0%</span></div>
-  <progress id="fatProgress" value="0" max="100" style="width:100%;"></progress>
-</div>
-
 <button onclick="addMacroMeal()">➕ Add Meal</button>   
 <div id="macroMealContainer"></div>
     
-<h3>Set Your Macro Targets</h3>
-<input type="number" id="bodyWeight" placeholder="Body Weight (lbs)">
-<select id="activityLevel">
-  <option value="13">Sedentary</option>
-  <option value="14">Lightly Active</option>
-  <option value="15">Moderately Active</option>
-  <option value="16">Very Active</option>
-</select>
-<button onclick="generateMacroTargets()">Calculate Targets</button>
-
-<div id="macroTargetsResult"></div>
-<div id="editableMacroTargets" style="display:none;">
-  <h4>Customize Your Targets</h4>
-  <label>Calories: <input type="number" id="targetCalories"></label><br>
-  <label>Protein (g): <input type="number" id="targetProtein"></label><br>
-  <label>Fat (g): <input type="number" id="targetFat"></label><br>
-  <label>Carbs (g): <input type="number" id="targetCarbs"></label><br>
-  <button onclick="saveMacroTargets()">Save Targets</button>
-</div>
-
  <h2>Macro Tracker</h2>
 
 <!-- Progress Bars -->
