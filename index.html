@@ -159,8 +159,11 @@ select {
     <div class="tab" onclick="showTab('crossfitTab')">CrossFit</div>
 
   </div>
+  
+<div id="progressReminder"></div>
 
 <div id="logTab" class="tab-content active">
+  
   <h2>Resistance Exercise Log</h2>
 
   <input type="text" id="exercise" placeholder="Exercise" />
@@ -433,6 +436,7 @@ function addLogEntry() {
   const unit = document.getElementById("weightUnit").value || 'kg';
   const date = new Date().toISOString().split('T')[0];
 
+
   if (!exercise || !sets || isNaN(sets) || sets < 1) {
     alert("Please enter a valid exercise and number of sets.");
     return;
@@ -480,6 +484,26 @@ function addLogEntry() {
 
   // ✅ Reset set counter
   currentSetCount = 0;
+
+  document.getElementById("exercise").addEventListener("blur", () => {
+  const name = document.getElementById("exercise").value.trim();
+  if (!name) return;
+
+  const last = getLastExerciseEntry(name);
+  const msgDiv = document.getElementById("progressReminder");
+  msgDiv.innerHTML = '';
+
+  if (last) {
+    const reps = last.repsArray.join(', ');
+    const weights = last.weightsArray.join(', ');
+    msgDiv.innerHTML = `
+      <div style="margin:10px 0; color: green; font-weight:bold;">
+        Last time: ${reps} reps at ${weights} ${last.unit} <br>
+        Try to beat that today!
+      </div>`;
+  }
+});
+
 }
 
   
@@ -775,6 +799,24 @@ async function loadWorkoutsFromBackend() {
   }
 }
   
+function getLastExerciseEntry(exerciseName) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+
+  // Flatten all sets for that exercise
+  let lastMatch = null;
+
+  for (let i = workouts.length - 1; i >= 0; i--) {
+    const log = workouts[i].log;
+    const match = log.find(entry => entry.exercise === exerciseName);
+    if (match) {
+      lastMatch = match;
+      break;
+    }
+  }
+
+  return lastMatch;
+}
+
   
 // LOGOUT
 function logout() {
