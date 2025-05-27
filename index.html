@@ -271,8 +271,18 @@ select {
 </div>
     
 
+    
  <div id="macroMealContainer"></div>
 <button onclick="addMacroMeal()">➕ Add Meal</button>
+<!-- Display Summary -->
+<div style="margin-top:20px;">
+  <p>Energy: <span id="macroEnergyDisplay">0 kcal</span></p>
+  <p>Protein: <span id="macroProteinDisplay">0 g</span></p>
+  <p>Carbs: <span id="macroCarbsDisplay">0 g</span></p>
+  <p>Fat: <span id="macroFatsDisplay">0 g</span></p>
+</div>
+
+
     
 <!-- Target Calculator -->
 <div style="margin-top:20px;">
@@ -876,46 +886,65 @@ let totalFats = 0;
 function addMacroMeal() {
   const index = macroMeals.length;
   const container = document.getElementById("macroMealContainer");
-
   const mealId = `meal${index}`;
-  const toggleId = `mealToggle${index}`;
+  const toggleId = `toggle${index}`;
   const contentId = `mealContent${index}`;
 
   const mealDiv = document.createElement("div");
   mealDiv.id = mealId;
+
   mealDiv.innerHTML = `
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-      <button onclick="toggleMeal('${contentId}')" id="${toggleId}" style="font-weight:bold; width:100%; text-align:left;">
+      <button onclick="toggleMeal('${contentId}', this)" style="width: 100%; text-align: left; font-weight: bold;">
         ➕ Meal ${index + 1}
       </button>
-      <div id="${contentId}" style="display: none; margin-top:10px;">
-        Protein: <input type="number" id="protein${index}" placeholder="g" />
-        Carbs: <input type="number" id="carbs${index}" placeholder="g" />
-        Fats: <input type="number" id="fats${index}" placeholder="g" />
+      <div id="${contentId}" style="display:block; margin-top: 10px;">
+        <label>Protein:</label>
+        <input type="number" id="protein${index}" placeholder="g" />
+        <label>Carbs:</label>
+        <input type="number" id="carbs${index}" placeholder="g" />
+        <label>Fats:</label>
+        <input type="number" id="fats${index}" placeholder="g" />
         <br>
-        <button onclick="resetMeal(${index})" class="remove-btn">Reset Meal</button>
-        <button onclick="removeMacroMeal(${index})" class="remove-btn">❌ Remove Meal</button>
+        <button onclick="submitMeal(${index})" style="margin-top: 5px;">➕ Add to Tracker</button>
+        <button onclick="removeMacroMeal(${index})" class="remove-btn">❌ Remove</button>
       </div>
     </div>
   `;
 
   container.appendChild(mealDiv);
 
-  macroMeals.push({ index, protein: 0, carbs: 0, fats: 0 });
-
-  // Optional: recalculate or refresh total
-  updateMacroUI();
+  // add placeholder to macroMeals array
+  macroMeals.push({ protein: 0, carbs: 0, fats: 0 });
 }
 
-function toggleMeal(contentId) {
-  const content = document.getElementById(contentId);
-  if (content.style.display === "none") {
-    content.style.display = "block";
+function toggleMeal(contentId, btn) {
+  const div = document.getElementById(contentId);
+  if (div.style.display === "none") {
+    div.style.display = "block";
+    btn.innerText = btn.innerText.replace("➕", "🔽");
   } else {
-    content.style.display = "none";
+    div.style.display = "none";
+    btn.innerText = btn.innerText.replace("🔽", "➕");
   }
 }
 
+function submitMeal(index) {
+  const protein = +document.getElementById(`protein${index}`).value || 0;
+  const carbs = +document.getElementById(`carbs${index}`).value || 0;
+  const fats = +document.getElementById(`fats${index}`).value || 0;
+
+  macroMeals[index] = { protein, carbs, fats };
+  updateMacroUI();
+
+  // Collapse the form
+  document.getElementById(`mealContent${index}`).style.display = "none";
+
+  const toggleButton = document.querySelector(`#meal${index} button`);
+  if (toggleButton) toggleButton.innerText = toggleButton.innerText.replace("🔽", "➕");
+}
+  
+  
 function resetMeal(index) {
   document.getElementById(`protein${index}`).value = '';
   document.getElementById(`carbs${index}`).value = '';
@@ -949,15 +978,13 @@ function updateMacroTotals() {
   
 
 function removeMacroMeal(index) {
-  const mealDiv = document.getElementById(`meal${index}`);
-  if (mealDiv) mealDiv.remove();
+  macroMeals[index] = { protein: 0, carbs: 0, fats: 0 };
 
-  // Mark that index as removed
-  macroMeals = macroMeals.filter(i => i !== index);
+  const div = document.getElementById(`meal${index}`);
+  if (div) div.remove();
 
-  updateMacroTotals(); // Refresh totals
+  updateMacroUI();
 }
-
 
 function calculateMacros() {
   let totalProtein = 0, totalCarbs = 0, totalFats = 0;
@@ -984,24 +1011,16 @@ function calculateMacros() {
   updateMacroUI(totalProtein, totalCarbs, totalFats, kcal);
 }
 
-function updateMacroUI(p = 0, c = 0, f = 0, kcal = 0) {
-  const goal = { kcal: 3380, protein: 230, carbs: 400, fats: 96 };
+function updateMacroUI() {
+  const totalProtein = macroMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
+  const totalCarbs = macroMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+  const totalFats = macroMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
+  const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
 
-  document.getElementById("energyDisplay").textContent = `${kcal} / ${goal.kcal} kcal`;
-  document.getElementById("energyPercent").textContent = Math.round((kcal / goal.kcal) * 100) + "%";
-  document.getElementById("energyProgress").value = Math.min(100, (kcal / goal.kcal) * 100);
-
-  document.getElementById("proteinDisplay").textContent = `${p} / ${goal.protein} g`;
-  document.getElementById("proteinPercent").textContent = Math.round((p / goal.protein) * 100) + "%";
-  document.getElementById("proteinProgress").value = Math.min(100, (p / goal.protein) * 100);
-
-  document.getElementById("carbDisplay").textContent = `${c} / ${goal.carbs} g`;
-  document.getElementById("carbPercent").textContent = Math.round((c / goal.carbs) * 100) + "%";
-  document.getElementById("carbProgress").value = Math.min(100, (c / goal.carbs) * 100);
-
-  document.getElementById("fatDisplay").textContent = `${f} / ${goal.fats} g`;
-  document.getElementById("fatPercent").textContent = Math.round((f / goal.fats) * 100) + "%";
-  document.getElementById("fatProgress").value = Math.min(100, (f / goal.fats) * 100);
+  document.getElementById("macroEnergyDisplay").textContent = `${totalCals} kcal`;
+  document.getElementById("macroProteinDisplay").textContent = `${totalProtein} g`;
+  document.getElementById("macroCarbsDisplay").textContent = `${totalCarbs} g`;
+  document.getElementById("macroFatsDisplay").textContent = `${totalFats} g`;
 }
 
 // 🔁 Auto-update every second
