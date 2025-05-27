@@ -307,9 +307,10 @@ select {
 </div>
 
 <!-- Hidden initially -->
-<button id="editTargetsBtn" style="display:none; margin-top:10px;" onclick="document.getElementById('macroSliders').style.display='block'; this.style.display='none';">
+<button id="editTargetsBtn" style="display:none; margin-top:10px;" onclick="toggleEditTargets()">
   ✏️ Edit Your Targets
 </button>
+
     
     
  </div>
@@ -1143,9 +1144,16 @@ function adjustMacros() {
   document.getElementById("proteinVal").textContent = protein;
   document.getElementById("fatVal").textContent = fat;
   document.getElementById("carbVal").textContent = carbs;
-  document.getElementById("macroTotalCals").textContent = totalCals;
 
-  document.getElementById("macroTotalCals").style.color = totalCals > maxCals ? "red" : "black";
+  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${maxCals} kcal`;
+
+  // 💥 Update top progress
+  document.getElementById("macroCalsProgress").textContent = totalCals;
+  document.getElementById("calsBar").value = totalCals;
+  document.getElementById("calsBar").max = maxCals;
+
+  // Disable further slider movement if over max
+  enforceSliderCaps(totalCals, maxCals);
 }
 
 function saveSliderMacros() {
@@ -1169,6 +1177,38 @@ function renderMacroTargets() {
   document.getElementById("macroCalsTarget").textContent = saved.calories;
 
 }
+
+function toggleEditTargets() {
+  const slider = document.getElementById("macroSliders");
+  const btn = document.getElementById("editTargetsBtn");
+
+  if (slider.style.display === 'none') {
+    slider.style.display = 'block';
+    btn.textContent = "➖ Collapse Targets";
+  } else {
+    slider.style.display = 'none';
+    btn.textContent = "✏️ Edit Your Targets";
+  }
+}
+
+
+function enforceSliderCaps(currentTotal, maxCals) {
+  const remainingCals = maxCals - currentTotal;
+
+  // Disable sliders that would push total over max
+  const sliders = ['proteinSlider', 'fatSlider', 'carbSlider'];
+  sliders.forEach(id => {
+    const slider = document.getElementById(id);
+    const value = +slider.value;
+    const kcal = id === 'fatSlider' ? 9 : 4;
+
+    const maxForThis = Math.floor((remainingCals + (value * kcal)) / kcal);
+    slider.max = maxForThis;
+  });
+}
+
+  
+  
   
   
 // LOGOUT
