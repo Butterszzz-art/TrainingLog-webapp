@@ -1011,11 +1011,30 @@ function updateMacroUI() {
   const totalFats = macroMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
   const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
 
+  // Update textual summary (bottom area)
   document.getElementById("macroEnergyDisplay").textContent = `${totalCals} kcal`;
   document.getElementById("macroProteinDisplay").textContent = `${totalProtein} g`;
   document.getElementById("macroCarbsDisplay").textContent = `${totalCarbs} g`;
   document.getElementById("macroFatsDisplay").textContent = `${totalFats} g`;
+
+  // Update progress bar + label (top area)
+  document.getElementById("macroEnergyProgress").value = totalCals;
+  document.getElementById("macroEnergyProgressLabel").textContent =
+    `${totalCals} / ${macroTargetCalories} kcal`;
+
+  document.getElementById("macroProteinProgress").value = totalProtein;
+  document.getElementById("macroProteinProgressLabel").textContent =
+    `${totalProtein} / ${macroTargetProtein} g`;
+
+  document.getElementById("macroCarbsProgress").value = totalCarbs;
+  document.getElementById("macroCarbsProgressLabel").textContent =
+    `${totalCarbs} / ${macroTargetCarbs} g`;
+
+  document.getElementById("macroFatsProgress").value = totalFats;
+  document.getElementById("macroFatsProgressLabel").textContent =
+    `${totalFats} / ${macroTargetFats} g`;
 }
+
 
 // 🔁 Auto-update every second
 setInterval(calculateMacros, 1000);
