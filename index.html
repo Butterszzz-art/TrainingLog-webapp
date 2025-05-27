@@ -1040,8 +1040,6 @@ document.getElementById("macroFatTarget").textContent = savedTargets.fat;
   document.getElementById("macroFatsDisplay").textContent = `${totalFats} g`;
 }
 
-// 🔁 Auto-update every second
-setInterval(calculateMacros, 1000);
 
 function generateMacroTargets() {
   const weight = +document.getElementById("bodyWeight").value;
