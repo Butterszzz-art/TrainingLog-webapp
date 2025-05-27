@@ -279,14 +279,15 @@ select {
 <div id="macroSliders" style="display:none; margin-top:20px;">
   <h4>Adjust Macros</h4>
 
+
   <label>Protein: <span id="proteinVal">0</span>g</label>
-  <input type="range" id="proteinSlider" min="0" max="300" step="1" oninput="adjustMacros('proteinSlider')"><br>
+    <input type="range" id="proteinSlider" step="1" oninput="adjustMacros('proteinSlider')">
 
   <label>Fat: <span id="fatVal">0</span>g</label>
- <input type="range" id="fatSlider" min="0" max="150" step="1"oninput="adjustMacros('fatSlider')">><br>
+<input type="range" id="fatSlider" step="1" oninput="adjustMacros('fatSlider')">
 
   <label>Carbs: <span id="carbVal">0</span>g</label>
-  <input type="range" id="carbSlider" min="0" max="1000" step="1" oninput="adjustMacros('carbSlider')">"><br>
+<input type="range" id="carbSlider" step="1" oninput="adjustMacros('carbSlider')">
 
   <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
   <button onclick="saveSliderMacros()">Save Macros</button>
@@ -1094,12 +1095,16 @@ function calculateMacroTargets() {
   const height = +document.getElementById("macroHeight").value;
   const activity = +document.getElementById("macroActivity").value;
 
-  if (!weight || !height) return alert("Enter bodyweight and height!");
+  if (!weight || !height) {
+    alert("Enter bodyweight and height!");
+    return;
+  }
 
   const age = 25;
   const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
   document.getElementById("calTarget").textContent = tdee;
 
+  // Calculate ranges
   const proteinMin = Math.round(0.78 * weight);
   const proteinMax = Math.round(2.0 * weight);
   const fatMin = Math.round(0.3 * weight);
@@ -1107,53 +1112,70 @@ function calculateMacroTargets() {
   const carbMin = Math.round(1.5 * weight);
   const carbMax = Math.round(3.0 * weight);
 
-  // Autofill sliders
-  document.getElementById("proteinSlider").min = proteinMin;
-  document.getElementById("proteinSlider").max = proteinMax;
-  document.getElementById("proteinSlider").value = proteinMin;
+  // Store ranges for use during adjustment
+  macroRanges = {
+    protein: { min: proteinMin, max: proteinMax },
+    fat: { min: fatMin, max: fatMax },
+    carbs: { min: carbMin, max: carbMax },
+    tdee
+  };
 
-  document.getElementById("fatSlider").min = fatMin;
-  document.getElementById("fatSlider").max = fatMax;
-  document.getElementById("fatSlider").value = fatMin;
+  // Set slider min/max/value
+  const set = (id, min, max, value) => {
+    const slider = document.getElementById(id);
+    slider.min = min;
+    slider.max = max;
+    slider.value = value;
+  };
 
-  document.getElementById("carbSlider").min = carbMin;
-  document.getElementById("carbSlider").max = carbMax;
-  document.getElementById("carbSlider").value = carbMin;
+  set("proteinSlider", proteinMin, proteinMax, proteinMin);
+  set("fatSlider", fatMin, fatMax, fatMin);
+  set("carbSlider", carbMin, carbMax, carbMin);
 
-  adjustMacros();
+  // Show slider section
+  document.getElementById("macroSliders").style.display = "block";
+  adjustMacros(); // initialize display
+}
 
-  // Hide the calculator section
-  document.getElementById("macroTargetInputForm").style.display = "none";
 
-  // Show "Edit Targets" button
-  document.getElementById("editTargetsBtn").style.display = "block";
 
-  // Save the current state so it's not lost
+function adjustMacros(changedId) {
+  const p = +document.getElementById("proteinSlider").value;
+  const f = +document.getElementById("fatSlider").value;
+  const c = +document.getElementById("carbSlider").value;
+  const maxCals = macroRanges?.tdee || 2200;
+
+  const total = p * 4 + f * 9 + c * 4;
+
+  // Update UI
+  document.getElementById("proteinVal").textContent = p;
+  document.getElementById("fatVal").textContent = f;
+  document.getElementById("carbVal").textContent = c;
+  document.getElementById("macroTotalCals").textContent = `${total} / ${maxCals} kcal`;
+
+  // Cap movement if we're exceeding TDEE
+  const sliders = [
+    { id: 'proteinSlider', kcal: 4, value: p },
+    { id: 'fatSlider', kcal: 9, value: f },
+    { id: 'carbSlider', kcal: 4, value: c }
+  ];
+
+  // Only allow changes to the active slider; clamp others to current value
+  const remaining = maxCals - (p * 4 + f * 9 + c * 4);
+
+  sliders.forEach(s => {
+    if (s.id === changedId) return;
+    const slider = document.getElementById(s.id);
+    const range = macroRanges[s.id.replace("Slider", "")];
+    const currentVal = +slider.value;
+    const maxAllowed = Math.floor((remaining + currentVal * s.kcal) / s.kcal);
+    slider.max = Math.min(range.max, maxAllowed);
+  });
+
+  // Save after change
   saveSliderMacros();
 }
 
-
-function adjustMacros(changedSliderId) {
-  const protein = +document.getElementById("proteinSlider").value;
-  const fat = +document.getElementById("fatSlider").value;
-  const carbs = +document.getElementById("carbSlider").value;
-
-  const totalCals = protein * 4 + fat * 9 + carbs * 4;
-  const maxCals = +document.getElementById("calTarget").textContent;
-
-  document.getElementById("proteinVal").textContent = protein;
-  document.getElementById("fatVal").textContent = fat;
-  document.getElementById("carbVal").textContent = carbs;
-
-  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${maxCals} kcal`;
-
-  document.getElementById("macroCalsProgress").textContent = totalCals;
-  document.getElementById("calsBar").value = totalCals;
-  document.getElementById("calsBar").max = maxCals;
-
-   enforceSliderCaps(changedSliderId, protein, fat, carbs, maxCals);
-  saveSliderMacros(); // ✅ Add this for persistence
-}
 
 
 function renderMacroTargets() {
