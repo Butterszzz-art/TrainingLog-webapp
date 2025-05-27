@@ -1006,35 +1006,36 @@ function calculateMacros() {
 }
 
 function updateMacroUI() {
+  const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`)) || { protein: 0, fat: 0, carbs: 0, calories: 0 };
+
   const totalProtein = macroMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
   const totalCarbs = macroMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
   const totalFats = macroMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
   const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
 
-  // Update textual summary (bottom area)
+  // Update progress bar values (max from user-set targets)
+  document.getElementById("macroEnergyProgress").max = savedTargets.calories;
+  document.getElementById("macroEnergyProgress").value = totalCals;
+  document.getElementById("macroEnergyProgressLabel").textContent = `${totalCals} / ${savedTargets.calories} kcal`;
+
+  document.getElementById("macroProteinProgress").max = savedTargets.protein;
+  document.getElementById("macroProteinProgress").value = totalProtein;
+  document.getElementById("macroProteinProgressLabel").textContent = `${totalProtein} / ${savedTargets.protein} g`;
+
+  document.getElementById("macroCarbsProgress").max = savedTargets.carbs;
+  document.getElementById("macroCarbsProgress").value = totalCarbs;
+  document.getElementById("macroCarbsProgressLabel").textContent = `${totalCarbs} / ${savedTargets.carbs} g`;
+
+  document.getElementById("macroFatsProgress").max = savedTargets.fat;
+  document.getElementById("macroFatsProgress").value = totalFats;
+  document.getElementById("macroFatsProgressLabel").textContent = `${totalFats} / ${savedTargets.fat} g`;
+
+  // Update textual summary (optional)
   document.getElementById("macroEnergyDisplay").textContent = `${totalCals} kcal`;
   document.getElementById("macroProteinDisplay").textContent = `${totalProtein} g`;
   document.getElementById("macroCarbsDisplay").textContent = `${totalCarbs} g`;
   document.getElementById("macroFatsDisplay").textContent = `${totalFats} g`;
-
-  // Update progress bar + label (top area)
-  document.getElementById("macroEnergyProgress").value = totalCals;
-  document.getElementById("macroEnergyProgressLabel").textContent =
-    `${totalCals} / ${macroTargetCalories} kcal`;
-
-  document.getElementById("macroProteinProgress").value = totalProtein;
-  document.getElementById("macroProteinProgressLabel").textContent =
-    `${totalProtein} / ${macroTargetProtein} g`;
-
-  document.getElementById("macroCarbsProgress").value = totalCarbs;
-  document.getElementById("macroCarbsProgressLabel").textContent =
-    `${totalCarbs} / ${macroTargetCarbs} g`;
-
-  document.getElementById("macroFatsProgress").value = totalFats;
-  document.getElementById("macroFatsProgressLabel").textContent =
-    `${totalFats} / ${macroTargetFats} g`;
 }
-
 
 // 🔁 Auto-update every second
 setInterval(calculateMacros, 1000);
@@ -1162,15 +1163,6 @@ function renderMacroTargets() {
   document.getElementById("macroCarbsTarget").textContent = saved.carbs;
   document.getElementById("macroCalsTarget").textContent = saved.calories;
 
-  document.getElementById("macroProteinProgress").textContent = 0;
-  document.getElementById("macroFatProgress").textContent = 0;
-  document.getElementById("macroCarbsProgress").textContent = 0;
-  document.getElementById("macroCalsProgress").textContent = 0;
-
-  document.getElementById("proteinBar").value = 0;
-  document.getElementById("fatBar").value = 0;
-  document.getElementById("carbBar").value = 0;
-  document.getElementById("calsBar").value = 0;
 }
   
   
