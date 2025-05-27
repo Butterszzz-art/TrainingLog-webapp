@@ -1013,22 +1013,25 @@ function updateMacroUI() {
   const totalFats = macroMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
   const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
 
-  // Update progress bar values (max from user-set targets)
-  document.getElementById("macroEnergyProgress").max = savedTargets.calories;
-  document.getElementById("macroEnergyProgress").value = totalCals;
-  document.getElementById("macroEnergyProgressLabel").textContent = `${totalCals} / ${savedTargets.calories} kcal`;
+document.getElementById("calsBar").max = savedTargets.calories;
+document.getElementById("calsBar").value = totalCals;
+document.getElementById("macroCalsProgress").textContent = totalCals;
+document.getElementById("macroCalsTarget").textContent = savedTargets.calories;
 
-  document.getElementById("macroProteinProgress").max = savedTargets.protein;
-  document.getElementById("macroProteinProgress").value = totalProtein;
-  document.getElementById("macroProteinProgressLabel").textContent = `${totalProtein} / ${savedTargets.protein} g`;
+document.getElementById("proteinBar").max = savedTargets.protein;
+document.getElementById("proteinBar").value = totalProtein;
+document.getElementById("macroProteinProgress").textContent = totalProtein;
+document.getElementById("macroProteinTarget").textContent = savedTargets.protein;
 
-  document.getElementById("macroCarbsProgress").max = savedTargets.carbs;
-  document.getElementById("macroCarbsProgress").value = totalCarbs;
-  document.getElementById("macroCarbsProgressLabel").textContent = `${totalCarbs} / ${savedTargets.carbs} g`;
+document.getElementById("carbBar").max = savedTargets.carbs;
+document.getElementById("carbBar").value = totalCarbs;
+document.getElementById("macroCarbsProgress").textContent = totalCarbs;
+document.getElementById("macroCarbsTarget").textContent = savedTargets.carbs;
 
-  document.getElementById("macroFatsProgress").max = savedTargets.fat;
-  document.getElementById("macroFatsProgress").value = totalFats;
-  document.getElementById("macroFatsProgressLabel").textContent = `${totalFats} / ${savedTargets.fat} g`;
+document.getElementById("fatBar").max = savedTargets.fat;
+document.getElementById("fatBar").value = totalFats;
+document.getElementById("macroFatProgress").textContent = totalFats;
+document.getElementById("macroFatTarget").textContent = savedTargets.fat;
 
   // Update textual summary (optional)
   document.getElementById("macroEnergyDisplay").textContent = `${totalCals} kcal`;
