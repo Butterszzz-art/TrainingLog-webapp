@@ -309,7 +309,26 @@ select {
   <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
   <button onclick="saveSliderMacros()">Save Macros</button>
 </div>
-   
+
+<div id="macroTargetInputForm">
+  <h3>Set Your Macro Targets</h3>
+  <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)">
+  <input type="number" id="macroHeight" placeholder="Height (in)">
+  <select id="macroActivity">
+    <option value="1.2">Sedentary</option>
+    <option value="1.375">Lightly Active</option>
+    <option value="1.55">Moderately Active</option>
+    <option value="1.725">Very Active</option>
+    <option value="1.9">Extremely Active</option>
+  </select>
+  <button onclick="calculateMacroTargets()">Calculate Targets</button>
+</div>
+
+<!-- Hidden initially -->
+<button id="editTargetsBtn" style="display:none; margin-top:10px;" onclick="document.getElementById('macroSliders').style.display='block'; this.style.display='none';">
+  ✏️ Edit Your Targets
+</button>
+    
     
  </div>
   
@@ -1094,25 +1113,18 @@ function calculateMacroTargets() {
 
   if (!weight || !height) return alert("Enter bodyweight and height!");
 
-  const age = 25; // Optional: add age input if needed
+  const age = 25;
   const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
   document.getElementById("calTarget").textContent = tdee;
 
-  // Protein range (0.78–2.0g/lb)
   const proteinMin = Math.round(0.78 * weight);
   const proteinMax = Math.round(2.0 * weight);
-
-  // Fat range (0.3–0.6g/lb)
   const fatMin = Math.round(0.3 * weight);
   const fatMax = Math.round(0.6 * weight);
-
-  // Carbs (based on what's left)
   const carbMin = Math.round(1.5 * weight);
   const carbMax = Math.round(3.0 * weight);
 
-  // Show sliders with ranges
-  document.getElementById("macroSliders").style.display = 'block';
-
+  // Autofill sliders
   document.getElementById("proteinSlider").min = proteinMin;
   document.getElementById("proteinSlider").max = proteinMax;
   document.getElementById("proteinSlider").value = proteinMin;
@@ -1126,7 +1138,17 @@ function calculateMacroTargets() {
   document.getElementById("carbSlider").value = carbMin;
 
   adjustMacros();
+
+  // Hide the calculator section
+  document.getElementById("macroTargetInputForm").style.display = "none";
+
+  // Show "Edit Targets" button
+  document.getElementById("editTargetsBtn").style.display = "block";
+
+  // Save the current state so it's not lost
+  saveSliderMacros();
 }
+
 
 function adjustMacros() {
   const protein = +document.getElementById("proteinSlider").value;
