@@ -254,8 +254,6 @@ select {
   <div id="macroTab" class="tab-content">
   
     
-<div id="macroMealContainer"></div>
-
 <!-- Progress Bars -->
 <div>
   <h3>Targets</h3>
@@ -273,6 +271,7 @@ select {
 </div>
     
 
+ <div id="macroMealContainer"></div>
 <button onclick="addMacroMeal()">➕ Add Meal</button>
     
 <!-- Target Calculator -->
@@ -878,23 +877,53 @@ function addMacroMeal() {
   const index = macroMeals.length;
   const container = document.getElementById("macroMealContainer");
 
+  const mealId = `meal${index}`;
+  const toggleId = `mealToggle${index}`;
+  const contentId = `mealContent${index}`;
+
   const mealDiv = document.createElement("div");
-  mealDiv.id = `meal${index}`;
+  mealDiv.id = mealId;
   mealDiv.innerHTML = `
     <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-      <strong>Meal ${index + 1}</strong><br>
-      Protein: <input type="number" id="protein${index}" placeholder="g" onchange="updateMacroTotals()" />
-      Carbs: <input type="number" id="carbs${index}" placeholder="g" onchange="updateMacroTotals()" />
-      Fats: <input type="number" id="fats${index}" placeholder="g" onchange="updateMacroTotals()" />
-      <button onclick="removeMacroMeal(${index})" class="remove-btn">❌</button>
+      <button onclick="toggleMeal('${contentId}')" id="${toggleId}" style="font-weight:bold; width:100%; text-align:left;">
+        ➕ Meal ${index + 1}
+      </button>
+      <div id="${contentId}" style="display: none; margin-top:10px;">
+        Protein: <input type="number" id="protein${index}" placeholder="g" />
+        Carbs: <input type="number" id="carbs${index}" placeholder="g" />
+        Fats: <input type="number" id="fats${index}" placeholder="g" />
+        <br>
+        <button onclick="resetMeal(${index})" class="remove-btn">Reset Meal</button>
+        <button onclick="removeMacroMeal(${index})" class="remove-btn">❌ Remove Meal</button>
+      </div>
     </div>
   `;
 
   container.appendChild(mealDiv);
-  macroMeals.push(index);
-  updateMacroTotals();
+
+  macroMeals.push({ index, protein: 0, carbs: 0, fats: 0 });
+
+  // Optional: recalculate or refresh total
+  updateMacroUI();
 }
 
+function toggleMeal(contentId) {
+  const content = document.getElementById(contentId);
+  if (content.style.display === "none") {
+    content.style.display = "block";
+  } else {
+    content.style.display = "none";
+  }
+}
+
+function resetMeal(index) {
+  document.getElementById(`protein${index}`).value = '';
+  document.getElementById(`carbs${index}`).value = '';
+  document.getElementById(`fats${index}`).value = '';
+  updateMacroUI();
+}
+
+  
 function updateMacroTotals() {
   totalProtein = 0;
   totalCarbs = 0;
