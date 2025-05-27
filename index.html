@@ -368,6 +368,12 @@ async function startLogin() {
 
     await loadTemplateDropdown(); // ✅ Load templates after login
   }
+
+if (savedUser) {
+  currentUser = savedUser;
+  renderMacroTargets();  // ✅ Restore progress bar + sliders
+}
+  
 }
 
 
@@ -1179,22 +1185,33 @@ function adjustMacros(changedId) {
 
 
 function renderMacroTargets() {
-  const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`)) || { protein: 0, fat: 0, carbs: 0, calories: 0 };
+  const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
+  if (!saved) return;
 
+  // Update progress bar targets
   document.getElementById("macroProteinTarget").textContent = saved.protein;
   document.getElementById("macroFatTarget").textContent = saved.fat;
   document.getElementById("macroCarbsTarget").textContent = saved.carbs;
   document.getElementById("macroCalsTarget").textContent = saved.calories;
 
+  // Restore sliders
   document.getElementById("proteinSlider").value = saved.protein;
   document.getElementById("fatSlider").value = saved.fat;
   document.getElementById("carbSlider").value = saved.carbs;
-  document.getElementById("calTarget").textContent = saved.calories;
 
-  document.getElementById("macroSliders").style.display = "none";
-  document.getElementById("editTargetsBtn").style.display = "block";
+  // Update display
+  document.getElementById("proteinVal").textContent = saved.protein;
+  document.getElementById("fatVal").textContent = saved.fat;
+  document.getElementById("carbVal").textContent = saved.carbs;
+  document.getElementById("macroTotalCals").textContent = `${saved.calories} / ${saved.calories} kcal`;
 
-  adjustMacros(); // apply UI changes
+  // Optional: re-initialize limits
+  if (typeof macroRanges !== "undefined") {
+    macroRanges.protein.max = saved.protein;
+    macroRanges.fat.max = saved.fat;
+    macroRanges.carbs.max = saved.carbs;
+    macroRanges.tdee = saved.calories;
+  }
 }
 
 
@@ -1235,11 +1252,15 @@ function saveSliderMacros() {
   const protein = +document.getElementById("proteinSlider").value;
   const fat = +document.getElementById("fatSlider").value;
   const carbs = +document.getElementById("carbSlider").value;
-  const calories = protein * 4 + fat * 9 + carbs * 4;
+  const calories = (protein * 4) + (fat * 9) + (carbs * 4);
 
   const targets = { protein, fat, carbs, calories };
   localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targets));
+
+  alert("Macro targets saved.");
+  renderMacroTargets(); // Refresh the display
 }
+
 
   
   
