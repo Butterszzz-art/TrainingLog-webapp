@@ -377,16 +377,19 @@ if (savedUser) {
   renderMacroTargets();  // ✅ Restore progress bar + sliders
 }
 
-await fetchMacroTargetsFromBackend(username);
+await fetchUserMacroTargets(currentUser); // define this function below
   
 }
 
-async function fetchMacroTargetsFromBackend(username) {
-  const res = await fetch(`${serverUrl}/getMacros?username=${username}`);
-  const data = await res.json();
-  if (data.targets) {
-    localStorage.setItem(`macroTargets_${username}`, JSON.stringify(data.targets));
-    renderMacroTargets();
+async function fetchUserMacroTargets(username) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${airtableToken}` }
+  });
+  const data = await response.json();
+  if (data.records.length > 0) {
+    const fields = data.records[0].fields;
+    saveMacroTargetsToTop(fields);
   }
 }
 
@@ -1149,6 +1152,10 @@ function calculateMacroTargets() {
 
   document.getElementById("macroSliders").style.display = 'block';
   adjustMacros();
+
+  document.getElementById("macroCalcForm").style.display = 'none';
+  document.getElementById("editMacroToggle").style.display = 'block';
+
 }
 
 
@@ -1308,8 +1315,31 @@ async function saveToAirtable(username, target) {
     console.error('Fetch error:', err);
     alert("Error saving to Airtable.");
   }
+
+  saveMacroTargetsToTop(target);
 }
 
+
+  
+function saveMacroTargetsToTop(target) {
+  // Update global variables (if you're using any)
+  macroTargetCalories = target.calories;
+  macroTargetProtein = target.protein;
+  macroTargetFat = target.fat;
+  macroTargetCarbs = target.carbs;
+
+  // Update UI display labels
+  document.getElementById("macroCalsTarget").textContent = target.calories;
+  document.getElementById("macroProteinTarget").textContent = target.protein;
+  document.getElementById("macroFatTarget").textContent = target.fat;
+  document.getElementById("macroCarbsTarget").textContent = target.carbs;
+
+  // Set max value of progress bars
+  document.getElementById("calsBar").max = target.calories;
+  document.getElementById("proteinBar").max = target.protein;
+  document.getElementById("fatBar").max = target.fat;
+  document.getElementById("carbBar").max = target.carbs;
+}
   
   
   
