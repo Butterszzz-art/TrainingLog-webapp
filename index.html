@@ -881,10 +881,14 @@ function getLastExerciseEntry(exerciseName) {
   return lastMatch;
 }
 
-let macroMeals = [];
-let totalProtein = 0;
-let totalCarbs = 0;
-let totalFats = 0;
+// GLOBAL MACRO RANGE STORAGE
+let macroRanges = {
+  protein: { min: 0, max: 0 },
+  fat: { min: 0, max: 0 },
+  carbs: { min: 0, max: 0 },
+  tdee: 0
+};
+
 
 function addMacroMeal() {
   const index = macroMeals.length;
@@ -1008,6 +1012,14 @@ function calculateMacros() {
     totalProtein += p;
     totalCarbs += c;
     totalFats += f;
+
+    macroRanges = {
+  protein: { min: proteinMin, max: proteinMax },
+  fat: { min: fatMin, max: fatMax },
+  carbs: { min: carbMin, max: carbMax },
+  tdee: tdee
+};
+
   });
 
   const kcal = (totalProtein * 4) + (totalCarbs * 4) + (totalFats * 9);
