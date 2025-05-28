@@ -279,19 +279,18 @@ select {
 <div id="macroSliders" style="display:none; margin-top:20px;">
   <h4>Adjust Macros</h4>
 
+<label>Protein: <span id="proteinVal">0</span>g</label>
+<input type="range" id="proteinSlider" oninput="updateSliderMacros()"><br>
 
-  <label>Protein: <span id="proteinVal">0</span>g</label>
-    <input type="range" id="proteinSlider" step="1" oninput="adjustMacros('proteinSlider')">
+<label>Fat: <span id="fatVal">0</span>g</label>
+<input type="range" id="fatSlider" oninput="updateSliderMacros()"><br>
 
-  <label>Fat: <span id="fatVal">0</span>g</label>
-<input type="range" id="fatSlider" step="1" oninput="adjustMacros('fatSlider')">
+<label>Carbs: <span id="carbVal">0</span>g</label>
+<input type="range" id="carbSlider" oninput="updateSliderMacros()"><br>
 
-  <label>Carbs: <span id="carbVal">0</span>g</label>
-<input type="range" id="carbSlider" step="1" oninput="adjustMacros('carbSlider')">
+<p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
+<button onclick="saveSliderMacros()">Save Macros</button>
 
-  <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
-  <button onclick="saveSliderMacros()">Save Macros</button>
-</div>
 
 <div id="macroTargetInputForm">
   <h3>Set Your Macro Targets</h3>
@@ -1113,46 +1112,39 @@ function calculateMacroTargets() {
   const height = +document.getElementById("macroHeight").value;
   const activity = +document.getElementById("macroActivity").value;
 
-  if (!weight || !height) {
-    alert("Enter bodyweight and height!");
+  if (!weight || !height || !activity) {
+    alert("Please fill out all fields.");
     return;
   }
 
-  const age = 25;
+  const age = 25; // static for now
   const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
-  document.getElementById("calTarget").textContent = tdee;
 
   // Calculate ranges
-  const proteinMin = Math.round(0.78 * weight);
-  const proteinMax = Math.round(2.0 * weight);
-  const fatMin = Math.round(0.3 * weight);
-  const fatMax = Math.round(0.6 * weight);
-  const carbMin = Math.round(1.5 * weight);
-  const carbMax = Math.round(3.0 * weight);
-
-  // Store ranges for use during adjustment
   macroRanges = {
-    protein: { min: proteinMin, max: proteinMax },
-    fat: { min: fatMin, max: fatMax },
-    carbs: { min: carbMin, max: carbMax },
-    tdee
+    tdee,
+    protein: { min: Math.round(weight * 0.78), max: Math.round(weight * 2.0) },
+    fat: { min: Math.round(weight * 0.3), max: Math.round(weight * 0.6) },
+    carbs: { min: Math.round(weight * 1.5), max: Math.round(weight * 3.0) }
   };
 
-  // Set slider min/max/value
-  const set = (id, min, max, value) => {
-    const slider = document.getElementById(id);
-    slider.min = min;
-    slider.max = max;
-    slider.value = value;
-  };
+  // Apply ranges to sliders
+  document.getElementById("proteinSlider").min = macroRanges.protein.min;
+  document.getElementById("proteinSlider").max = macroRanges.protein.max;
+  document.getElementById("proteinSlider").value = macroRanges.protein.min;
 
-  set("proteinSlider", proteinMin, proteinMax, proteinMin);
-  set("fatSlider", fatMin, fatMax, fatMin);
-  set("carbSlider", carbMin, carbMax, carbMin);
+  document.getElementById("fatSlider").min = macroRanges.fat.min;
+  document.getElementById("fatSlider").max = macroRanges.fat.max;
+  document.getElementById("fatSlider").value = macroRanges.fat.min;
 
-  // Show slider section
-  document.getElementById("macroSliders").style.display = "block";
-  adjustMacros(); // initialize display
+  document.getElementById("carbSlider").min = macroRanges.carbs.min;
+  document.getElementById("carbSlider").max = macroRanges.carbs.max;
+  document.getElementById("carbSlider").value = macroRanges.carbs.min;
+
+  document.getElementById("calTarget").textContent = tdee;
+  document.getElementById("macroSliders").style.display = 'block';
+
+  updateSliderMacros(); // set preview
 }
 
 
@@ -1190,39 +1182,34 @@ function adjustMacros(changedId) {
     slider.max = Math.min(range.max, maxAllowed);
   });
 
-  // Save after change
-  saveSliderMacros();
 }
-
 
 
 function renderMacroTargets() {
   const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
   if (!saved) return;
 
-  // Update progress bar targets
   document.getElementById("macroProteinTarget").textContent = saved.protein;
   document.getElementById("macroFatTarget").textContent = saved.fat;
   document.getElementById("macroCarbsTarget").textContent = saved.carbs;
   document.getElementById("macroCalsTarget").textContent = saved.calories;
 
-  // Restore sliders
-  document.getElementById("proteinSlider").value = saved.protein;
-  document.getElementById("fatSlider").value = saved.fat;
-  document.getElementById("carbSlider").value = saved.carbs;
+  document.getElementById("macroProteinProgress").textContent = 0;
+  document.getElementById("macroFatProgress").textContent = 0;
+  document.getElementById("macroCarbsProgress").textContent = 0;
+  document.getElementById("macroCalsProgress").textContent = 0;
 
-  // Update display
-  document.getElementById("proteinVal").textContent = saved.protein;
-  document.getElementById("fatVal").textContent = saved.fat;
-  document.getElementById("carbVal").textContent = saved.carbs;
-  document.getElementById("macroTotalCals").textContent = `${saved.calories} / ${saved.calories} kcal`;
+  document.getElementById("proteinBar").value = 0;
+  document.getElementById("fatBar").value = 0;
+  document.getElementById("carbBar").value = 0;
+  document.getElementById("calsBar").value = 0;
 
-  // Optional: re-initialize limits
-  if (typeof macroRanges !== "undefined") {
-    macroRanges.protein.max = saved.protein;
-    macroRanges.fat.max = saved.fat;
-    macroRanges.carbs.max = saved.carbs;
-    macroRanges.tdee = saved.calories;
+  // Restore sliders if ranges are known
+  if (macroRanges?.protein) {
+    document.getElementById("proteinSlider").value = saved.protein;
+    document.getElementById("fatSlider").value = saved.fat;
+    document.getElementById("carbSlider").value = saved.carbs;
+    updateSliderMacros();
   }
 }
 
@@ -1264,16 +1251,44 @@ function saveSliderMacros() {
   const protein = +document.getElementById("proteinSlider").value;
   const fat = +document.getElementById("fatSlider").value;
   const carbs = +document.getElementById("carbSlider").value;
-  const calories = (protein * 4) + (fat * 9) + (carbs * 4);
+  const totalCals = (protein * 4) + (fat * 9) + (carbs * 4);
 
-  const targets = { protein, fat, carbs, calories };
+  const targets = { protein, fat, carbs, calories: totalCals };
   localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targets));
-
-  alert("Macro targets saved.");
-  renderMacroTargets(); // Refresh the display
+  alert("Macros saved!");
+  renderMacroTargets();
 }
 
 
+function updateSliderMacros() {
+  const protein = +document.getElementById("proteinSlider").value;
+  const fat = +document.getElementById("fatSlider").value;
+  const carbs = +document.getElementById("carbSlider").value;
+  const calLimit = macroRanges?.tdee || 0;
+
+  const totalCals = (protein * 4) + (fat * 9) + (carbs * 4);
+
+  // Show current values
+  document.getElementById("proteinVal").textContent = protein;
+  document.getElementById("fatVal").textContent = fat;
+  document.getElementById("carbVal").textContent = carbs;
+  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${calLimit} kcal`;
+
+  // Enforce total calorie cap
+  const sliders = [
+    { id: "proteinSlider", value: protein, calPerUnit: 4 },
+    { id: "fatSlider", value: fat, calPerUnit: 9 },
+    { id: "carbSlider", value: carbs, calPerUnit: 4 },
+  ];
+
+  sliders.forEach(slider => {
+    const el = document.getElementById(slider.id);
+    const otherCals = totalCals - (slider.value * slider.calPerUnit);
+    const maxUnits = Math.floor((calLimit - otherCals) / slider.calPerUnit);
+
+    el.max = Math.min(macroRanges[slider.id.replace("Slider", "")].max, maxUnits);
+  });
+}
   
   
   
