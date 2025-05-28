@@ -275,8 +275,7 @@ select {
 <button onclick="addMacroMeal()">➕ Add Meal</button>
 
 
-<!-- Macro Target Calculator -->
-<div id="macroCalculator" style="margin-top: 20px;">
+<div id="targetCalculatorSection">
   <h3>Set Your Macro Targets</h3>
   <input type="number" id="macroWeight" placeholder="Weight (lbs)">
   <input type="number" id="macroHeight" placeholder="Height (in)">
@@ -289,6 +288,10 @@ select {
   </select>
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
+
+<!-- Hidden by default -->
+<button id="editTargetsBtn" style="display:none;" onclick="toggleTargetEditor()">✏️ Edit Targets</button>
+
 
 <!-- Slider Adjustment -->
 <div id="macroSliders" style="display:none; margin-top: 20px;">
@@ -1163,6 +1166,8 @@ function calculateMacroTargets() {
   document.getElementById("macroCalcForm").style.display = 'none';
   document.getElementById("editMacroToggle").style.display = 'block';
 
+  toggleTargetEditor(false);
+
 }
 
 
@@ -1217,18 +1222,19 @@ function renderMacroTargets() {
 }
 
 
-function toggleEditTargets() {
-  const slider = document.getElementById("macroSliders");
-  const btn = document.getElementById("editTargetsBtn");
+function toggleTargetEditor(show = true) {
+  const form = document.getElementById("targetCalculatorSection");
+  const editBtn = document.getElementById("editTargetsBtn");
 
-  if (slider.style.display === 'none') {
-    slider.style.display = 'block';
-    btn.textContent = "➖ Collapse Targets";
+  if (show) {
+    form.style.display = "block";
+    editBtn.style.display = "none";
   } else {
-    slider.style.display = 'none';
-    btn.textContent = "✏️ Edit Your Targets";
+    form.style.display = "none";
+    editBtn.style.display = "inline-block";
   }
 }
+
 
 
 function enforceSliderCaps(changedId, p, f, c, maxCals) {
