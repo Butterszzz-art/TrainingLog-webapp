@@ -1164,26 +1164,27 @@ function saveMacroTargets() {
 
 
 function adjustMacros() {
-  const p = +document.getElementById("proteinSlider").value;
-  const f = +document.getElementById("fatSlider").value;
-  const c = +document.getElementById("carbSlider").value;
+  const protein = +document.getElementById("proteinSlider").value;
+  const fat = +document.getElementById("fatSlider").value;
+  const carbs = +document.getElementById("carbSlider").value;
 
-  const total = (p * 4) + (f * 9) + (c * 4);
-  const limit = macroRanges.tdee || 3000;
+  // ❗ FIX: Declare totalCals here
+  const totalCals = protein * 4 + fat * 9 + carbs * 4;
 
-  if (total > limit) {
-    const newCarbs = Math.floor((limit - (p * 4 + f * 9)) / 4);
-    document.getElementById("carbSlider").value = Math.max(newCarbs, 0);
-    return adjustMacros();
-  }
+  document.getElementById("proteinVal").textContent = protein;
+  document.getElementById("fatVal").textContent = fat;
+  document.getElementById("carbVal").textContent = carbs;
 
-  document.getElementById("proteinVal").textContent = p;
-  document.getElementById("fatVal").textContent = f;
-  document.getElementById("carbVal").textContent = c;
- document.getElementById("macroTotalCals").textContent =
-  `${totalCals} / ${macroTargetCalories} kcal`;
+  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${macroTargetCalories} kcal`;
 
+  document.getElementById("macroTotalCals").style.color = totalCals > macroTargetCalories ? "red" : "black";
+
+  // Update global vars for saving
+  macroTargetProtein = protein;
+  macroTargetFat = fat;
+  macroTargetCarbs = carbs;
 }
+
 
   
 function renderMacroTargets() {
@@ -1350,34 +1351,37 @@ function saveMacroTargetsToTop(target) {
 }
   
 function applyCustomCalories() {
-  const val = +document.getElementById("customCalories").value;
-  if (!val) return alert("Please enter a valid calorie value.");
+  const input = document.getElementById("customCalories");
+  const customCal = +input.value;
+  if (!customCal || customCal < 800) return alert("Please enter a valid calorie value (e.g. 2800)");
 
-  // Update global calorie target
-  macroTargetCalories = val;
+  // 1. Update global target
+  macroTargetCalories = customCal;
 
-  // Approximate macros: 30% Protein, 25% Fat, 45% Carbs
-  const protein = Math.round((val * 0.3) / 4);
-  const fat = Math.round((val * 0.25) / 9);
-  const carbs = Math.round((val * 0.45) / 4);
+  // 2. Calculate default macro ranges based on ratios
+  const protein = Math.round((customCal * 0.3) / 4); // 30% protein
+  const fat = Math.round((customCal * 0.25) / 9);    // 25% fat
+  const carbs = Math.round((customCal * 0.45) / 4);  // 45% carbs
 
   macroTargetProtein = protein;
   macroTargetFat = fat;
   macroTargetCarbs = carbs;
 
-  // Update sliders
+  // 3. Set slider values
   document.getElementById("proteinSlider").value = protein;
   document.getElementById("fatSlider").value = fat;
   document.getElementById("carbSlider").value = carbs;
 
-  // Set slider max bounds appropriately
-  document.getElementById("proteinSlider").max = protein * 1.5;
-  document.getElementById("fatSlider").max = fat * 1.5;
-  document.getElementById("carbSlider").max = carbs * 1.5;
+  // 4. Set slider bounds so they can’t exceed
+  document.getElementById("proteinSlider").max = protein * 1.2;
+  document.getElementById("fatSlider").max = fat * 1.2;
+  document.getElementById("carbSlider").max = carbs * 1.2;
 
-  adjustMacros();  // Recalculate progress
-  updateMacroUI(); // Refresh top UI
+  // 5. Trigger calculation + UI updates
+  adjustMacros();
+  updateMacroUI();
 }
+
   
   
 // LOGOUT
