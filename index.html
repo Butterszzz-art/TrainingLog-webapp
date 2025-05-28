@@ -387,11 +387,18 @@ async function fetchUserMacroTargets(username) {
     headers: { Authorization: `Bearer ${airtableToken}` }
   });
   const data = await response.json();
+
   if (data.records.length > 0) {
     const fields = data.records[0].fields;
+
+    // ✅ Update local UI display bars
     saveMacroTargetsToTop(fields);
+
+    // ✅ Store locally so they persist on refresh
+    localStorage.setItem(`macroTargets_${username}`, JSON.stringify(fields));
   }
 }
+
 
   
 
@@ -1709,6 +1716,13 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     document.getElementById("macroSliders").style.display = "block";
     adjustMacros();
   }
+
+const savedTargets = localStorage.getItem(`macroTargets_${currentUser}`);
+if (savedTargets) {
+  const targetObj = JSON.parse(savedTargets);
+  saveMacroTargetsToTop(targetObj); // update top UI bars
+}
+
     
 }); // closing DOMContentLoaded
 
