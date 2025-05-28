@@ -300,6 +300,7 @@ select {
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
 
+<button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
 
 
 <!-- Slider Adjustment -->
@@ -1191,7 +1192,8 @@ function calculateMacroTargets() {
   document.getElementById("macroSliders").style.display = 'block';
   adjustMacros();
 
-  document.getElementById("macroCalcForm").style.display = 'none';
+document.getElementById("macroTargetSection").style.display = 'none';
+document.getElementById("toggleTargetFormBtn").style.display = 'block';
   document.getElementById("editMacroToggle").style.display = 'block';
 
   toggleTargetEditor(false);
@@ -1208,16 +1210,15 @@ function adjustMacros() {
   const limit = macroRanges.tdee || 3000;
 
   if (total > limit) {
-    // clamp carbs
     const newCarbs = Math.floor((limit - (p * 4 + f * 9)) / 4);
     document.getElementById("carbSlider").value = Math.max(newCarbs, 0);
-    return adjustMacros(); // re-call to update UI
+    return adjustMacros();
   }
 
   document.getElementById("proteinVal").textContent = p;
   document.getElementById("fatVal").textContent = f;
   document.getElementById("carbVal").textContent = c;
-  document.getElementById("macroTotalCals").textContent = total;
+  document.getElementById("macroTotalCals").textContent = `${total} / ${limit} kcal`;
 }
 
   
@@ -1251,17 +1252,18 @@ function renderMacroTargets() {
 
 
 function toggleTargetForm() {
-  const section = document.getElementById("targetCalculatorSection");
-  const toggleBtn = document.getElementById("toggleTargetFormBtn");
+  const section = document.getElementById("macroTargetSection");
+  const btn = document.getElementById("toggleTargetFormBtn");
 
-  if (section.style.display === "none") {
-    section.style.display = "block";
-    toggleBtn.textContent = "🔽 Set Your Targets";
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    btn.textContent = "🔽 Hide Target Calculator";
   } else {
-    section.style.display = "none";
-    toggleBtn.textContent = "▶️ Set Your Targets";
+    section.style.display = 'none';
+    btn.textContent = "▶️ Set Your Targets";
   }
 }
+
 
 
 
@@ -1756,6 +1758,7 @@ const savedTargets = localStorage.getItem(`macroTargets_${currentUser}`);
 if (savedTargets) {
   const targetObj = JSON.parse(savedTargets);
   saveMacroTargetsToTop(targetObj); // update top UI bars
+  // do NOT call saveToAirtable again
 }
 
     
