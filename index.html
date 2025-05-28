@@ -300,6 +300,8 @@ select {
 
   <label>Custom Calorie Intake (optional):</label>
 <input type="number" id="customCalories" placeholder="Enter custom calorie target" />
+<!-- New Button -->
+<button onclick="applyCustomCalories()" class="primary-btn">Insert Calories</button>
 
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
@@ -1347,6 +1349,35 @@ function saveMacroTargetsToTop(target) {
   document.getElementById("carbBar").max = target.carbs;
 }
   
+function applyCustomCalories() {
+  const val = +document.getElementById("customCalories").value;
+  if (!val) return alert("Please enter a valid calorie value.");
+
+  // Update global calorie target
+  macroTargetCalories = val;
+
+  // Approximate macros: 30% Protein, 25% Fat, 45% Carbs
+  const protein = Math.round((val * 0.3) / 4);
+  const fat = Math.round((val * 0.25) / 9);
+  const carbs = Math.round((val * 0.45) / 4);
+
+  macroTargetProtein = protein;
+  macroTargetFat = fat;
+  macroTargetCarbs = carbs;
+
+  // Update sliders
+  document.getElementById("proteinSlider").value = protein;
+  document.getElementById("fatSlider").value = fat;
+  document.getElementById("carbSlider").value = carbs;
+
+  // Set slider max bounds appropriately
+  document.getElementById("proteinSlider").max = protein * 1.5;
+  document.getElementById("fatSlider").max = fat * 1.5;
+  document.getElementById("carbSlider").max = carbs * 1.5;
+
+  adjustMacros();  // Recalculate progress
+  updateMacroUI(); // Refresh top UI
+}
   
   
 // LOGOUT
