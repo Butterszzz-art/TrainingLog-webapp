@@ -275,7 +275,10 @@ select {
 <button onclick="addMacroMeal()">➕ Add Meal</button>
 
 
-<div id="targetCalculatorSection">
+<div id="targetCalculatorSection" style="display: none;">
+    
+<!-- Calculator Form -->
+<div id="targetCalculatorSection" style="display: block;">
   <h3>Set Your Macro Targets</h3>
   <input type="number" id="macroWeight" placeholder="Weight (lbs)">
   <input type="number" id="macroHeight" placeholder="Height (in)">
@@ -289,6 +292,10 @@ select {
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
 
+<!-- Toggle Button (always visible) -->
+<button id="toggleTargetFormBtn" onclick="toggleTargetForm()" style="margin-top: 10px;">
+  🔽 Set Your Targets
+</button>
 
 
 
@@ -308,8 +315,6 @@ select {
   <button onclick="saveSliderMacros()">Save Macros</button>
 </div>
 
- <!-- Hidden by default -->
-<button id="editTargetsBtn" style="display:none;" onclick="toggleTargetEditor()">✏️ Edit Targets</button>   
     
  </div>
   
@@ -1222,18 +1227,19 @@ function renderMacroTargets() {
 }
 
 
-function toggleTargetEditor(show = true) {
-  const form = document.getElementById("targetCalculatorSection");
-  const editBtn = document.getElementById("editTargetsBtn");
+function toggleTargetForm() {
+  const section = document.getElementById("targetCalculatorSection");
+  const toggleBtn = document.getElementById("toggleTargetFormBtn");
 
-  if (show) {
-    form.style.display = "block";
-    editBtn.style.display = "none";
+  if (section.style.display === "none") {
+    section.style.display = "block";
+    toggleBtn.textContent = "🔽 Set Your Targets";
   } else {
-    form.style.display = "none";
-    editBtn.style.display = "inline-block";
+    section.style.display = "none";
+    toggleBtn.textContent = "▶️ Set Your Targets";
   }
 }
+
 
 
 
