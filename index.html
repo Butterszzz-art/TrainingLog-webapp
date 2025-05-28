@@ -318,6 +318,7 @@ const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2
 const airtableBaseId = 'appmjr4IgnEH72K1b';
 const usersTableName = 'Users';
 const templatesTableName = 'Templates';
+const MacroTargetsTableName = 'MacroTargets';  
 
 let macroRanges = {
   protein: { min: 0, max: 0 },
@@ -1270,25 +1271,45 @@ function updateSliderMacros() {
 
 
 async function saveToAirtable(username, target) {
-  const url = `https://api.airtable.com/v0/YOUR_BASE_ID/YOUR_TABLE_NAME`;
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer YOUR_API_KEY`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      fields: {
-        Username: username,
-        Calories: target.calories,
-        Protein: target.protein,
-        Fat: target.fat,
-        Carbs: target.carbs
-      }
-    })
-  });
+  const airtableBaseId = 'appmjr4IgnEH72K1b'; // replace with your base ID
+  const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577'; // replace with your API token
+  const tableName = 'MacroTargets'; // this must match your actual Airtable table name
+
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/${tableName}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${airtableToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fields: {
+          Username: username,
+          Calories: target.calories,
+          Protein: target.protein,
+          Fat: target.fat,
+          Carbs: target.carbs
+        }
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Airtable save error:', data);
+      alert(`Failed to save to Airtable: ${data.error?.message || 'Unknown error'}`);
+    } else {
+      console.log('Saved to Airtable:', data);
+    }
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    alert("Error saving to Airtable.");
+  }
 }
-  
+
   
   
   
