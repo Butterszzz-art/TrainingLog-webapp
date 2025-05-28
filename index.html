@@ -297,6 +297,10 @@ select {
     <option value="1.725">Very Active</option>
     <option value="1.9">Extremely Active</option>
   </select>
+
+  <label>Custom Calorie Intake (optional):</label>
+<input type="number" id="customCalories" placeholder="Enter custom calorie target" />
+
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
 
@@ -1158,42 +1162,44 @@ function calculateMacroTargets() {
   const weight = +document.getElementById("macroWeight").value;
   const height = +document.getElementById("macroHeight").value;
   const activity = +document.getElementById("macroActivity").value;
+  const customCalories = +document.getElementById("customCalories").value;
 
-  if (!weight || !height) return alert("Please enter valid weight and height.");
+  if (!weight || !height) {
+    alert("Please enter your weight and height.");
+    return;
+  }
 
-  const age = 25; // placeholder or make this dynamic
-  const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
+  const age = 25;
+  const tdee = customCalories > 0
+    ? customCalories
+    : Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
+
   document.getElementById("calTarget").textContent = tdee;
 
-  macroRanges = {
-    protein: { min: Math.round(0.78 * weight), max: Math.round(2.0 * weight) },
-    fat: { min: Math.round(0.3 * weight), max: Math.round(0.6 * weight) },
-    carbs: { min: Math.round(1.5 * weight), max: Math.round(3.0 * weight) },
-    tdee
-  };
+  // Set macro ranges
+  const proteinMin = Math.round(0.78 * weight);
+  const proteinMax = Math.round(2.0 * weight);
+  const fatMin = Math.round(0.3 * weight);
+  const fatMax = Math.round(0.6 * weight);
+  const carbMin = Math.round(1.5 * weight);
+  const carbMax = Math.round(3.0 * weight);
 
-  // set sliders
-  document.getElementById("proteinSlider").min = macroRanges.protein.min;
-  document.getElementById("proteinSlider").max = macroRanges.protein.max;
-  document.getElementById("proteinSlider").value = macroRanges.protein.min;
-
-  document.getElementById("fatSlider").min = macroRanges.fat.min;
-  document.getElementById("fatSlider").max = macroRanges.fat.max;
-  document.getElementById("fatSlider").value = macroRanges.fat.min;
-
-  document.getElementById("carbSlider").min = macroRanges.carbs.min;
-  document.getElementById("carbSlider").max = macroRanges.carbs.max;
-  document.getElementById("carbSlider").value = macroRanges.carbs.min;
-
+  // Show sliders
   document.getElementById("macroSliders").style.display = 'block';
-  adjustMacros();
 
-document.getElementById("macroTargetSection").style.display = 'none';
-document.getElementById("toggleTargetFormBtn").style.display = 'block';
-  document.getElementById("editMacroToggle").style.display = 'block';
+  document.getElementById("proteinSlider").min = proteinMin;
+  document.getElementById("proteinSlider").max = proteinMax;
+  document.getElementById("proteinSlider").value = proteinMin;
 
-  toggleTargetEditor(false);
+  document.getElementById("fatSlider").min = fatMin;
+  document.getElementById("fatSlider").max = fatMax;
+  document.getElementById("fatSlider").value = fatMin;
 
+  document.getElementById("carbSlider").min = carbMin;
+  document.getElementById("carbSlider").max = carbMax;
+  document.getElementById("carbSlider").value = carbMin;
+
+  adjustMacros(); // recalculate calories
 }
 
 
