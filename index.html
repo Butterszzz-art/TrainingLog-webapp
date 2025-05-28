@@ -277,11 +277,20 @@ select {
 
 <div id="targetCalculatorSection" style="display: none;">
     
-<!-- Calculator Form -->
-<div id="targetCalculatorSection" style="display: block;">
+<!-- Target Calculator -->
+<div style="margin-top:20px;" id="macroTargetSection">
   <h3>Set Your Macro Targets</h3>
-  <input type="number" id="macroWeight" placeholder="Weight (lbs)">
-  <input type="number" id="macroHeight" placeholder="Height (in)">
+  <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)">
+  
+  <!-- Height input with unit toggle -->
+  <div style="margin-top: 10px;">
+    <input type="number" id="macroHeight" placeholder="Height" />
+    <select id="heightUnit">
+      <option value="in">in</option>
+      <option value="cm">cm</option>
+    </select>
+  </div>
+
   <select id="macroActivity">
     <option value="1.2">Sedentary</option>
     <option value="1.375">Lightly Active</option>
@@ -291,6 +300,7 @@ select {
   </select>
   <button onclick="calculateMacroTargets()">Calculate Targets</button>
 </div>
+
 
 <!-- Toggle Button (always visible) -->
 <button id="toggleTargetFormBtn" onclick="toggleTargetForm()" style="margin-top: 10px;">
@@ -1019,37 +1029,53 @@ function removeMacroMeal(index) {
   updateMacroUI();
 }
 
-function calculateMacros() {
-  let totalProtein = 0, totalCarbs = 0, totalFats = 0;
+function calculateMacroTargets() {
+  const weight = +document.getElementById("macroWeight").value;
+  const rawHeight = +document.getElementById("macroHeight").value;
+  const heightUnit = document.getElementById("heightUnit").value;
+  const activity = +document.getElementById("macroActivity").value;
 
-  macroMeals.forEach((meal, i) => {
-    if (!meal) return;
+  if (!weight || !rawHeight) {
+    alert("Enter both weight and height!");
+    return;
+  }
 
-    const proteinInput = document.getElementById(`protein${i}`);
-    const carbInput = document.getElementById(`carbs${i}`);
-    const fatInput = document.getElementById(`fats${i}`);
-    
-    if (!proteinInput || !carbInput || !fatInput) return;
+  // Convert height to inches if entered in cm
+  const height = heightUnit === "cm" ? rawHeight / 2.54 : rawHeight;
 
-    const p = +proteinInput.value || 0;
-    const c = +carbInput.value || 0;
-    const f = +fatInput.value || 0;
+  const age = 25; // you can later add a real input
+  const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
 
-    totalProtein += p;
-    totalCarbs += c;
-    totalFats += f;
+  document.getElementById("calTarget").textContent = tdee;
 
-    macroRanges = {
-  protein: { min: proteinMin, max: proteinMax },
-  fat: { min: fatMin, max: fatMax },
-  carbs: { min: carbMin, max: carbMax },
-  tdee: tdee
-};
+  // Protein range (0.78–2.0g/lb)
+  const proteinMin = Math.round(0.78 * weight);
+  const proteinMax = Math.round(2.0 * weight);
 
-  });
+  // Fat range (0.3–0.6g/lb)
+  const fatMin = Math.round(0.3 * weight);
+  const fatMax = Math.round(0.6 * weight);
 
-  const kcal = (totalProtein * 4) + (totalCarbs * 4) + (totalFats * 9);
-  updateMacroUI(totalProtein, totalCarbs, totalFats, kcal);
+  // Carbs (based on what's left)
+  const carbMin = Math.round(1.5 * weight);
+  const carbMax = Math.round(3.0 * weight);
+
+  // Show sliders
+  document.getElementById("macroSliders").style.display = 'block';
+
+  document.getElementById("proteinSlider").min = proteinMin;
+  document.getElementById("proteinSlider").max = proteinMax;
+  document.getElementById("proteinSlider").value = proteinMin;
+
+  document.getElementById("fatSlider").min = fatMin;
+  document.getElementById("fatSlider").max = fatMax;
+  document.getElementById("fatSlider").value = fatMin;
+
+  document.getElementById("carbSlider").min = carbMin;
+  document.getElementById("carbSlider").max = carbMax;
+  document.getElementById("carbSlider").value = carbMin;
+
+  adjustMacros();
 }
 
 function updateMacroUI() {
