@@ -1033,10 +1033,11 @@ function calculateMacroTargets() {
   const heightUnit = document.getElementById("heightUnit").value;
   const activity = +document.getElementById("macroActivity").value;
 
-  if (!weight || !rawHeight) {
-    alert("Enter both weight and height!");
-    return;
-  }
+ if (!customCalories && (!weight || !height)) {
+  alert("Please enter your weight and height, or enter a custom calorie intake.");
+  return;
+}
+
 
   // Convert height to inches if entered in cm
   const height = heightUnit === "cm" ? rawHeight / 2.54 : rawHeight;
@@ -1158,49 +1159,6 @@ function saveMacroTargets() {
   renderMacroTargets(); // optional: live refresh UI
 }
 
-function calculateMacroTargets() {
-  const weight = +document.getElementById("macroWeight").value;
-  const height = +document.getElementById("macroHeight").value;
-  const activity = +document.getElementById("macroActivity").value;
-  const customCalories = +document.getElementById("customCalories").value;
-
-  if (!weight || !height) {
-    alert("Please enter your weight and height.");
-    return;
-  }
-
-  const age = 25;
-  const tdee = customCalories > 0
-    ? customCalories
-    : Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
-
-  document.getElementById("calTarget").textContent = tdee;
-
-  // Set macro ranges
-  const proteinMin = Math.round(0.78 * weight);
-  const proteinMax = Math.round(2.0 * weight);
-  const fatMin = Math.round(0.3 * weight);
-  const fatMax = Math.round(0.6 * weight);
-  const carbMin = Math.round(1.5 * weight);
-  const carbMax = Math.round(3.0 * weight);
-
-  // Show sliders
-  document.getElementById("macroSliders").style.display = 'block';
-
-  document.getElementById("proteinSlider").min = proteinMin;
-  document.getElementById("proteinSlider").max = proteinMax;
-  document.getElementById("proteinSlider").value = proteinMin;
-
-  document.getElementById("fatSlider").min = fatMin;
-  document.getElementById("fatSlider").max = fatMax;
-  document.getElementById("fatSlider").value = fatMin;
-
-  document.getElementById("carbSlider").min = carbMin;
-  document.getElementById("carbSlider").max = carbMax;
-  document.getElementById("carbSlider").value = carbMin;
-
-  adjustMacros(); // recalculate calories
-}
 
 
 function adjustMacros() {
@@ -1220,7 +1178,9 @@ function adjustMacros() {
   document.getElementById("proteinVal").textContent = p;
   document.getElementById("fatVal").textContent = f;
   document.getElementById("carbVal").textContent = c;
-  document.getElementById("macroTotalCals").textContent = `${total} / ${limit} kcal`;
+ document.getElementById("macroTotalCals").textContent =
+  `${totalCals} / ${macroTargetCalories} kcal`;
+
 }
 
   
