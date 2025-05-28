@@ -324,6 +324,14 @@ const airtableBaseId = 'appmjr4IgnEH72K1b';
 const usersTableName = 'Users';
 const templatesTableName = 'Templates';
 
+let macroRanges = {
+  protein: { min: 0, max: 0 },
+  fat: { min: 0, max: 0 },
+  carbs: { min: 0, max: 0 },
+  tdee: 0
+};
+
+  
 // LOGIN
 async function startLogin() {
   const username = document.getElementById("username").value.trim();
@@ -372,9 +380,21 @@ if (savedUser) {
   currentUser = savedUser;
   renderMacroTargets();  // ✅ Restore progress bar + sliders
 }
+
+await fetchMacroTargetsFromBackend(username);
   
 }
 
+async function fetchMacroTargetsFromBackend(username) {
+  const res = await fetch(`${serverUrl}/getMacros?username=${username}`);
+  const data = await res.json();
+  if (data.targets) {
+    localStorage.setItem(`macroTargets_${username}`, JSON.stringify(data.targets));
+    renderMacroTargets();
+  }
+}
+
+  
 
 // SIGNUP
 async function startSignup() {
@@ -880,13 +900,6 @@ function getLastExerciseEntry(exerciseName) {
   return lastMatch;
 }
 
-// GLOBAL MACRO RANGE STORAGE
-let macroRanges = {
-  protein: { min: 0, max: 0 },
-  fat: { min: 0, max: 0 },
-  carbs: { min: 0, max: 0 },
-  tdee: 0
-};
 
 
 function addMacroMeal() {
@@ -1251,44 +1264,46 @@ function saveSliderMacros() {
   const protein = +document.getElementById("proteinSlider").value;
   const fat = +document.getElementById("fatSlider").value;
   const carbs = +document.getElementById("carbSlider").value;
-  const totalCals = (protein * 4) + (fat * 9) + (carbs * 4);
+  const totalCals = protein * 4 + fat * 9 + carbs * 4;
 
   const targets = { protein, fat, carbs, calories: totalCals };
+
   localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targets));
+  saveMacroTargetsToBackend(targets);  // ✅ Save to backend
   alert("Macros saved!");
   renderMacroTargets();
 }
+
 
 
 function updateSliderMacros() {
   const protein = +document.getElementById("proteinSlider").value;
   const fat = +document.getElementById("fatSlider").value;
   const carbs = +document.getElementById("carbSlider").value;
-  const calLimit = macroRanges?.tdee || 0;
 
+  const calLimit = macroRanges?.tdee || 0;
   const totalCals = (protein * 4) + (fat * 9) + (carbs * 4);
 
-  // Show current values
   document.getElementById("proteinVal").textContent = protein;
   document.getElementById("fatVal").textContent = fat;
   document.getElementById("carbVal").textContent = carbs;
   document.getElementById("macroTotalCals").textContent = `${totalCals} / ${calLimit} kcal`;
 
-  // Enforce total calorie cap
-  const sliders = [
-    { id: "proteinSlider", value: protein, calPerUnit: 4 },
-    { id: "fatSlider", value: fat, calPerUnit: 9 },
-    { id: "carbSlider", value: carbs, calPerUnit: 4 },
-  ];
-
-  sliders.forEach(slider => {
-    const el = document.getElementById(slider.id);
-    const otherCals = totalCals - (slider.value * slider.calPerUnit);
-    const maxUnits = Math.floor((calLimit - otherCals) / slider.calPerUnit);
-
-    el.max = Math.min(macroRanges[slider.id.replace("Slider", "")].max, maxUnits);
-  });
+  // Do not auto-save here!
 }
+
+
+async function saveMacroTargetsToBackend(targets) {
+  const response = await fetch(`${serverUrl}/saveMacros`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: currentUser, targets })
+  });
+  if (!response.ok) {
+    console.error("Failed to save macros to backend");
+  }
+}
+  
   
   
   
