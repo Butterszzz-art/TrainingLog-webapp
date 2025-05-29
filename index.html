@@ -1164,26 +1164,32 @@ function saveMacroTargets() {
 
 
 function adjustMacros() {
-  const protein = +document.getElementById("proteinSlider").value;
-  const fat = +document.getElementById("fatSlider").value;
-  const carbs = +document.getElementById("carbSlider").value;
+  let protein = +document.getElementById("proteinSlider").value;
+  let fat = +document.getElementById("fatSlider").value;
+  let carbs = +document.getElementById("carbSlider").value;
 
-  // ❗ FIX: Declare totalCals here
-  const totalCals = protein * 4 + fat * 9 + carbs * 4;
+  let totalCals = protein * 4 + fat * 9 + carbs * 4;
+
+  // 🔒 Block input if calories exceed
+  const maxCals = macroTargetCalories;
+  if (totalCals > maxCals) {
+    alert("Total calories exceed your set intake. Please reduce one of the macros.");
+    return;
+  }
 
   document.getElementById("proteinVal").textContent = protein;
   document.getElementById("fatVal").textContent = fat;
   document.getElementById("carbVal").textContent = carbs;
 
   document.getElementById("macroTotalCals").textContent = `${totalCals} / ${macroTargetCalories} kcal`;
+  document.getElementById("macroTotalCals").style.color = totalCals > maxCals ? "red" : "black";
 
-  document.getElementById("macroTotalCals").style.color = totalCals > macroTargetCalories ? "red" : "black";
-
-  // Update global vars for saving
+  // Update progress display targets (optional)
   macroTargetProtein = protein;
   macroTargetFat = fat;
   macroTargetCarbs = carbs;
 }
+
 
 
   
