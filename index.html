@@ -1779,6 +1779,21 @@ if (savedTargets) {
   // do NOT call saveToAirtable again
 }
 
+ const sliders = [
+    { id: "proteinSlider", label: "proteinVal" },
+    { id: "fatSlider", label: "fatVal" },
+    { id: "carbSlider", label: "carbVal" }
+  ];
+
+  sliders.forEach(({ id, label }) => {
+    const slider = document.getElementById(id);
+    const display = document.getElementById(label);
+    if (slider && display) {
+      slider.value = 0;
+      display.textContent = "0";
+    }
+  });
+    
 document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
   document.getElementById("carbSlider").value = 0;
@@ -1787,6 +1802,8 @@ document.getElementById("proteinSlider").value = 0;
   document.getElementById("carbVal").textContent = "0";
   document.getElementById("macroTotalCals").textContent = "0";
     
+
+
     
 }); // closing DOMContentLoaded
 
