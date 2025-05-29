@@ -309,21 +309,24 @@ select {
 <button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
 
 
-<!-- Slider Adjustment -->
-<div id="macroSliders" style="display:none; margin-top: 20px;">
+<button onclick="toggleMacroAdjust()" id="adjustToggleBtn">▶ Adjust Macros</button>
+
+<div id="adjustMacroSection" style="display: none; margin-top: 15px;">
   <h3>Adjust Macros</h3>
+
   <label>Protein: <span id="proteinVal">0</span>g</label>
-  <input type="range" id="proteinSlider" min="0" max="300" oninput="adjustMacros()"><br>
+  <input type="range" id="proteinSlider" min="0" value="0" step="1" oninput="adjustMacros()">
 
   <label>Fat: <span id="fatVal">0</span>g</label>
-  <input type="range" id="fatSlider" min="0" max="150" oninput="adjustMacros()"><br>
+  <input type="range" id="fatSlider" min="0" value="0" step="1" oninput="adjustMacros()">
 
   <label>Carbs: <span id="carbVal">0</span>g</label>
-  <input type="range" id="carbSlider" min="0" max="400" oninput="adjustMacros()"><br>
+  <input type="range" id="carbSlider" min="0" value="0" step="1" oninput="adjustMacros()">
 
-  <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
+  <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="macroTargetCalories">0</span> kcal</p>
   <button onclick="saveSliderMacros()">Save Macros</button>
 </div>
+
 
     
  </div>
@@ -1388,7 +1391,19 @@ function applyCustomCalories() {
   updateMacroUI();
 }
 
-  
+ function toggleMacroAdjust() {
+  const section = document.getElementById("adjustMacroSection");
+  const btn = document.getElementById("adjustToggleBtn");
+
+  if (section.style.display === "none") {
+    section.style.display = "block";
+    btn.textContent = "▼ Adjust Macros";
+  } else {
+    section.style.display = "none";
+    btn.textContent = "▶ Adjust Macros";
+  }
+}
+ 
   
 // LOGOUT
 function logout() {
