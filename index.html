@@ -274,10 +274,12 @@ select {
   <label>Custom Calorie Intake (optional):</label>
 <input type="number" id="customCalories" placeholder="Enter custom calorie target" />
 <!-- New Button -->
-<button onclick="applyCustomCalories()" class="primary-btn">Insert Calories</button>
-
-
     
+<button onclick="applyCustomCalories()">Insert Calories</button>
+
+
+<button id="adjustToggleBtn" onclick="toggleMacroAdjust()">▶ Adjust Macros</button>
+
 <div id="adjustMacroSection" style="display:none;">
 
 <!-- (4) Macro Sliders (hidden initially) -->
@@ -293,7 +295,6 @@ select {
     <button onclick="saveSliderMacros()">Save Macros</button>
   </div>
    </div>
-<button id="adjustToggleBtn" onclick="toggleMacroAdjust()">▶ Adjust Macros</button>
 
     
 <button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
@@ -1806,6 +1807,9 @@ document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
     document.getElementById("btnSaveCFWorkout").addEventListener("click", saveCrossfitWorkout);
 
     
+window.addEventListener("DOMContentLoaded", () => {
+  updateMacroUI(); // or anything else DOM-dependent
+});    
 }); // closing DOMContentLoaded
 
 
