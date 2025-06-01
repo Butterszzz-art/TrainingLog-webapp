@@ -277,8 +277,8 @@ select {
 <button onclick="applyCustomCalories()" class="primary-btn">Insert Calories</button>
 
 
-
-<button onclick="toggleMacroAdjust()" id="adjustToggleBtn">▶ Adjust Macros</button>
+    
+<div id="adjustMacroSection" style="display:none;">
 
 <!-- (4) Macro Sliders (hidden initially) -->
   <div id="macroSliders" style="display:none; margin-top:20px;">
@@ -292,6 +292,9 @@ select {
     <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
     <button onclick="saveSliderMacros()">Save Macros</button>
   </div>
+   </div>
+<button id="adjustToggleBtn" onclick="toggleMacroAdjust()">▶ Adjust Macros</button>
+
     
 <button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
 
