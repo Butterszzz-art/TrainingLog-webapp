@@ -1019,52 +1019,45 @@ function removeMacroMeal(index) {
 }
 
 function calculateMacroTargets() {
-  const weight = +document.getElementById("macroWeight").value;
-  const rawHeight = +document.getElementById("macroHeight").value;
-  const heightUnit = document.getElementById("heightUnit").value;
+  const w = +document.getElementById("macroWeight").value;
+  const hRaw = +document.getElementById("macroHeight").value;
+  if (!w || !hRaw) {
+    alert("Enter both weight and height.");
+    return;
+  }
+  const unit = document.getElementById("heightUnit").value;
+  const hInches = unit==="cm" ? hRaw/2.54 : hRaw;
   const activity = +document.getElementById("macroActivity").value;
+  const age = 25; // or prompt separately
+  const tdee = Math.round((10*(w*0.453592) + 6.25*(hInches*2.54) - 5*age + 5)*activity);
 
- if (!customCalories && (!weight || !height)) {
-  alert("Please enter your weight and height, or enter a custom calorie intake.");
-  return;
-}
+  const pMin = Math.round(0.78*w), pMax = Math.round(2.0*w);
+  const fMin = Math.round(0.3*w),  fMax = Math.round(0.6*w);
+  const cMin = Math.round(1.5*w),  cMax = Math.round(3.0*w);
 
+  macroRanges = {
+    protein: { min:pMin, max:pMax },
+    fat:     { min:fMin, max:fMax },
+    carbs:   { min:cMin, max:cMax },
+    tdee
+  };
 
-  // Convert height to inches if entered in cm
-  const height = heightUnit === "cm" ? rawHeight / 2.54 : rawHeight;
+  document.getElementById("macroSliders").style.display = "block";
+  document.getElementById("proteinSlider").min = pMin;
+  document.getElementById("proteinSlider").max = pMax;
+  document.getElementById("proteinSlider").value = pMin;
 
-  const age = 25; // you can later add a real input
-  const tdee = Math.round((10 * weight * 0.4536 + 6.25 * height * 2.54 - 5 * age + 5) * activity);
+  document.getElementById("fatSlider").min = fMin;
+  document.getElementById("fatSlider").max = fMax;
+  document.getElementById("fatSlider").value = fMin;
+
+  document.getElementById("carbSlider").min = cMin;
+  document.getElementById("carbSlider").max = cMax;
+  document.getElementById("carbSlider").value = cMin;
 
   document.getElementById("calTarget").textContent = tdee;
-
-  // Protein range (0.78–2.0g/lb)
-  const proteinMin = Math.round(0.78 * weight);
-  const proteinMax = Math.round(2.0 * weight);
-
-  // Fat range (0.3–0.6g/lb)
-  const fatMin = Math.round(0.3 * weight);
-  const fatMax = Math.round(0.6 * weight);
-
-  // Carbs (based on what's left)
-  const carbMin = Math.round(1.5 * weight);
-  const carbMax = Math.round(3.0 * weight);
-
-  // Show sliders
-  document.getElementById("macroSliders").style.display = 'block';
-
-  document.getElementById("proteinSlider").min = proteinMin;
-  document.getElementById("proteinSlider").max = proteinMax;
-  document.getElementById("proteinSlider").value = proteinMin;
-
-  document.getElementById("fatSlider").min = fatMin;
-  document.getElementById("fatSlider").max = fatMax;
-  document.getElementById("fatSlider").value = fatMin;
-
-  document.getElementById("carbSlider").min = carbMin;
-  document.getElementById("carbSlider").max = carbMax;
-  document.getElementById("carbSlider").value = carbMin;
-
+  document.getElementById("macroCalcForm").style.display = "none";
+  document.getElementById("toggleTargetFormBtn").textContent = "▶️ Set Your Targets";
   adjustMacros();
 }
 
@@ -1153,30 +1146,24 @@ function saveMacroTargets() {
 
 
 function adjustMacros() {
-  let protein = +document.getElementById("proteinSlider").value;
-  let fat = +document.getElementById("fatSlider").value;
-  let carbs = +document.getElementById("carbSlider").value;
+  let p = +document.getElementById("proteinSlider").value;
+  let f = +document.getElementById("fatSlider").value;
+  let c = +document.getElementById("carbSlider").value;
+  const tdee = macroRanges.tdee;
 
-  let totalCals = protein * 4 + fat * 9 + carbs * 4;
-
-  // 🔒 Block input if calories exceed
-  const maxCals = macroTargetCalories;
-  if (totalCals > maxCals) {
-    alert("Total calories exceed your set intake. Please reduce one of the macros.");
-    return;
+  let total = p*4 + f*9 + c*4;
+  if (total > tdee) {
+    // clamp carbs so we never exceed:
+    const leftover = tdee - (p*4 + f*9);
+    c = Math.max(0, Math.floor(leftover/4));
+    document.getElementById("carbSlider").value = c;
+    total = p*4 + f*9 + c*4;
   }
 
-  document.getElementById("proteinVal").textContent = protein;
-  document.getElementById("fatVal").textContent = fat;
-  document.getElementById("carbVal").textContent = carbs;
-
-  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${macroTargetCalories} kcal`;
-  document.getElementById("macroTotalCals").style.color = totalCals > maxCals ? "red" : "black";
-
-  // Update progress display targets (optional)
-  macroTargetProtein = protein;
-  macroTargetFat = fat;
-  macroTargetCarbs = carbs;
+  document.getElementById("proteinVal").textContent = p;
+  document.getElementById("fatVal").textContent     = f;
+  document.getElementById("carbVal").textContent    = c;
+  document.getElementById("macroTotalCals").textContent = total + " / " + tdee + " kcal";
 }
 
 
@@ -1212,20 +1199,16 @@ function renderMacroTargets() {
 
 
 function toggleTargetForm() {
-  const section = document.getElementById("macroTargetSection");
-  const btn = document.getElementById("toggleTargetFormBtn");
-
-  if (section.style.display === 'none') {
-    section.style.display = 'block';
-    btn.textContent = "🔽 Hide Target Calculator";
+  const form = document.getElementById("macroCalcForm");
+  const btn  = document.getElementById("toggleTargetFormBtn");
+  if (form.style.display === "none") {
+    form.style.display = "block";
+    btn.textContent = "🔽 Hide Targets Form";
   } else {
-    section.style.display = 'none';
+    form.style.display = "none";
     btn.textContent = "▶️ Set Your Targets";
   }
 }
-
-
-
 
 
 function enforceSliderCaps(changedId, p, f, c, maxCals) {
@@ -1249,18 +1232,15 @@ function enforceSliderCaps(changedId, p, f, c, maxCals) {
   
 function saveSliderMacros() {
   const protein = +document.getElementById("proteinSlider").value;
-  const fat = +document.getElementById("fatSlider").value;
-  const carbs = +document.getElementById("carbSlider").value;
-  const calories = protein * 4 + fat * 9 + carbs * 4;
+  const fat     = +document.getElementById("fatSlider").value;
+  const carbs   = +document.getElementById("carbSlider").value;
+  const calories = protein*4 + fat*9 + carbs*4;
+  const targetObj = { protein, fat, carbs, calories };
 
-  const target = { protein, fat, carbs, calories };
-
-  // Save locally
-  localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(target));
-
-  // OPTIONAL: save to Airtable
-  saveToAirtable(currentUser, target);
+  localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targetObj));
   alert("Macro targets saved!");
+  saveToAirtable(currentUser, targetObj);
+  saveMacroTargetsToTop(targetObj);
 }
 
 
@@ -1282,68 +1262,48 @@ function updateSliderMacros() {
 
 
 async function saveToAirtable(username, target) {
-  const airtableBaseId = 'appmjr4IgnEH72K1b'; // replace with your base ID
-  const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577'; // replace with your API token
-  const tableName = 'MacroTargets'; // this must match your actual Airtable table name
-
-  const url = `https://api.airtable.com/v0/${airtableBaseId}/${tableName}`;
-
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets`;
   try {
-    const response = await fetch(url, {
-      method: 'POST',
+    const r = await fetch(url, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${airtableToken}`,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         fields: {
           Username: username,
           Calories: target.calories,
-          Protein: target.protein,
-          Fat: target.fat,
-          Carbs: target.carbs
+          Protein:  target.protein,
+          Fat:      target.fat,
+          Carbs:    target.carbs
         }
       })
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Airtable save error:', data);
-      alert(`Failed to save to Airtable: ${data.error?.message || 'Unknown error'}`);
-    } else {
-      console.log('Saved to Airtable:', data);
+    const d = await r.json();
+    if (!r.ok) {
+      console.error("Airtable save error:", d);
+      alert(`Could not save macros: ${d.error?.message || "unknown"}`);
     }
-
   } catch (err) {
-    console.error('Fetch error:', err);
-    alert("Error saving to Airtable.");
+    console.error(err);
+    alert("Network error saving macros.");
   }
-
-  saveMacroTargetsToTop(target);
 }
-
 
   
 function saveMacroTargetsToTop(target) {
-  // Update global variables (if you're using any)
-  macroTargetCalories = target.calories;
-  macroTargetProtein = target.protein;
-  macroTargetFat = target.fat;
-  macroTargetCarbs = target.carbs;
-
-  // Update UI display labels
-  document.getElementById("macroCalsTarget").textContent = target.calories;
+  document.getElementById("macroCalsTarget").textContent    = target.calories;
   document.getElementById("macroProteinTarget").textContent = target.protein;
-  document.getElementById("macroFatTarget").textContent = target.fat;
-  document.getElementById("macroCarbsTarget").textContent = target.carbs;
+  document.getElementById("macroFatTarget").textContent     = target.fat;
+  document.getElementById("macroCarbsTarget").textContent   = target.carbs;
 
-  // Set max value of progress bars
-  document.getElementById("calsBar").max = target.calories;
-  document.getElementById("proteinBar").max = target.protein;
-  document.getElementById("fatBar").max = target.fat;
-  document.getElementById("carbBar").max = target.carbs;
+  document.getElementById("calsBar").max     = target.calories;
+  document.getElementById("proteinBar").max  = target.protein;
+  document.getElementById("fatBar").max      = target.fat;
+  document.getElementById("carbBar").max     = target.carbs;
 }
+
   
 function applyCustomCalories() {
   const input = document.getElementById("customCalories");
@@ -1747,7 +1707,20 @@ if (savedUser) {
   loadTemplateDropdown(); // ✅ Needed here too
 }
 
-    
+// Rehydrate any saved macro targets:
+  const savedUser = localStorage.getItem("fitnessAppUser");
+  if (!savedUser) return;
+
+  const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
+  if (savedTargets) {
+    saveMacroTargetsToTop(savedTargets);
+    macroRanges.tdee = savedTargets.calories;
+    document.getElementById("macroSliders").style.display = "block";
+    document.getElementById("proteinSlider").value = savedTargets.protein;
+    document.getElementById("fatSlider").value     = savedTargets.fat;
+    document.getElementById("carbSlider").value    = savedTargets.carbs;
+    adjustMacros();
+  }    
 const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
   if (saved) {
     document.getElementById("proteinSlider").value = saved.protein;
@@ -1757,13 +1730,6 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     document.getElementById("macroSliders").style.display = "block";
     adjustMacros();
   }
-
-const savedTargets = localStorage.getItem(`macroTargets_${currentUser}`);
-if (savedTargets) {
-  const targetObj = JSON.parse(savedTargets);
-  saveMacroTargetsToTop(targetObj); // update top UI bars
-  // do NOT call saveToAirtable again
-}
 
  const sliders = [
     { id: "proteinSlider", label: "proteinVal" },
