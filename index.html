@@ -1707,9 +1707,6 @@ if (savedUser) {
   loadTemplateDropdown(); // ✅ Needed here too
 }
 
-// Rehydrate any saved macro targets:
-  const savedUser = localStorage.getItem("fitnessAppUser");
-  if (!savedUser) return;
 
   const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
   if (savedTargets) {
