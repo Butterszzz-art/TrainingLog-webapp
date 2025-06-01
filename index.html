@@ -916,39 +916,43 @@ function getLastExerciseEntry(exerciseName) {
 
 
 function addMacroMeal() {
-  const index = macroMeals.length;
-  const container = document.getElementById("macroMealContainer");
-  const mealId = `meal${index}`;
-  const toggleId = `toggle${index}`;
-  const contentId = `mealContent${index}`;
-
-  const mealDiv = document.createElement("div");
-  mealDiv.id = mealId;
-
-  mealDiv.innerHTML = `
-    <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-      <button onclick="toggleMeal('${contentId}', this)" style="width: 100%; text-align: left; font-weight: bold;">
-        ➕ Meal ${index + 1}
-      </button>
-      <div id="${contentId}" style="display:block; margin-top: 10px;">
-        <label>Protein:</label>
-        <input type="number" id="protein${index}" placeholder="g" />
-        <label>Carbs:</label>
-        <input type="number" id="carbs${index}" placeholder="g" />
-        <label>Fats:</label>
-        <input type="number" id="fats${index}" placeholder="g" />
-        <br>
-        <button onclick="submitMeal(${index})" style="margin-top: 5px;">➕ Add to Tracker</button>
-        <button onclick="removeMacroMeal(${index})" class="remove-btn">❌ Remove</button>
+    const idx = macroMeals.length;
+    const container = document.getElementById("macroMealContainer");
+    container.insertAdjacentHTML("beforeend", `
+      <div id="meal${idx}" style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+        <button data-idx="${idx}" class="toggle-meal">➕ Meal ${idx+1}</button>
+        <div id="mealContent${idx}" style="display:block; margin-top:10px;">
+          <label>Protein:</label>
+          <input type="number" id="protein${idx}" placeholder="g">
+          <label>Carbs:</label>
+          <input type="number" id="carbs${idx}" placeholder="g">
+          <label>Fats:</label>
+          <input type="number" id="fats${idx}" placeholder="g">
+          <br>
+          <button data-idx="${idx}" class="meal-submit">➕ Add to Tracker</button>
+          <button data-idx="${idx}" class="remove-meal">❌ Remove</button>
+        </div>
       </div>
-    </div>
-  `;
+    `);
+    macroMeals.push({ protein:0, carbs:0, fats:0 });
 
-  container.appendChild(mealDiv);
-
-  // add placeholder to macroMeals array
-  macroMeals.push({ protein: 0, carbs: 0, fats: 0 });
-}
+    // Wire up this meal’s toggle, submit, and remove
+    const toggleBtn = document.querySelector(`#meal${idx} .toggle-meal`);
+    const content  = document.getElementById(`mealContent${idx}`);
+    toggleBtn.addEventListener("click", () => {
+      if (content.style.display === "none") {
+        content.style.display = "block";
+        toggleBtn.textContent = toggleBtn.textContent.replace("➕","🔽");
+      } else {
+        content.style.display = "none";
+        toggleBtn.textContent = toggleBtn.textContent.replace("🔽","➕");
+      }
+    });
+    document.querySelector(`#meal${idx} .meal-submit`)
+            .addEventListener("click", () => submitMeal(idx));
+    document.querySelector(`#meal${idx} .remove-meal`)
+            .addEventListener("click", () => removeMacroMeal(idx));
+  }
 
 function toggleMeal(contentId, btn) {
   const div = document.getElementById(contentId);
@@ -961,20 +965,21 @@ function toggleMeal(contentId, btn) {
   }
 }
 
-function submitMeal(index) {
-  const protein = +document.getElementById(`protein${index}`).value || 0;
-  const carbs = +document.getElementById(`carbs${index}`).value || 0;
-  const fats = +document.getElementById(`fats${index}`).value || 0;
-
-  macroMeals[index] = { protein, carbs, fats };
-  updateMacroUI();
-
-  // Collapse the form
-  document.getElementById(`mealContent${index}`).style.display = "none";
-
-  const toggleButton = document.querySelector(`#meal${index} button`);
-  if (toggleButton) toggleButton.innerText = toggleButton.innerText.replace("🔽", "➕");
-}
+function submitMeal(idx) {
+    const p = Number(document.getElementById(`protein${idx}`).value) || 0;
+    const c = Number(document.getElementById(`carbs${idx}`).value ) || 0;
+    const f = Number(document.getElementById(`fats${idx}`).value ) || 0;
+    macroMeals[idx] = { protein: p, carbs: c, fats: f };
+    updateMacroUI();
+    // collapse form
+    const content = document.getElementById(`mealContent${idx}`);
+    if (content) {
+      content.style.display = "none";
+      document.querySelector(`#meal${idx} .toggle-meal`).textContent =
+        document.querySelector(`#meal${idx} .toggle-meal`).textContent.replace("🔽","➕");
+    }
+    showToast("Meal added!");
+  }
   
   
 function resetMeal(index) {
@@ -1009,14 +1014,17 @@ function updateMacroTotals() {
 }
   
 
-function removeMacroMeal(index) {
-  macroMeals[index] = { protein: 0, carbs: 0, fats: 0 };
-
-  const div = document.getElementById(`meal${index}`);
-  if (div) div.remove();
-
-  updateMacroUI();
-}
+function removeMacroMeal(idx) {
+    macroMeals.splice(idx, 1);
+    const node = document.getElementById(`meal${idx}`);
+    if (node) node.remove();
+    // Rebuild the entire container so IDs line up again
+    const oldMeals = macroMeals.slice();
+    macroMeals = [];
+    document.getElementById("macroMealContainer").innerHTML = "";
+    oldMeals.forEach((_, i) => addMacroMeal());
+    updateMacroUI();
+  }
 
 function calculateMacroTargets() {
   const w = +document.getElementById("macroWeight").value;
@@ -1145,26 +1153,30 @@ function saveMacroTargets() {
 
 
 
-function adjustMacros() {
-  let p = +document.getElementById("proteinSlider").value;
-  let f = +document.getElementById("fatSlider").value;
-  let c = +document.getElementById("carbSlider").value;
-  const tdee = macroRanges.tdee;
+function adjustMacros(changedId) {
+    const p = Number(document.getElementById("proteinSlider").value);
+    const f = Number(document.getElementById("fatSlider").value);
+    const c = Number(document.getElementById("carbSlider").value);
+    const total = p*4 + f*9 + c*4;
+    const limit = macroRanges.tdee || 0;
 
-  let total = p*4 + f*9 + c*4;
-  if (total > tdee) {
-    // clamp carbs so we never exceed:
-    const leftover = tdee - (p*4 + f*9);
-    c = Math.max(0, Math.floor(leftover/4));
-    document.getElementById("carbSlider").value = c;
-    total = p*4 + f*9 + c*4;
+    if (total > limit) {
+      // automatically clamp carbs (simple approach)
+      const newC = Math.floor((limit - (p*4 + f*9)) / 4);
+      document.getElementById("carbSlider").value = Math.max(newC, 0);
+      return adjustMacros("carbSlider");
+    }
+
+    document.getElementById("proteinVal").textContent = p;
+    document.getElementById("fatVal").textContent = f;
+    document.getElementById("carbVal").textContent = c;
+    document.getElementById("macroTotalCals").textContent = `${total} / ${limit} kcal`;
+
+    // Optionally enforce max on non-changed sliders:
+    if (changedId) {
+      enforceSliderCaps(changedId, p, f, c, limit);
+    }
   }
-
-  document.getElementById("proteinVal").textContent = p;
-  document.getElementById("fatVal").textContent     = f;
-  document.getElementById("carbVal").textContent    = c;
-  document.getElementById("macroTotalCals").textContent = total + " / " + tdee + " kcal";
-}
 
 
 
@@ -1211,37 +1223,41 @@ function toggleTargetForm() {
 }
 
 
-function enforceSliderCaps(changedId, p, f, c, maxCals) {
-  const currentCals = p * 4 + f * 9 + c * 4;
-  const remainingCals = maxCals - currentCals;
-
-  const sliders = [
-    { id: 'proteinSlider', value: p, kcal: 4 },
-    { id: 'fatSlider', value: f, kcal: 9 },
-    { id: 'carbSlider', value: c, kcal: 4 }
-  ];
-
-  sliders.forEach(s => {
-    if (s.id === changedId) return;
-
-    const maxThis = Math.floor((remainingCals + (s.value * s.kcal)) / s.kcal);
-    document.getElementById(s.id).max = maxThis;
-  });
-}
-
+function enforceSliderCaps(changedId, p, f, c, limit) {
+    const sliders = [
+      { id: "proteinSlider", val: p, kc: 4 },
+      { id: "fatSlider",     val: f, kc: 9 },
+      { id: "carbSlider",    val: c, kc: 4 }
+    ];
+    sliders.forEach(s => {
+      if (s.id === changedId) return;
+      const remaining = limit - (p*4 + f*9 + c*4) + s.val * s.kc;
+      const maxAllowed = Math.floor(remaining / s.kc);
+      const range = macroRanges[s.id.replace("Slider","")];
+      document.getElementById(s.id).max = Math.min(range.max, maxAllowed);
+    });
+  }
   
 function saveSliderMacros() {
-  const protein = +document.getElementById("proteinSlider").value;
-  const fat     = +document.getElementById("fatSlider").value;
-  const carbs   = +document.getElementById("carbSlider").value;
-  const calories = protein*4 + fat*9 + carbs*4;
-  const targetObj = { protein, fat, carbs, calories };
-
-  localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(targetObj));
-  alert("Macro targets saved!");
-  saveToAirtable(currentUser, targetObj);
-  saveMacroTargetsToTop(targetObj);
-}
+    const p = Number(document.getElementById("proteinSlider").value);
+    const f = Number(document.getElementById("fatSlider").value);
+    const c = Number(document.getElementById("carbSlider").value);
+    const calTotal = p*4 + f*9 + c*4;
+    const fields = {
+      Username: currentUser,
+      Calories: calTotal,
+      Protein:  p,
+      Fat:      f,
+      Carbs:    c
+    };
+    airtableSave(macroTargetsTableName, fields)
+      .then(id => {
+        if (id) {
+          showToast("Macro targets saved!");
+          saveMacroTargetsToTop({ calories: calTotal, protein: p, fat: f, carbs: c });
+        }
+      });
+  }
 
 
 function updateSliderMacros() {
@@ -1292,17 +1308,26 @@ async function saveToAirtable(username, target) {
 }
 
   
-function saveMacroTargetsToTop(target) {
-  document.getElementById("macroCalsTarget").textContent    = target.calories;
-  document.getElementById("macroProteinTarget").textContent = target.protein;
-  document.getElementById("macroFatTarget").textContent     = target.fat;
-  document.getElementById("macroCarbsTarget").textContent   = target.carbs;
+ function saveMacroTargetsToTop(target) {
+    localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(target));
+    document.getElementById("macroCalsTarget").textContent    = target.calories;
+    document.getElementById("macroProteinTarget").textContent = target.protein;
+    document.getElementById("macroFatTarget").textContent     = target.fat;
+    document.getElementById("macroCarbsTarget").textContent   = target.carbs;
+  }
 
-  document.getElementById("calsBar").max     = target.calories;
-  document.getElementById("proteinBar").max  = target.protein;
-  document.getElementById("fatBar").max      = target.fat;
-  document.getElementById("carbBar").max     = target.carbs;
-}
+function renderMacroSlots() {
+    const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
+    if (!saved) return;
+    document.getElementById("macroCalsTarget").textContent    = saved.calories;
+    document.getElementById("macroProteinTarget").textContent = saved.protein;
+    document.getElementById("macroFatTarget").textContent     = saved.fat;
+    document.getElementById("macroCarbsTarget").textContent   = saved.carbs;
+    document.getElementById("calsBar").max   = saved.calories;
+    document.getElementById("proteinBar").max= saved.protein;
+    document.getElementById("fatBar").max    = saved.fat;
+    document.getElementById("carbBar").max   = saved.carbs;
+  }
 
   
 function applyCustomCalories() {
