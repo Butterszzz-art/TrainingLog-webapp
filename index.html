@@ -327,12 +327,20 @@ const usersTableName = 'Users';
 const templatesTableName = 'Templates';
 const MacroTargetsTableName = 'MacroTargets';  
 
+let macroMeals = [];
+
+let macroTargetCalories = 0;
+let macroTargetProtein = 0;
+let macroTargetFat = 0;
+let macroTargetCarbs = 0;
+
 let macroRanges = {
   protein: { min: 0, max: 0 },
-  fat: { min: 0, max: 0 },
-  carbs: { min: 0, max: 0 },
-  tdee: 0
+  fat:     { min: 0, max: 0 },
+  carbs:   { min: 0, max: 0 },
+  tdee:    0
 };
+
 
   
 // LOGIN
@@ -1348,9 +1356,10 @@ function applyCustomCalories() {
   macroTargetCarbs = carbs;
 
   // 3. Set slider values
-  document.getElementById("proteinSlider").value = protein;
-  document.getElementById("fatSlider").value = fat;
-  document.getElementById("carbSlider").value = carbs;
+ document.getElementById("proteinVal").textContent = protein;
+document.getElementById("fatVal").textContent = fat;
+document.getElementById("carbVal").textContent = carbs;
+
 
   // 4. Set slider bounds so they can’t exceed
   document.getElementById("proteinSlider").max = protein * 1.2;
