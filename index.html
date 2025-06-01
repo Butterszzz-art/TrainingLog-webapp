@@ -252,81 +252,67 @@ select {
   </div>
 
   <div id="macroTab" class="tab-content">
-  
-    
-<!-- Progress Bars -->
-<div>
-  <h3>Targets</h3>
-  <p>Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
-  <progress id="calsBar" value="0" max="100"></progress>
+  <!-- (1) Top: Progress Bars -->
+  <div>
+    <h3>Targets</h3>
+    <p>Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
+    <progress id="calsBar" value="0" max="100"></progress>
+    <p>Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
+    <progress id="proteinBar" value="0" max="100"></progress>
+    <p>Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
+    <progress id="carbBar" value="0" max="100"></progress>
+    <p>Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
+    <progress id="fatBar" value="0" max="100"></progress>
+  </div>
 
-  <p>Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
-  <progress id="proteinBar" value="0" max="100"></progress>
-
-  <p>Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
-  <progress id="carbBar" value="0" max="100"></progress>
-
-  <p>Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
-  <progress id="fatBar" value="0" max="100"></progress>
-</div>
-    
-    
- <div id="macroMealContainer"></div>
-<button onclick="addMacroMeal()">➕ Add Meal</button>
+  <!-- (2) Meal Tracker -->
+  <div id="macroMealContainer"></div>
+  <button onclick="addMacroMeal()">➕ Add Meal</button>
 
 
     
-<!-- Target Calculator -->
-<div style="margin-top:20px;" id="macroTargetSection">
-  <h3>Set Your Macro Targets</h3>
-  <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)">
-  
-  <!-- Height input with unit toggle -->
-  <div style="margin-top: 10px;">
-    <input type="number" id="macroHeight" placeholder="Height" />
+<!-- (3) Macro Target Calculator -->
+  <div id="macroCalcForm" style="margin-top:20px;">
+    <h3>Set Your Macro Targets</h3>
+    <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)"><br>
+    <input type="number" id="macroHeight" placeholder="Height">
     <select id="heightUnit">
       <option value="in">in</option>
       <option value="cm">cm</option>
-    </select>
+    </select><br>
+    <select id="macroActivity">
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly Active</option>
+      <option value="1.55">Moderately Active</option>
+      <option value="1.725">Very Active</option>
+      <option value="1.9">Extremely Active</option>
+    </select><br>
+    <button onclick="calculateMacroTargets()">Calculate Targets</button>
   </div>
-
-  <select id="macroActivity">
-    <option value="1.2">Sedentary</option>
-    <option value="1.375">Lightly Active</option>
-    <option value="1.55">Moderately Active</option>
-    <option value="1.725">Very Active</option>
-    <option value="1.9">Extremely Active</option>
-  </select>
 
   <label>Custom Calorie Intake (optional):</label>
 <input type="number" id="customCalories" placeholder="Enter custom calorie target" />
 <!-- New Button -->
 <button onclick="applyCustomCalories()" class="primary-btn">Insert Calories</button>
 
-  <button onclick="calculateMacroTargets()">Calculate Targets</button>
-</div>
-
-<button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
 
 
 <button onclick="toggleMacroAdjust()" id="adjustToggleBtn">▶ Adjust Macros</button>
 
-<div id="adjustMacroSection" style="display: none; margin-top: 15px;">
-  <h3>Adjust Macros</h3>
-
-  <label>Protein: <span id="proteinVal">0</span>g</label>
-  <input type="range" id="proteinSlider" min="0" value="0" step="1" oninput="adjustMacros()">
-
-  <label>Fat: <span id="fatVal">0</span>g</label>
-  <input type="range" id="fatSlider" min="0" value="0" step="1" oninput="adjustMacros()">
-
-  <label>Carbs: <span id="carbVal">0</span>g</label>
-  <input type="range" id="carbSlider" min="0" value="0" step="1" oninput="adjustMacros()">
-
-  <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="macroTargetCalories">0</span> kcal</p>
-  <button onclick="saveSliderMacros()">Save Macros</button>
-</div>
-
+<!-- (4) Macro Sliders (hidden initially) -->
+  <div id="macroSliders" style="display:none; margin-top:20px;">
+    <h3>Adjust Macros</h3>
+    <label>Protein: <span id="proteinVal">0</span> g</label>
+    <input type="range" id="proteinSlider" min="0" max="0" oninput="adjustMacros()"><br>
+    <label>Fat: <span id="fatVal">0</span> g</label>
+    <input type="range" id="fatSlider" min="0" max="0" oninput="adjustMacros()"><br>
+    <label>Carbs: <span id="carbVal">0</span> g</label>
+    <input type="range" id="carbSlider" min="0" max="0" oninput="adjustMacros()"><br>
+    <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
+    <button onclick="saveSliderMacros()">Save Macros</button>
+  </div>
+    
+<button id="toggleTargetFormBtn" onclick="toggleTargetForm()">▶️ Set Your Targets</button>
 
     
  </div>
