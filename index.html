@@ -1751,7 +1751,22 @@ document.getElementById("proteinSlider").value = 0;
   document.getElementById("carbVal").textContent = "0";
   document.getElementById("macroTotalCals").textContent = "0";
     
-
+document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
+    document.getElementById("sets").addEventListener("input", e => generateSetInputs(Number(e.target.value)));
+    document.getElementById("btnStartNewWorkout").addEventListener("click", completeWorkout);
+    document.getElementById("btnSaveAsTemplate").addEventListener("click", saveWorkoutAsTemplate);
+    document.getElementById("templateSelect").addEventListener("change", loadSelectedTemplate);
+    document.getElementById("btnAddWeight").addEventListener("click", addWeightEntry);
+    document.getElementById("btnAddCardio").addEventListener("click", addCardioEntry);
+    document.getElementById("macroMeal").addEventListener("click", addmacroMeal);
+    document.getElementById("toggleTargetFormBtn").addEventListener("click", toggleTargetForm);
+    document.getElementById("btnCalcMacroTargets").addEventListener("click", calculateMacroTargets);
+    document.getElementById("proteinSlider").addEventListener("input", () => adjustMacros("proteinSlider"));
+    document.getElementById("fatSlider").addEventListener("input", () => adjustMacros("fatSlider"));
+    document.getElementById("carbSlider").addEventListener("input", () => adjustMacros("carbSlider"));
+    document.getElementById("btnSaveSliderMacros").addEventListener("click", saveSliderMacros);
+    document.getElementById("btnAddCFExercise").addEventListener("click", addCrossfitExercise);
+    document.getElementById("btnSaveCFWorkout").addEventListener("click", saveCrossfitWorkout);
 
     
 }); // closing DOMContentLoaded
