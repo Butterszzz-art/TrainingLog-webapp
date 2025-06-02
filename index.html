@@ -132,16 +132,6 @@ select {
   max-width: 400px;
 }  
 
-.menu-toggle {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  font-size: 28px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-}
 
 .side-menu {
   position: fixed;
@@ -181,6 +171,23 @@ select {
   color: #007bff;
 }
 
+.menu-toggle {
+  position: fixed;
+  top: 20px;       /* space from top */
+  left: 10px;      /* space from left edge */
+  font-size: 24px; /* smaller size */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;   /* above everything */
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
     
   </style>
 </head>
