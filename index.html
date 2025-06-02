@@ -994,24 +994,20 @@ function submitMeal(idx) {
 
   macroMeals[idx] = { protein: p, carbs: c, fats: f };
 
-  // Calculate totals from all meals including this one
-  let totalProtein = 0, totalCarbs = 0, totalFats = 0;
-  macroMeals.forEach(meal => {
-    totalProtein += meal.protein || 0;
-    totalCarbs += meal.carbs || 0;
-    totalFats += meal.fats || 0;
-  });
+  // Save meals to dailyMacroMeals array in localStorage
+  const currentMeals = JSON.parse(localStorage.getItem("dailyMacroMeals")) || [];
+  currentMeals[idx] = { protein: p, carbs: c, fats: f };
+  localStorage.setItem("dailyMacroMeals", JSON.stringify(currentMeals));
 
-  const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
+  // Update totals and save
+  const newTotals = currentMeals.reduce((totals, meal) => {
+    totals.protein += meal.protein || 0;
+    totals.carbs += meal.carbs || 0;
+    totals.fats += meal.fats || 0;
+    return totals;
+  }, { protein:0, carbs:0, fats:0 });
 
-  // Update the daily progress in localStorage by adding this meal macros
-  const currentProgress = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein: 0, carbs: 0, fats: 0 };
-  const newProgress = {
-    protein: currentProgress.protein + p,
-    carbs: currentProgress.carbs + c,
-    fats: currentProgress.fats + f
-  };
-  localStorage.setItem("dailyMacroProgress", JSON.stringify(newProgress));
+  updateDailyMacroProgress(newTotals.protein, newTotals.carbs, newTotals.fats);
 
   // Now update the UI with the updated macro meals and new daily progress
   updateMacroUI();
@@ -1581,6 +1577,30 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   }
 }
   
+function checkNewDayAndSave() {
+  const lastDate = localStorage.getItem("dailyMacroDate");
+  const today = new Date().toISOString().split('T')[0];
+
+  if (lastDate && lastDate !== today) {
+    // It's a new day, so save previous day's totals before resetting
+
+    const previousTotals = JSON.parse(localStorage.getItem("dailyMacroProgress")) || {};
+    const previousMeals = JSON.parse(localStorage.getItem("dailyMacroMeals")) || [];
+
+    // Save previous day log to Airtable
+    saveDailyMacroLog(currentUser, lastDate, previousMeals, previousTotals);
+
+    // Reset localStorage for new day
+    localStorage.setItem("dailyMacroDate", today);
+    localStorage.setItem("dailyMacroProgress", JSON.stringify({ protein:0, carbs:0, fats:0 }));
+    localStorage.setItem("dailyMacroMeals", JSON.stringify([]));
+  } else if (!lastDate) {
+    // First time user or no date stored
+    localStorage.setItem("dailyMacroDate", today);
+  }
+}
+
+
   
 // LOGOUT
 function logout() {
