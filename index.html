@@ -390,6 +390,7 @@ async function startLogin() {
       renderCardio();
       renderCrossfitWorkouts();
       loadTemplateDropdown(); // ✅ Load saved templates
+      renderDailyMacroLog(); // <-- ADD HERE to show daily macros immediately
     } else {
       alert(result.message || "Login failed.");
     }
@@ -993,6 +994,7 @@ function submitMeal(idx) {
     const f = Number(document.getElementById(`fats${idx}`).value ) || 0;
     macroMeals[idx] = { protein: p, carbs: c, fats: f };
     updateMacroUI();
+  addMealToDailyLog(protein, carbs, fats);
     // collapse form
     const content = document.getElementById(`mealContent${idx}`);
     if (content) {
