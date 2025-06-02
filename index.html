@@ -981,21 +981,34 @@ function toggleMeal(contentId, btn) {
 }
 
 function submitMeal(idx) {
-    const p = Number(document.getElementById(`protein${idx}`).value) || 0;
-    const c = Number(document.getElementById(`carbs${idx}`).value ) || 0;
-    const f = Number(document.getElementById(`fats${idx}`).value ) || 0;
-    macroMeals[idx] = { protein: p, carbs: c, fats: f };
-    updateMacroUI();
-  updateDailyMacroProgress(protein, carbs, fats);
-    // collapse form
-    const content = document.getElementById(`mealContent${idx}`);
-    if (content) {
-      content.style.display = "none";
-      document.querySelector(`#meal${idx} .toggle-meal`).textContent =
-        document.querySelector(`#meal${idx} .toggle-meal`).textContent.replace("🔽","➕");
-    }
-    showToast("Meal added!");
+  const p = Number(document.getElementById(`protein${idx}`).value) || 0;
+  const c = Number(document.getElementById(`carbs${idx}`).value) || 0;
+  const f = Number(document.getElementById(`fats${idx}`).value) || 0;
+
+  macroMeals[idx] = { protein: p, carbs: c, fats: f };
+
+  // Update the daily progress in localStorage by adding this meal macros
+  const currentProgress = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein: 0, carbs: 0, fats: 0 };
+  const newProgress = {
+    protein: currentProgress.protein + p,
+    carbs: currentProgress.carbs + c,
+    fats: currentProgress.fats + f
+  };
+  localStorage.setItem("dailyMacroProgress", JSON.stringify(newProgress));
+
+  // Now update the UI with the updated macro meals and new daily progress
+  updateMacroUI();
+
+  // collapse form
+  const content = document.getElementById(`mealContent${idx}`);
+  if (content) {
+    content.style.display = "none";
+    document.querySelector(`#meal${idx} .toggle-meal`).textContent =
+      document.querySelector(`#meal${idx} .toggle-meal`).textContent.replace("🔽", "➕");
   }
+  showToast("Meal added!");
+}
+
   
   
 function resetMeal(index) {
@@ -1435,6 +1448,17 @@ function updateDailyMacroProgress(protein, carbs, fats) {
   renderDailyMacroProgress();
 }
 
+function loadAndRenderDailyProgress() {
+  const progress = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein: 0, carbs: 0, fats: 0 };
+  // Update macroMeals to match progress so your app state is consistent
+  macroMeals = [{ protein: progress.protein, carbs: progress.carbs, fats: progress.fats }];
+
+  // Update UI accordingly
+  updateMacroUI();
+}
+
+// Call on page/app start
+loadAndRenderDailyProgress();
   
   
 // LOGOUT
