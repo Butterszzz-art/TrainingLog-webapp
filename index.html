@@ -1013,7 +1013,13 @@ function submitMeal(idx) {
     document.querySelector(`#meal${idx} .toggle-meal`).textContent =
       document.querySelector(`#meal${idx} .toggle-meal`).textContent.replace("🔽", "➕");
   }
-  showToast("Meal added!");
+
+  const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+const meals = macroMeals; // or whatever holds your meals data
+const totals = { calories: totalCals, protein: totalProtein, carbs: totalCarbs, fat: totalFats };
+
+saveDailyMacroLog(currentUser, today, meals, totals);
+
 }
 
   
@@ -1504,63 +1510,54 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   }
 }
 
-async function fetchDailyLogs(username) {
-  const url = `https://api.airtable.com/v0/${airtableBaseId}/DailyLogs?filterByFormula=Username='${username}'&sort[0][field]=Date&sort[0][direction]=desc`;
+
+
+async function showTab(tabName) {
+  // Hide all tabs, then show the chosen one
+  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+  document.getElementById(tabName).style.display = 'block';
+
+  if (tabName === 'logHistoryTab') {
+    const logs = await fetchDailyLogs(currentUser);
+    renderLogHistory(logs);
+  }
+}
+  
+async function saveDailyMacroLog(username, date, meals, totals) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/DailyLogs`;
+  const body = {
+    fields: {
+      Username: username,
+      Date: date,
+      Type: "Macros",
+      LogData: JSON.stringify(meals),
+      CaloriesTotal: totals.calories,
+      ProteinTotal: totals.protein,
+      CarbsTotal: totals.carbs,
+      FatTotal: totals.fat
+    }
+  };
 
   try {
     const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${airtableToken}` }
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${airtableToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
     });
     const data = await response.json();
     if (!response.ok) {
-      console.error("Failed to fetch daily logs:", data);
-      return [];
+      console.error("Failed to save daily log:", data);
+      alert("Failed to save daily log");
     }
-    return data.records;
+    return data;
   } catch (error) {
-    console.error("Network error fetching daily logs:", error);
-    return [];
+    console.error("Network error saving daily log:", error);
+    alert("Network error saving daily log");
   }
 }
-
-function renderLogHistory(logs) {
-  const container = document.getElementById("logHistoryContainer");
-  container.innerHTML = "";
-
-  // Group by date then by type
-  const grouped = logs.reduce((acc, log) => {
-    const date = log.fields.Date;
-    if (!acc[date]) acc[date] = {};
-    const type = log.fields.Type;
-    if (!acc[date][type]) acc[date][type] = [];
-    acc[date][type].push(log);
-    return acc;
-  }, {});
-
-  for (const [date, types] of Object.entries(grouped)) {
-    const dateSection = document.createElement("div");
-    dateSection.innerHTML = `<h3>${date}</h3>`;
-
-    for (const [type, entries] of Object.entries(types)) {
-      const typeSection = document.createElement("div");
-      typeSection.innerHTML = `<h4>${type}</h4>`;
-      
-      entries.forEach(entry => {
-        const log = JSON.parse(entry.fields.LogData);
-        const logHtml = JSON.stringify(log, null, 2).replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
-        const entryDiv = document.createElement("pre");
-        entryDiv.innerHTML = logHtml;
-        typeSection.appendChild(entryDiv);
-      });
-
-      dateSection.appendChild(typeSection);
-    }
-
-    container.appendChild(dateSection);
-  }
-}
-
-  
   
   
 // LOGOUT
@@ -1746,6 +1743,63 @@ async function createUser(username, password) {
   });
 }
 
+async function fetchDailyLogs(username) {
+  const url = `https://api.airtable.com/v0/${airtableBaseId}/DailyLogs?filterByFormula=Username='${username}'&sort[0][field]=Date&sort[0][direction]=desc`;
+
+  try {
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${airtableToken}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Failed to fetch daily logs:", data);
+      return [];
+    }
+    return data.records;
+  } catch (error) {
+    console.error("Network error fetching daily logs:", error);
+    return [];
+  }
+}
+
+function renderLogHistory(logs) {
+  const container = document.getElementById("logHistoryContainer");
+  container.innerHTML = "";
+
+  // Group by date then by type
+  const grouped = logs.reduce((acc, log) => {
+    const date = log.fields.Date;
+    if (!acc[date]) acc[date] = {};
+    const type = log.fields.Type;
+    if (!acc[date][type]) acc[date][type] = [];
+    acc[date][type].push(log);
+    return acc;
+  }, {});
+
+  for (const [date, types] of Object.entries(grouped)) {
+    const dateSection = document.createElement("div");
+    dateSection.innerHTML = `<h3>${date}</h3>`;
+
+    for (const [type, entries] of Object.entries(types)) {
+      const typeSection = document.createElement("div");
+      typeSection.innerHTML = `<h4>${type}</h4>`;
+      
+      entries.forEach(entry => {
+        const log = JSON.parse(entry.fields.LogData);
+        const logHtml = JSON.stringify(log, null, 2).replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
+        const entryDiv = document.createElement("pre");
+        entryDiv.innerHTML = logHtml;
+        typeSection.appendChild(entryDiv);
+      });
+
+      dateSection.appendChild(typeSection);
+    }
+
+    container.appendChild(dateSection);
+  }
+}
+
+    
 
 // ===== BODYWEIGHT TRACKER =====
 
