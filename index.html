@@ -131,6 +131,57 @@ select {
   width: 90%;
   max-width: 400px;
 }  
+
+.menu-toggle {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px; /* hidden by default */
+  width: 250px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+}
+
+.side-menu ul li {
+  margin-bottom: 15px;
+}
+
+.side-menu ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.side-menu ul li a:hover {
+  color: #007bff;
+}
+
+    
   </style>
 </head>
 <body>
@@ -151,15 +202,29 @@ select {
   
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
 
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('logTab')">Training Log</div>
-    <div class="tab" onclick="showTab('weightTab')">Bodyweight</div>
-    <div class="tab" onclick="showTab('cardioTab')">Cardio</div>
-    <div class="tab" onclick="showTab('macroTab')">Macros</div>
-    <div class="tab" onclick="showTab('crossfitTab')">CrossFit</div>
-    <div class="tab" onclick="showTab('logHistoryTab')">Log History</div>
+ <!-- Hamburger button -->
+<button id="menuToggle" class="menu-toggle">☰</button>
 
-  </div>
+<!-- Side menu -->
+<nav id="sideMenu" class="side-menu">
+  <ul>
+    <li><a href="#" data-tab="trainingLogTab">Training Log</a></li>
+    <li><a href="#" data-tab="bodyweightTab">Bodyweight</a></li>
+    <li><a href="#" data-tab="cardioTab">Cardio</a></li>
+    <li><a href="#" data-tab="macrosTab">Macros</a></li>
+    <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
+    <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
+  </ul>
+</nav>
+
+<!-- Your tab content sections -->
+<div id="trainingLogTab" class="tab-content">...</div>
+<div id="bodyweightTab" class="tab-content" style="display:none;">...</div>
+<div id="cardioTab" class="tab-content" style="display:none;">...</div>
+<div id="macrosTab" class="tab-content" style="display:none;">...</div>
+<div id="crossfitTab" class="tab-content" style="display:none;">...</div>
+<div id="logHistoryTab" class="tab-content" style="display:none;">...</div>
+
   
 <div id="progressReminder"></div>
 
@@ -332,6 +397,27 @@ select {
 </div>
   
 <script>
+const menuToggle = document.getElementById('menuToggle');
+const sideMenu = document.getElementById('sideMenu');
+const tabContents = document.querySelectorAll('.tab-content');
+
+menuToggle.addEventListener('click', () => {
+  sideMenu.classList.toggle('open');
+});
+
+sideMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const tabToShow = e.target.getAttribute('data-tab');
+
+    tabContents.forEach(tab => {
+      tab.style.display = (tab.id === tabToShow) ? 'block' : 'none';
+    });
+
+    // Close the menu
+    sideMenu.classList.remove('open');
+  });
+});
   
 const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
 const airtableBaseId = 'appmjr4IgnEH72K1b';
