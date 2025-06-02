@@ -1122,29 +1122,41 @@ function calculateMacroTargets() {
 }
 
 function updateMacroUI() {
-  // Update Top Bar
-  document.getElementById("macroCalsTarget").textContent    = macroTargetCalories;
+  // Calculate totals from macroMeals array
+  let totalProtein = 0, totalCarbs = 0, totalFats = 0;
+  macroMeals.forEach(meal => {
+    totalProtein += meal.protein || 0;
+    totalCarbs += meal.carbs || 0;
+    totalFats += meal.fats || 0;
+  });
+
+  const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
+
+  // Update Top Bar Targets and progress
+  document.getElementById("macroCalsTarget").textContent = macroTargetCalories;
   document.getElementById("macroProteinTarget").textContent = macroTargetProtein;
-  document.getElementById("macroFatTarget").textContent     = macroTargetFat;
-  document.getElementById("macroCarbsTarget").textContent   = macroTargetCarbs;
+  document.getElementById("macroFatTarget").textContent = macroTargetFat;
+  document.getElementById("macroCarbsTarget").textContent = macroTargetCarbs;
 
-  document.getElementById("calsBar").max       = macroTargetCalories;
-  document.getElementById("proteinBar").max    = macroTargetProtein;
-  document.getElementById("fatBar").max        = macroTargetFat;
-  document.getElementById("carbBar").max       = macroTargetCarbs;
+  document.getElementById("calsBar").max = macroTargetCalories;
+  document.getElementById("proteinBar").max = macroTargetProtein;
+  document.getElementById("fatBar").max = macroTargetFat;
+  document.getElementById("carbBar").max = macroTargetCarbs;
 
-  document.getElementById("macroCalsProgress").textContent = 0;
-  document.getElementById("macroProteinProgress").textContent = 0;
-  document.getElementById("macroFatProgress").textContent = 0;
-  document.getElementById("macroCarbsProgress").textContent = 0;
+  document.getElementById("calsBar").value = totalCals;
+  document.getElementById("proteinBar").value = totalProtein;
+  document.getElementById("fatBar").value = totalFats;
+  document.getElementById("carbBar").value = totalCarbs;
 
-  document.getElementById("calsBar").value    = 0;
-  document.getElementById("proteinBar").value = 0;
-  document.getElementById("fatBar").value     = 0;
-  document.getElementById("carbBar").value    = 0;
+  document.getElementById("macroCalsProgress").textContent = totalCals;
+  document.getElementById("macroProteinProgress").textContent = totalProtein;
+  document.getElementById("macroFatProgress").textContent = totalFats;
+  document.getElementById("macroCarbsProgress").textContent = totalCarbs;
 
-  document.getElementById("macroTotalCals").textContent = `0 / ${macroTargetCalories} kcal`;
+  // Update textual summary (optional)
+  document.getElementById("macroTotalCals").textContent = `${totalCals} / ${macroTargetCalories} kcal`;
 }
+
 
 function generateMacroTargets() {
   const weight = +document.getElementById("bodyWeight").value;
