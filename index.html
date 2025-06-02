@@ -319,14 +319,6 @@ select {
     <button onclick="calculateMacroTargets()">Calculate Targets</button>
   </div>  
 
-<div id="dailyMacroTracker" style="margin-top:20px; padding:10px; border:1px solid #ccc;">
-  <h4>Today's Macro Intake</h4>
-  <p>Protein: <span id="dailyProteinTotal">0</span> g</p>
-  <p>Carbs: <span id="dailyCarbsTotal">0</span> g</p>
-  <p>Fats: <span id="dailyFatsTotal">0</span> g</p>
-  <p>Calories: <span id="dailyCaloriesTotal">0</span> kcal</p>
-</div>
-
     
  </div>
   
@@ -390,7 +382,7 @@ async function startLogin() {
       renderCardio();
       renderCrossfitWorkouts();
       loadTemplateDropdown(); // ✅ Load saved templates
-      renderDailyMacroLog(); // <-- ADD HERE to show daily macros immediately
+      renderDailyMacroProgress();
     } else {
       alert(result.message || "Login failed.");
     }
@@ -994,7 +986,7 @@ function submitMeal(idx) {
     const f = Number(document.getElementById(`fats${idx}`).value ) || 0;
     macroMeals[idx] = { protein: p, carbs: c, fats: f };
     updateMacroUI();
-  addMealToDailyLog(protein, carbs, fats);
+  updateDailyMacroProgress(protein, carbs, fats);
     // collapse form
     const content = document.getElementById(`mealContent${idx}`);
     if (content) {
@@ -1389,60 +1381,58 @@ function applyCustomCalories() {
   }
 }
 
-// Initialize or load today's macro log from localStorage
-function loadDailyMacroLog() {
-  const today = new Date().toISOString().split('T')[0];
-  let dailyLog = JSON.parse(localStorage.getItem(`dailyMacroLog_${currentUser}`)) || {};
-  
-  // Reset if date mismatch or no log exists
-  if (dailyLog.date !== today) {
-    dailyLog = {
-      date: today,
-      protein: 0,
-      carbs: 0,
-      fats: 0,
-      calories: 0,
-      meals: []  // optional: track individual meals if needed
-    };
-    localStorage.setItem(`dailyMacroLog_${currentUser}`, JSON.stringify(dailyLog));
+function getTodayDateString() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function loadDailyMacroProgress() {
+  const today = getTodayDateString();
+  const savedDate = localStorage.getItem("dailyMacroDate");
+  if (savedDate !== today) {
+    // New day, reset saved macros
+    localStorage.setItem("dailyMacroDate", today);
+    localStorage.setItem("dailyMacroProgress", JSON.stringify({ protein: 0, carbs: 0, fats: 0 }));
+    return { protein: 0, carbs: 0, fats: 0 };
   }
-  
-  return dailyLog;
+
+  const progress = JSON.parse(localStorage.getItem("dailyMacroProgress"));
+  return progress || { protein: 0, carbs: 0, fats: 0 };
 }
 
-// Save the daily macro log
-function saveDailyMacroLog(log) {
-  localStorage.setItem(`dailyMacroLog_${currentUser}`, JSON.stringify(log));
+function saveDailyMacroProgress(protein, carbs, fats) {
+  const today = getTodayDateString();
+  localStorage.setItem("dailyMacroDate", today);
+  localStorage.setItem("dailyMacroProgress", JSON.stringify({ protein, carbs, fats }));
 }
 
-// Add a meal’s macros to the daily log and update UI
-function addMealToDailyLog(protein, carbs, fats) {
-  const log = loadDailyMacroLog();
+function renderDailyMacroProgress() {
+  const progress = loadDailyMacroProgress();
 
-  const calories = protein * 4 + carbs * 4 + fats * 9;
-  
-  // Update totals
-  log.protein += protein;
-  log.carbs += carbs;
-  log.fats += fats;
-  log.calories += calories;
+  const totalCals = progress.protein * 4 + progress.carbs * 4 + progress.fats * 9;
 
-  // Optional: store meal details
-  log.meals.push({ protein, carbs, fats, calories, time: new Date().toISOString() });
+  document.getElementById("proteinBar").value = progress.protein;
+  document.getElementById("macroProteinProgress").textContent = progress.protein;
 
-  saveDailyMacroLog(log);
-  renderDailyMacroLog();
+  document.getElementById("carbBar").value = progress.carbs;
+  document.getElementById("macroCarbsProgress").textContent = progress.carbs;
+
+  document.getElementById("fatBar").value = progress.fats;
+  document.getElementById("macroFatProgress").textContent = progress.fats;
+
+  document.getElementById("calsBar").value = totalCals;
+  document.getElementById("macroCalsProgress").textContent = totalCals;
 }
 
-// Render daily macro totals somewhere in your UI
-function renderDailyMacroLog() {
-  const log = loadDailyMacroLog();
+// Call this when a meal is added or macros change:
+function updateDailyMacroProgress(protein, carbs, fats) {
+  const current = loadDailyMacroProgress();
+  const newProtein = current.protein + protein;
+  const newCarbs = current.carbs + carbs;
+  const newFats = current.fats + fats;
 
-  // Update UI elements with daily totals (create these spans/divs in your HTML)
-  document.getElementById("dailyProteinTotal").textContent = log.protein.toFixed(1);
-  document.getElementById("dailyCarbsTotal").textContent = log.carbs.toFixed(1);
-  document.getElementById("dailyFatsTotal").textContent = log.fats.toFixed(1);
-  document.getElementById("dailyCaloriesTotal").textContent = log.calories.toFixed(0);
+  saveDailyMacroProgress(newProtein, newCarbs, newFats);
+  renderDailyMacroProgress();
 }
 
   
