@@ -994,6 +994,16 @@ function submitMeal(idx) {
 
   macroMeals[idx] = { protein: p, carbs: c, fats: f };
 
+  // Calculate totals from all meals including this one
+  let totalProtein = 0, totalCarbs = 0, totalFats = 0;
+  macroMeals.forEach(meal => {
+    totalProtein += meal.protein || 0;
+    totalCarbs += meal.carbs || 0;
+    totalFats += meal.fats || 0;
+  });
+
+  const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
+
   // Update the daily progress in localStorage by adding this meal macros
   const currentProgress = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein: 0, carbs: 0, fats: 0 };
   const newProgress = {
@@ -1015,12 +1025,12 @@ function submitMeal(idx) {
   }
 
   const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
-const meals = macroMeals; // or whatever holds your meals data
-const totals = { calories: totalCals, protein: totalProtein, carbs: totalCarbs, fat: totalFats };
+  const meals = macroMeals; // your meals array
+  const totals = { calories: totalCals, protein: totalProtein, carbs: totalCarbs, fat: totalFats };
 
-saveDailyMacroLog(currentUser, today, meals, totals);
-
+  saveDailyMacroLog(currentUser, today, meals, totals);
 }
+
 
   
   
