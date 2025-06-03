@@ -2143,7 +2143,38 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
       display.textContent = "0";
     }
   });
-    
+  const menuToggle = document.getElementById("menuToggle");
+  const sideMenu = document.getElementById("sideMenu");
+  
+  menuToggle.addEventListener("click", () => {
+    sideMenu.classList.toggle("open");
+  });
+
+  // Get all sidebar links
+  const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
+  tabLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tabName = link.getAttribute("data-tab");
+      showTab(tabName);
+      // Close sidebar after click (optional)
+      sideMenu.classList.remove("open");
+    });
+  });
+
+  // Show initial tab (e.g., Training Log)
+  showTab("trainingLogTab");
+});
+
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+
+  // Show selected tab
+  const tab = document.getElementById(tabName);
+  if (tab) tab.style.display = 'block';  
 document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
   document.getElementById("carbSlider").value = 0;
