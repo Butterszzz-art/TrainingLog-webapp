@@ -153,10 +153,10 @@
   background-color: var(--primary);
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
 }
 #macrosSettingsBtn:hover {
   background-color: #0056b3;
@@ -299,7 +299,7 @@
 
  <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
-  <button id="macrosSettingsBtn" style="position: absolute; top: 10px; right: 20px; display: none;">
+  <button id="macrosSettingsBtn" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
     ⚙️ Settings
   </button>
 
@@ -2137,7 +2137,6 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     }
   });
   
-
   
 document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
@@ -2147,22 +2146,7 @@ document.getElementById("proteinSlider").value = 0;
   document.getElementById("carbVal").textContent = "0";
   document.getElementById("macroTotalCals").textContent = "0";
     
-document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
-    document.getElementById("sets").addEventListener("input", e => generateSetInputs(Number(e.target.value)));
-    document.getElementById("btnStartNewWorkout").addEventListener("click", completeWorkout);
-    document.getElementById("btnSaveAsTemplate").addEventListener("click", saveWorkoutAsTemplate);
-    document.getElementById("templateSelect").addEventListener("change", loadSelectedTemplate);
-    document.getElementById("btnAddWeight").addEventListener("click", addWeightEntry);
-    document.getElementById("btnAddCardio").addEventListener("click", addCardioEntry);
-    document.getElementById("macroMeal").addEventListener("click", addMacroMeal);
-    document.getElementById("toggleTargetFormBtn").addEventListener("click", toggleTargetForm);
-    document.getElementById("btnCalcMacroTargets").addEventListener("click", calculateMacroTargets);
-    document.getElementById("proteinSlider").addEventListener("input", () => adjustMacros("proteinSlider"));
-    document.getElementById("fatSlider").addEventListener("input", () => adjustMacros("fatSlider"));
-    document.getElementById("carbSlider").addEventListener("input", () => adjustMacros("carbSlider"));
-    document.getElementById("btnSaveSliderMacros").addEventListener("click", saveSliderMacros);
-    document.getElementById("btnAddCFExercise").addEventListener("click", addCrossfitExercise);
-    document.getElementById("btnSaveCFWorkout").addEventListener("click", saveCrossfitWorkout);
+
 
     
 window.addEventListener("DOMContentLoaded", () => {
