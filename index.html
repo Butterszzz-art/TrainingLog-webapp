@@ -1621,18 +1621,21 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   }
 }
 
+ // Show initial tab (e.g., Training Log)
+  showTab("trainingLogTab");
 
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
 
-async function showTab(tabName) {
-  // Hide all tabs, then show the chosen one
-  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-  document.getElementById(tabName).style.display = 'block';
-
-  if (tabName === 'logHistoryTab') {
-    const logs = await fetchDailyLogs(currentUser);
-    renderLogHistory(logs);
-  }
+  // Show selected tab
+  const tab = document.getElementById(tabName);
+  if (tab) tab.style.display = 'block';
 }
+
+
   
 async function saveDailyMacroLog(username, date, meals, totals) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/DailyLogs`;
@@ -2143,6 +2146,7 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
       display.textContent = "0";
     }
   });
+  
   const menuToggle = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
   
@@ -2162,19 +2166,8 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     });
   });
 
-  // Show initial tab (e.g., Training Log)
-  showTab("trainingLogTab");
-});
 
-function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.style.display = 'none';
-  });
-
-  // Show selected tab
-  const tab = document.getElementById(tabName);
-  if (tab) tab.style.display = 'block';  
+  
 document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
   document.getElementById("carbSlider").value = 0;
