@@ -486,7 +486,7 @@ await fetchUserMacroTargets(currentUser); // define this function below
   
 }
   
-function showTabWithSettingsToggle(tabName) {
+function showTab(tabName) {
   // Hide all tabs
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove("active");
@@ -2199,7 +2199,7 @@ window.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const tabName = link.getAttribute("data-tab");
-      showTabWithSettingsToggle(tabName);
+      showTab(tabName);
       sideMenu.classList.remove("open");
       menuToggle.setAttribute("aria-expanded", "false");
     });
