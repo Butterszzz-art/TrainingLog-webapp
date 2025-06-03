@@ -130,6 +130,7 @@
 
   <!-- Hamburger button -->
   <button id="menuToggle" class="menu-toggle">☰</button>
+ <button id="menuToggle" class="menu-toggle" aria-expanded="false" aria-label="Toggle menu">☰</button>
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
@@ -2065,41 +2066,52 @@ window.addEventListener("DOMContentLoaded", () => {
   updateMacroUI(); // or anything else DOM-dependent
 });    
 
-document.addEventListener("DOMContentLoaded", () => {
-    const menuToggle = document.getElementById("menuToggle");
-    const sideMenu = document.getElementById("sideMenu");
-    
-    menuToggle.addEventListener("click", () => {
-      sideMenu.classList.toggle("open");
-    });
+const menuToggle = document.getElementById("menuToggle");
+  const sideMenu = document.getElementById("sideMenu");
 
-    // Tab links
-    const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
-    tabLinks.forEach(link => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const tabName = link.getAttribute("data-tab");
-        showTab(tabName);
-        sideMenu.classList.remove("open"); // close menu after click
-      });
-    });
-
-    // Show initial tab
-    showTab("trainingLogTab");
+  menuToggle.addEventListener("click", () => {
+    sideMenu.classList.toggle("open");
+    // Optionally toggle aria-expanded for accessibility
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
   });
 
-  function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      tab.classList.remove("active");
-      tab.style.display = "none";
-    });
-
-    const tab = document.getElementById(tabName);
-    if (tab) {
-      tab.classList.add("active");
-      tab.style.display = "block";
+  // Close menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+      sideMenu.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
     }
+  });
+
+  // Handle tab clicks
+  const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
+  tabLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tabName = link.getAttribute("data-tab");
+      showTab(tabName);
+      sideMenu.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  // Show initial tab
+  showTab("trainingLogTab");
+
+
+function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove("active");
+    tab.style.display = "none";
+  });
+
+  const tab = document.getElementById(tabName);
+  if (tab) {
+    tab.classList.add("active");
+    tab.style.display = "block";
   }
+}
 
 
     
