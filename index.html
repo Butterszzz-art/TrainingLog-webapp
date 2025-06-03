@@ -412,16 +412,6 @@ await fetchUserMacroTargets(currentUser); // define this function below
   
 }
   
-function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.style.display = 'none';
-  });
-
-  // Show selected tab
-  const tab = document.getElementById(tabName);
-  if (tab) tab.style.display = 'block';
-}
   
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
@@ -2088,28 +2078,40 @@ window.addEventListener("DOMContentLoaded", () => {
 });    
 
 document.addEventListener("DOMContentLoaded", () => {
-  const menuToggle = document.getElementById("menuToggle");
-  const sideMenu = document.getElementById("sideMenu");
-  
-  menuToggle.addEventListener("click", () => {
-    sideMenu.classList.toggle("open");
-  });
-
-  // Get all sidebar links
-  const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
-  tabLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const tabName = link.getAttribute("data-tab");
-      showTab(tabName);
-      // Close sidebar after click (optional)
-      sideMenu.classList.remove("open");
+    const menuToggle = document.getElementById("menuToggle");
+    const sideMenu = document.getElementById("sideMenu");
+    
+    menuToggle.addEventListener("click", () => {
+      sideMenu.classList.toggle("open");
     });
+
+    // Tab links
+    const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
+    tabLinks.forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const tabName = link.getAttribute("data-tab");
+        showTab(tabName);
+        sideMenu.classList.remove("open"); // close menu after click
+      });
+    });
+
+    // Show initial tab
+    showTab("trainingLogTab");
   });
 
-  // Show initial tab (e.g., Training Log)
-  showTab("trainingLogTab");
-});
+  function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.classList.remove("active");
+      tab.style.display = "none";
+    });
+
+    const tab = document.getElementById(tabName);
+    if (tab) {
+      tab.classList.add("active");
+      tab.style.display = "block";
+    }
+  }
 
 
     
