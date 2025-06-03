@@ -566,14 +566,8 @@ function toggleWorkoutDetails(index) {
 }
 window.toggleWorkoutDetails = toggleWorkoutDetails;  
   
-// Make tab switching available globally
-  
-window.showTab = function(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-};
+// Expose showTab globally for sidebar navigation
+window.showTab = showTab;
 
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
