@@ -205,15 +205,7 @@
     </ul>
   </nav>
 
-  <!-- Tab contents -->
-  <div id="logTab" class="tab-content">Training Log Content...</div>
-  <div id="weightTab" class="tab-content">Bodyweight Content...</div>
-  <div id="cardioTab" class="tab-content">Cardio Content...</div>
-  <div id="macroTab" class="tab-content">Macros Content...</div>
-  <div id="crossfitTab" class="tab-content">CrossFit Content...</div>
-  <div id="logHistoryTab" class="tab-content">Log History Content...</div>
 
-  
 <div id="progressReminder"></div>
 
 <div id="logTab" class="tab-content active">
@@ -328,7 +320,7 @@
     <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
 
     <div id="macroMealContainer"></div>
-    <button onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
+    <button id="macroMeal" onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -422,9 +414,7 @@ sideMenu.querySelectorAll('a').forEach(link => {
     e.preventDefault();
     const tabToShow = e.target.getAttribute('data-tab');
 
-    tabContents.forEach(tab => {
-      tab.style.display = (tab.id === tabToShow) ? 'block' : 'none';
-    });
+    showTab(tabToShow);
 
     // Close the menu
     sideMenu.classList.remove('open');
@@ -576,14 +566,8 @@ function toggleWorkoutDetails(index) {
 }
 window.toggleWorkoutDetails = toggleWorkoutDetails;  
   
-// Make tab switching available globally
-  
-window.showTab = function(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-};
+// Expose showTab globally for sidebar navigation
+window.showTab = showTab;
 
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
@@ -2170,7 +2154,7 @@ document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
     document.getElementById("templateSelect").addEventListener("change", loadSelectedTemplate);
     document.getElementById("btnAddWeight").addEventListener("click", addWeightEntry);
     document.getElementById("btnAddCardio").addEventListener("click", addCardioEntry);
-    document.getElementById("macroMeal").addEventListener("click", addmacroMeal);
+    document.getElementById("macroMeal").addEventListener("click", addMacroMeal);
     document.getElementById("toggleTargetFormBtn").addEventListener("click", toggleTargetForm);
     document.getElementById("btnCalcMacroTargets").addEventListener("click", calculateMacroTargets);
     document.getElementById("proteinSlider").addEventListener("input", () => adjustMacros("proteinSlider"));
