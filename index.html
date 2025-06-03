@@ -482,7 +482,18 @@ if (savedUser) {
 await fetchUserMacroTargets(currentUser); // define this function below
   
 }
+  
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
 
+  // Show selected tab
+  const tab = document.getElementById(tabName);
+  if (tab) tab.style.display = 'block';
+}
+  
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
@@ -2171,16 +2182,6 @@ document.addEventListener("DOMContentLoaded", () => {
   showTab("trainingLogTab");
 });
 
-function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.style.display = 'none';
-  });
-
-  // Show selected tab
-  const tab = document.getElementById(tabName);
-  if (tab) tab.style.display = 'block';
-}
 
     
     
