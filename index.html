@@ -198,7 +198,7 @@
       <li><a href="#" data-tab="logTab">Training Log</a></li>
       <li><a href="#" data-tab="weightTab">Bodyweight</a></li>
       <li><a href="#" data-tab="cardioTab">Cardio</a></li>
-      <li><a href="#" data-tab="macrosTab">Macros</a></li>
+      <li><a href="#" data-tab="macroTab">Macros</a></li>
       <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
       <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()" style="width: 100%; padding: 8px; background-color: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button></li>
@@ -209,7 +209,7 @@
   <div id="logTab" class="tab-content">Training Log Content...</div>
   <div id="weightTab" class="tab-content">Bodyweight Content...</div>
   <div id="cardioTab" class="tab-content">Cardio Content...</div>
-  <div id="macrosTab" class="tab-content">Macros Content...</div>
+  <div id="macroTab" class="tab-content">Macros Content...</div>
   <div id="crossfitTab" class="tab-content">CrossFit Content...</div>
   <div id="logHistoryTab" class="tab-content">Log History Content...</div>
 
@@ -305,7 +305,7 @@
     </table>
   </div>
 
- <div id="macrosTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
+ <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
   <button id="macrosSettingsBtn" style="position: absolute; top: 10px; right: 20px; display: none;">
     ⚙️ Settings
@@ -504,7 +504,7 @@ function showTab(tabName) {
   const settingsBtn = document.getElementById("settingsButton");
   if (!settingsBtn) return;
 
-  if (tabName === "macrosTab") {
+  if (tabName === "macroTab") {
     settingsBtn.style.display = "block";
   } else {
     settingsBtn.style.display = "none";
