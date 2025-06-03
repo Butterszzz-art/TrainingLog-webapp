@@ -2137,7 +2137,6 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     }
   });
   
-
   
 document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
@@ -2147,53 +2146,7 @@ document.getElementById("proteinSlider").value = 0;
   document.getElementById("carbVal").textContent = "0";
   document.getElementById("macroTotalCals").textContent = "0";
     
-const addLogBtn = document.getElementById("btnAddLog");
-if (addLogBtn) addLogBtn.addEventListener("click", addLogEntry);
 
-const setsInput = document.getElementById("sets");
-if (setsInput) setsInput.addEventListener("input", e => generateSetInputs(Number(e.target.value)));
-
-const newWorkoutBtn = document.getElementById("btnStartNewWorkout");
-if (newWorkoutBtn) newWorkoutBtn.addEventListener("click", completeWorkout);
-
-const saveTemplateBtn = document.getElementById("btnSaveAsTemplate");
-if (saveTemplateBtn) saveTemplateBtn.addEventListener("click", saveWorkoutAsTemplate);
-
-const templateSelectEl = document.getElementById("templateSelect");
-if (templateSelectEl) templateSelectEl.addEventListener("change", loadSelectedTemplate);
-
-const addWeightBtn = document.getElementById("btnAddWeight");
-if (addWeightBtn) addWeightBtn.addEventListener("click", addWeightEntry);
-
-const addCardioBtn = document.getElementById("btnAddCardio");
-if (addCardioBtn) addCardioBtn.addEventListener("click", addCardioEntry);
-
-const addMealBtn = document.getElementById("macroMeal");
-if (addMealBtn) addMealBtn.addEventListener("click", addMacroMeal);
-
-const toggleTargetBtn = document.getElementById("toggleTargetFormBtn");
-if (toggleTargetBtn) toggleTargetBtn.addEventListener("click", toggleTargetForm);
-
-const calcMacroBtn = document.getElementById("btnCalcMacroTargets");
-if (calcMacroBtn) calcMacroBtn.addEventListener("click", calculateMacroTargets);
-
-const protSlider = document.getElementById("proteinSlider");
-if (protSlider) protSlider.addEventListener("input", () => adjustMacros("proteinSlider"));
-
-const fatSliderEl = document.getElementById("fatSlider");
-if (fatSliderEl) fatSliderEl.addEventListener("input", () => adjustMacros("fatSlider"));
-
-const carbSliderEl = document.getElementById("carbSlider");
-if (carbSliderEl) carbSliderEl.addEventListener("input", () => adjustMacros("carbSlider"));
-
-const saveSliderBtn = document.getElementById("btnSaveSliderMacros");
-if (saveSliderBtn) saveSliderBtn.addEventListener("click", saveSliderMacros);
-
-const addCFExerciseBtn = document.getElementById("btnAddCFExercise");
-if (addCFExerciseBtn) addCFExerciseBtn.addEventListener("click", addCrossfitExercise);
-
-const saveCFWorkoutBtn = document.getElementById("btnSaveCFWorkout");
-if (saveCFWorkoutBtn) saveCFWorkoutBtn.addEventListener("click", saveCrossfitWorkout);
 
     
 window.addEventListener("DOMContentLoaded", () => {
