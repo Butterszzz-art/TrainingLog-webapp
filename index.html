@@ -501,7 +501,7 @@ function showTab(tabName) {
   }
 
   // Show settings button only for the macros tab
-  const settingsBtn = document.getElementById("settingsButton");
+  const settingsBtn = document.getElementById("macrosSettingsBtn");
   if (!settingsBtn) return;
 
   if (tabName === "macroTab") {
@@ -509,7 +509,14 @@ function showTab(tabName) {
   } else {
     settingsBtn.style.display = "none";
   }
+
+  // Always reset macros view to main content on tab change
+  if (tabName === "macroTab") {
+    document.getElementById('macrosMainContent').style.display = 'block';
+    document.getElementById('macrosSettingsContent').style.display = 'none';
+  }
 }
+
 
   
 async function fetchUserMacroTargets(username) {
