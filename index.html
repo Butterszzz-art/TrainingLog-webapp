@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fitness Tracker App</title>
   <style>
     :root {
@@ -36,6 +36,7 @@
       background-color: var(--primary);
       color: #fff;
       border: none;
+      cursor: pointer;
     }
     button:hover {
       background-color: #0056b3;
@@ -56,139 +57,68 @@
     th {
       background-color: #f0f0f0;
     }
-    .tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 20px;
+    /* Sidebar Styles */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px; /* hidden */
+      width: 250px;
+      height: 100%;
+      background-color: #fff;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      z-index: 1000;
     }
-    .tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      background: #eaeaea;
-      cursor: pointer;
-      border-radius: 6px;
+    .side-menu.open {
+      left: 0;
+    }
+    .side-menu ul {
+      list-style: none;
+      padding: 20px;
+      margin: 0;
+    }
+    .side-menu ul li {
+      margin-bottom: 15px;
+    }
+    .side-menu ul li a {
+      text-decoration: none;
+      color: #333;
       font-weight: bold;
+      font-size: 16px;
+      display: block;
+      padding: 8px 12px;
+      border-radius: 4px;
     }
-    .tab.active {
-      background: var(--primary);
-      color: white;
+    .side-menu ul li a:hover {
+      color: #007bff;
+      background-color: #e9f0ff;
     }
+    /* Hamburger button */
+    .menu-toggle {
+      position: fixed;
+      top: 20px;
+      left: 10px;
+      font-size: 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 1001;
+      padding: 5px 8px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    .menu-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    /* Tab content */
     .tab-content {
       display: none;
+      padding: 20px 0;
     }
     .tab-content.active {
       display: block;
     }
-    .remove-btn {
-      background-color: var(--danger);
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .remove-btn:hover {
-      background-color: #c82333;
-    }
-    .add-set-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  margin-top: 4px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-.add-set-btn:hover {
-  background-color: #218838;
-}
-
-select {
-  padding: 10px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  width: 100%;
-  box-sizing: border-box;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  font-size: 14px;
-  background-color: #fff;
-  color: var(--text-color);
-  appearance: none;
-}
-
-.log-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin: 20px auto;
-}
-
-.log-buttons button {
-  width: 90%;
-  max-width: 400px;
-}  
-
-
-.side-menu {
-  position: fixed;
-  top: 0;
-  left: -250px; /* hidden by default */
-  width: 250px;
-  height: 100%;
-  background-color: #fff;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-  overflow-y: auto;
-  transition: left 0.3s ease;
-  z-index: 1000;
-}
-
-.side-menu.open {
-  left: 0;
-}
-
-.side-menu ul {
-  list-style: none;
-  padding: 20px;
-  margin: 0;
-}
-
-.side-menu ul li {
-  margin-bottom: 15px;
-}
-
-.side-menu ul li a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.side-menu ul li a:hover {
-  color: #007bff;
-}
-
-.menu-toggle {
-  position: fixed;
-  top: 20px;       /* space from top */
-  left: 10px;      /* space from left edge */
-  font-size: 24px; /* smaller size */
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;   /* above everything */
-  padding: 5px 8px;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.menu-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-    
   </style>
 </head>
 
@@ -197,12 +127,11 @@ select {
 
 <div id="loginContainer">
   <h2>Login to Your Fitness Tracker</h2>
-  <input type="text" id="username" placeholder="Enter Username">
-  <input type="password" id="password" placeholder="Enter Password">
-  <button onclick="startLogin()">Login</button>  <!-- StartLogin for login -->
-  <button onclick="startSignup()">Sign Up</button> <!-- StartSignup for signup -->
+  <input type="text" id="username" placeholder="Enter Username" />
+  <input type="password" id="password" placeholder="Enter Password" />
+  <button onclick="startLogin()">Login</button>
+  <button onclick="startSignup()">Sign Up</button>
 </div>
-
 
 <div id="appContainer" style="display:none;">
   <div style="text-align: right; margin-bottom: 10px;" id="logoutSection">
@@ -211,28 +140,28 @@ select {
   
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
 
- <!-- Hamburger button -->
-<button id="menuToggle" class="menu-toggle">☰</button>
+  <!-- Hamburger button -->
+  <button id="menuToggle" class="menu-toggle">☰</button>
 
-<!-- Side menu -->
-<nav id="sideMenu" class="side-menu">
-  <ul>
-    <li><a href="#" data-tab="trainingLogTab">Training Log</a></li>
-    <li><a href="#" data-tab="bodyweightTab">Bodyweight</a></li>
-    <li><a href="#" data-tab="cardioTab">Cardio</a></li>
-    <li><a href="#" data-tab="macrosTab">Macros</a></li>
-    <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
-    <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
-  </ul>
-</nav>
+  <!-- Sidebar -->
+  <nav id="sideMenu" class="side-menu">
+    <ul>
+      <li><a href="#" data-tab="trainingLogTab">Training Log</a></li>
+      <li><a href="#" data-tab="bodyweightTab">Bodyweight</a></li>
+      <li><a href="#" data-tab="cardioTab">Cardio</a></li>
+      <li><a href="#" data-tab="macrosTab">Macros</a></li>
+      <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
+      <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
+    </ul>
+  </nav>
 
-<!-- Your tab content sections -->
-<div id="trainingLogTab" class="tab-content">...</div>
-<div id="bodyweightTab" class="tab-content" style="display:none;">...</div>
-<div id="cardioTab" class="tab-content" style="display:none;">...</div>
-<div id="macrosTab" class="tab-content" style="display:none;">...</div>
-<div id="crossfitTab" class="tab-content" style="display:none;">...</div>
-<div id="logHistoryTab" class="tab-content" style="display:none;">...</div>
+  <!-- Tab contents -->
+  <div id="trainingLogTab" class="tab-content">Training Log Content...</div>
+  <div id="bodyweightTab" class="tab-content">Bodyweight Content...</div>
+  <div id="cardioTab" class="tab-content">Cardio Content...</div>
+  <div id="macrosTab" class="tab-content">Macros Content...</div>
+  <div id="crossfitTab" class="tab-content">CrossFit Content...</div>
+  <div id="logHistoryTab" class="tab-content">Log History Content...</div>
 
   
 <div id="progressReminder"></div>
