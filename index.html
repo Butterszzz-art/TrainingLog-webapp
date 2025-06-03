@@ -486,18 +486,31 @@ await fetchUserMacroTargets(currentUser); // define this function below
   
 }
   
-function showTab(tabName) {
+function showTabWithSettingsToggle(tabName) {
+  // Hide all tabs
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove("active");
     tab.style.display = "none";
   });
 
+  // Show the selected tab
   const tab = document.getElementById(tabName);
   if (tab) {
     tab.classList.add("active");
     tab.style.display = "block";
   }
+
+  // Show settings button only for the macros tab
+  const settingsBtn = document.getElementById("settingsButton");
+  if (!settingsBtn) return;
+
+  if (tabName === "macrosTab") {
+    settingsBtn.style.display = "block";
+  } else {
+    settingsBtn.style.display = "none";
+  }
 }
+
   
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
@@ -1680,44 +1693,7 @@ function checkNewDayAndSave() {
   }
 }
 
-function showTabWithSettingsToggle(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.style.display = 'none';
-    tab.classList.remove('active');
-  });
 
-  // Show selected tab
-  const tab = document.getElementById(tabName);
-  if (tab) {
-    tab.style.display = 'block';
-    tab.classList.add('active');
-  }
-
-  // Show Settings button only on macros tab
-  const settingsBtn = document.getElementById('macrosSettingsBtn');
-  if (tabName === 'macrosTab') {
-    settingsBtn.style.display = 'inline-block';
-  } else {
-    settingsBtn.style.display = 'none';
-
-    // Ensure macros mini-settings hidden and main content visible when switching away
-    document.getElementById('macrosSettingsContent').style.display = 'none';
-    document.getElementById('macrosMainContent').style.display = 'block';
-  }
-}
-
-// Settings button click shows mini settings, hides main content
-document.getElementById('macrosSettingsBtn').addEventListener('click', () => {
-  document.getElementById('macrosMainContent').style.display = 'none';
-  document.getElementById('macrosSettingsContent').style.display = 'block';
-});
-
-// Go Back button hides mini settings, shows main content
-document.getElementById('goBackBtn').addEventListener('click', () => {
-  document.getElementById('macrosSettingsContent').style.display = 'none';
-  document.getElementById('macrosMainContent').style.display = 'block';
-});
 
 
   
