@@ -153,10 +153,11 @@
   background-color: var(--primary);
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
+  width: auto;
 }
 #macrosSettingsBtn:hover {
   background-color: #0056b3;
@@ -205,15 +206,7 @@
     </ul>
   </nav>
 
-  <!-- Tab contents -->
-  <div id="logTab" class="tab-content">Training Log Content...</div>
-  <div id="weightTab" class="tab-content">Bodyweight Content...</div>
-  <div id="cardioTab" class="tab-content">Cardio Content...</div>
-  <div id="macroTab" class="tab-content">Macros Content...</div>
-  <div id="crossfitTab" class="tab-content">CrossFit Content...</div>
-  <div id="logHistoryTab" class="tab-content">Log History Content...</div>
 
-  
 <div id="progressReminder"></div>
 
 <div id="logTab" class="tab-content active">
@@ -307,7 +300,7 @@
 
  <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
-  <button id="macrosSettingsBtn" style="position: absolute; top: 10px; right: 20px; display: none;">
+  <button id="macrosSettingsBtn" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
     ⚙️ Settings
   </button>
 
@@ -328,7 +321,7 @@
     <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
 
     <div id="macroMealContainer"></div>
-    <button onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
+    <button id="macroMeal" onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -422,9 +415,7 @@ sideMenu.querySelectorAll('a').forEach(link => {
     e.preventDefault();
     const tabToShow = e.target.getAttribute('data-tab');
 
-    tabContents.forEach(tab => {
-      tab.style.display = (tab.id === tabToShow) ? 'block' : 'none';
-    });
+    showTab(tabToShow);
 
     // Close the menu
     sideMenu.classList.remove('open');
@@ -576,14 +567,8 @@ function toggleWorkoutDetails(index) {
 }
 window.toggleWorkoutDetails = toggleWorkoutDetails;  
   
-// Make tab switching available globally
-  
-window.showTab = function(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
-  document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
-};
+// Expose showTab globally for sidebar navigation
+window.showTab = showTab;
 
 const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
 let currentUser = null;
@@ -2163,22 +2148,53 @@ document.getElementById("proteinSlider").value = 0;
   document.getElementById("carbVal").textContent = "0";
   document.getElementById("macroTotalCals").textContent = "0";
     
-document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
-    document.getElementById("sets").addEventListener("input", e => generateSetInputs(Number(e.target.value)));
-    document.getElementById("btnStartNewWorkout").addEventListener("click", completeWorkout);
-    document.getElementById("btnSaveAsTemplate").addEventListener("click", saveWorkoutAsTemplate);
-    document.getElementById("templateSelect").addEventListener("change", loadSelectedTemplate);
-    document.getElementById("btnAddWeight").addEventListener("click", addWeightEntry);
-    document.getElementById("btnAddCardio").addEventListener("click", addCardioEntry);
-    document.getElementById("macroMeal").addEventListener("click", addmacroMeal);
-    document.getElementById("toggleTargetFormBtn").addEventListener("click", toggleTargetForm);
-    document.getElementById("btnCalcMacroTargets").addEventListener("click", calculateMacroTargets);
-    document.getElementById("proteinSlider").addEventListener("input", () => adjustMacros("proteinSlider"));
-    document.getElementById("fatSlider").addEventListener("input", () => adjustMacros("fatSlider"));
-    document.getElementById("carbSlider").addEventListener("input", () => adjustMacros("carbSlider"));
-    document.getElementById("btnSaveSliderMacros").addEventListener("click", saveSliderMacros);
-    document.getElementById("btnAddCFExercise").addEventListener("click", addCrossfitExercise);
-    document.getElementById("btnSaveCFWorkout").addEventListener("click", saveCrossfitWorkout);
+const addLogBtn = document.getElementById("btnAddLog");
+if (addLogBtn) addLogBtn.addEventListener("click", addLogEntry);
+
+const setsInput = document.getElementById("sets");
+if (setsInput) setsInput.addEventListener("input", e => generateSetInputs(Number(e.target.value)));
+
+const newWorkoutBtn = document.getElementById("btnStartNewWorkout");
+if (newWorkoutBtn) newWorkoutBtn.addEventListener("click", completeWorkout);
+
+const saveTemplateBtn = document.getElementById("btnSaveAsTemplate");
+if (saveTemplateBtn) saveTemplateBtn.addEventListener("click", saveWorkoutAsTemplate);
+
+const templateSelectEl = document.getElementById("templateSelect");
+if (templateSelectEl) templateSelectEl.addEventListener("change", loadSelectedTemplate);
+
+const addWeightBtn = document.getElementById("btnAddWeight");
+if (addWeightBtn) addWeightBtn.addEventListener("click", addWeightEntry);
+
+const addCardioBtn = document.getElementById("btnAddCardio");
+if (addCardioBtn) addCardioBtn.addEventListener("click", addCardioEntry);
+
+const addMealBtn = document.getElementById("macroMeal");
+if (addMealBtn) addMealBtn.addEventListener("click", addMacroMeal);
+
+const toggleTargetBtn = document.getElementById("toggleTargetFormBtn");
+if (toggleTargetBtn) toggleTargetBtn.addEventListener("click", toggleTargetForm);
+
+const calcMacroBtn = document.getElementById("btnCalcMacroTargets");
+if (calcMacroBtn) calcMacroBtn.addEventListener("click", calculateMacroTargets);
+
+const protSlider = document.getElementById("proteinSlider");
+if (protSlider) protSlider.addEventListener("input", () => adjustMacros("proteinSlider"));
+
+const fatSliderEl = document.getElementById("fatSlider");
+if (fatSliderEl) fatSliderEl.addEventListener("input", () => adjustMacros("fatSlider"));
+
+const carbSliderEl = document.getElementById("carbSlider");
+if (carbSliderEl) carbSliderEl.addEventListener("input", () => adjustMacros("carbSlider"));
+
+const saveSliderBtn = document.getElementById("btnSaveSliderMacros");
+if (saveSliderBtn) saveSliderBtn.addEventListener("click", saveSliderMacros);
+
+const addCFExerciseBtn = document.getElementById("btnAddCFExercise");
+if (addCFExerciseBtn) addCFExerciseBtn.addEventListener("click", addCrossfitExercise);
+
+const saveCFWorkoutBtn = document.getElementById("btnSaveCFWorkout");
+if (saveCFWorkoutBtn) saveCFWorkoutBtn.addEventListener("click", saveCrossfitWorkout);
 
     
 window.addEventListener("DOMContentLoaded", () => {
@@ -2220,15 +2236,21 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.getElementById('macrosSettingsBtn').addEventListener('click', () => {
+function openMacroSettings() {
   document.getElementById('macrosMainContent').style.display = 'none';
   document.getElementById('macrosSettingsContent').style.display = 'block';
-});
+}
 
-document.getElementById('goBackBtn').addEventListener('click', () => {
+function closeMacroSettings() {
   document.getElementById('macrosSettingsContent').style.display = 'none';
   document.getElementById('macrosMainContent').style.display = 'block';
-});
+}
+
+const macrosSettingsBtn = document.getElementById('macrosSettingsBtn');
+if (macrosSettingsBtn) macrosSettingsBtn.addEventListener('click', openMacroSettings);
+
+const goBackButton = document.getElementById('goBackBtn');
+if (goBackButton) goBackButton.addEventListener('click', closeMacroSettings);
 
     
     
