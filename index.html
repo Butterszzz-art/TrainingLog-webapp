@@ -406,27 +406,7 @@ select {
 </div>
   
 <script>
-const menuToggle = document.getElementById('menuToggle');
-const sideMenu = document.getElementById('sideMenu');
-const tabContents = document.querySelectorAll('.tab-content');
 
-menuToggle.addEventListener('click', () => {
-  sideMenu.classList.toggle('open');
-});
-
-sideMenu.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const tabToShow = e.target.getAttribute('data-tab');
-
-    tabContents.forEach(tab => {
-      tab.style.display = (tab.id === tabToShow) ? 'block' : 'none';
-    });
-
-    // Close the menu
-    sideMenu.classList.remove('open');
-  });
-});
   
 const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
 const airtableBaseId = 'appmjr4IgnEH72K1b';
@@ -447,28 +427,6 @@ let macroRanges = {
   carbs:   { min: 0, max: 0 },
   tdee:    0
 };
-
-const menuToggle = document.getElementById('menuToggle');
-const sideMenu = document.getElementById('sideMenu');
-const tabContents = document.querySelectorAll('.tab-content');
-
-menuToggle.addEventListener('click', () => {
-  sideMenu.classList.toggle('open');
-});
-
-sideMenu.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const tabToShow = e.target.getAttribute('data-tab');
-
-    tabContents.forEach(tab => {
-      tab.style.display = (tab.id === tabToShow) ? 'block' : 'none';
-    });
-
-    // Close the menu
-    sideMenu.classList.remove('open');
-  });
-});
 
   
 // LOGIN
@@ -2188,6 +2146,44 @@ document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
 window.addEventListener("DOMContentLoaded", () => {
   updateMacroUI(); // or anything else DOM-dependent
 });    
+
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.getElementById("menuToggle");
+  const sideMenu = document.getElementById("sideMenu");
+  
+  menuToggle.addEventListener("click", () => {
+    sideMenu.classList.toggle("open");
+  });
+
+  // Get all sidebar links
+  const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
+  tabLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tabName = link.getAttribute("data-tab");
+      showTab(tabName);
+      // Close sidebar after click (optional)
+      sideMenu.classList.remove("open");
+    });
+  });
+
+  // Show initial tab (e.g., Training Log)
+  showTab("trainingLogTab");
+});
+
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+
+  // Show selected tab
+  const tab = document.getElementById(tabName);
+  if (tab) tab.style.display = 'block';
+}
+
+    
+    
 }); // closing DOMContentLoaded
 
 
