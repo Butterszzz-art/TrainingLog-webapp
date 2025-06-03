@@ -284,66 +284,77 @@
     </table>
   </div>
 
-  <div id="macroTab" class="tab-content" style="display:none;">
-  <div id="macrosMainContent">
-    <button id="macrosSettingsBtn" style="float:right; margin-bottom:10px;">⚙️ Settings</button>
-    <h3>Targets</h3>
-    <p>Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
-    <progress id="calsBar" value="0" max="100"></progress>
+ <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
+  <!-- Settings Button, top right, only shown on Macros tab -->
+  <button id="macrosSettingsBtn" style="position: absolute; top: 10px; right: 20px; display: none;">
+    ⚙️ Settings
+  </button>
 
-    <p>Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
-    <progress id="proteinBar" value="0" max="100"></progress>
+  <!-- Main Macros Content -->
+  <div id="macrosMainContent" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Targets</h2>
 
-    <p>Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
-    <progress id="carbBar" value="0" max="100"></progress>
+    <p style="font-size: 1.3rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
+    <progress id="calsBar" value="0" max="100" style="width: 100%; height: 20px; margin-bottom: 20px;"></progress>
 
-    <p>Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
-    <progress id="fatBar" value="0" max="100"></progress>
+    <p style="font-size: 1.2rem;">Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
+    <progress id="proteinBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 20px;"></progress>
+
+    <p style="font-size: 1.2rem;">Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
+    <progress id="carbBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 20px;"></progress>
+
+    <p style="font-size: 1.2rem;">Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
+    <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
 
     <div id="macroMealContainer"></div>
-    <button onclick="addMacroMeal()">➕ Add Meal</button>
-
-    <div style="margin-top: 20px;">
-      <label for="customCalories">Custom Calorie Intake (optional):</label><br>
-      <input id="customCalories" type="number" placeholder="Enter custom calorie target">
-      <button onclick="applyCustomCalories()">Insert Calories</button>
-    </div>
+    <button onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
   </div>
 
-  <div id="macrosSettingsContent" style="display:none;">
-    <button id="goBackBtn" style="margin-bottom: 10px;">⬅️ Go Back</button>
+  <!-- Settings Mini Tab -->
+  <div id="macrosSettingsContent" style="max-width: 600px; margin: 0 auto; display: none;">
+    <button id="goBackBtn" style="margin-bottom: 20px; font-size: 1rem; padding: 8px 16px;">⬅️ Go Back</button>
 
-    <div id="adjustMacroSection">
-      <h3>Adjust Macros</h3>
-      <label>Protein: <span id="proteinVal">0</span> g</label>
-      <input type="range" id="proteinSlider" min="0" max="0" oninput="adjustMacros('proteinSlider')"><br>
-      <label>Fat: <span id="fatVal">0</span> g</label>
-      <input type="range" id="fatSlider" min="0" max="0" oninput="adjustMacros('fatSlider')"><br>
-      <label>Carbs: <span id="carbVal">0</span> g</label>
-      <input type="range" id="carbSlider" min="0" max="0" oninput="adjustMacros('carbSlider')"><br>
-      <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
-      <button onclick="saveSliderMacros()">Save Macros</button>
+    <!-- Custom Calories Input moved here -->
+    <div style="margin-bottom: 20px;">
+      <label for="customCalories">Custom Calorie Intake (optional):</label><br>
+      <input id="customCalories" type="number" placeholder="Enter custom calorie target" style="width: 100%; padding: 8px; margin-top: 6px;"/>
+      <button onclick="applyCustomCalories()" style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Insert Calories</button>
     </div>
 
-    <div id="macroCalcForm" style="margin-top:20px;">
+    <!-- Adjust Macros -->
+    <div id="adjustMacroSection" style="margin-bottom: 30px;">
+      <h3>Adjust Macros</h3>
+      <label>Protein: <span id="proteinVal">0</span> g</label>
+      <input type="range" id="proteinSlider" min="0" max="0" oninput="adjustMacros('proteinSlider')" style="width: 100%; margin-bottom: 10px;"><br>
+      <label>Fat: <span id="fatVal">0</span> g</label>
+      <input type="range" id="fatSlider" min="0" max="0" oninput="adjustMacros('fatSlider')" style="width: 100%; margin-bottom: 10px;"><br>
+      <label>Carbs: <span id="carbVal">0</span> g</label>
+      <input type="range" id="carbSlider" min="0" max="0" oninput="adjustMacros('carbSlider')" style="width: 100%; margin-bottom: 10px;"><br>
+      <p>Total Calories: <span id="macroTotalCals">0</span> / <span id="calTarget">0</span> kcal</p>
+      <button onclick="saveSliderMacros()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Save Macros</button>
+    </div>
+
+    <!-- Set Your Targets -->
+    <div id="macroCalcForm">
       <h3>Set Your Macro Targets</h3>
-      <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)"><br>
-      <input type="number" id="macroHeight" placeholder="Height">
-      <select id="heightUnit">
+      <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+      <input type="number" id="macroHeight" placeholder="Height" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+      <select id="heightUnit" style="width: 100%; padding: 8px; margin-bottom: 10px;">
         <option value="in">in</option>
         <option value="cm">cm</option>
-      </select><br>
-      <select id="macroActivity">
+      </select>
+      <select id="macroActivity" style="width: 100%; padding: 8px; margin-bottom: 20px;">
         <option value="1.2">Sedentary</option>
         <option value="1.375">Lightly Active</option>
         <option value="1.55">Moderately Active</option>
         <option value="1.725">Very Active</option>
         <option value="1.9">Extremely Active</option>
-      </select><br>
-      <button onclick="calculateMacroTargets()">Calculate Targets</button>
+      </select>
+      <button onclick="calculateMacroTargets()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Calculate Targets</button>
     </div>
   </div>
 </div>
+
 
 
 <div id="logHistoryTab" class="tab-content" style="display:none;">
@@ -1648,6 +1659,41 @@ function checkNewDayAndSave() {
   }
 }
 
+function showTabWithSettingsToggle(tabName) {
+  // Hide all tab contents
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+    tab.classList.remove('active');
+  });
+
+  // Show chosen tab content
+  const tab = document.getElementById(tabName);
+  if (tab) {
+    tab.style.display = 'block';
+    tab.classList.add('active');
+  }
+
+  // Toggle Settings button only for Macros tab
+  const settingsBtn = document.getElementById('macrosSettingsBtn');
+  if (tabName === 'macrosTab') {
+    settingsBtn.style.display = 'inline-block';
+  } else {
+    settingsBtn.style.display = 'none';
+    // Also hide mini-settings content and show main macros content in case user switched tabs
+    document.getElementById('macrosSettingsContent').style.display = 'none';
+    document.getElementById('macrosMainContent').style.display = 'block';
+  }
+}
+
+document.getElementById('macrosSettingsBtn').addEventListener('click', () => {
+  document.getElementById('macrosMainContent').style.display = 'none';
+  document.getElementById('macrosSettingsContent').style.display = 'block';
+});
+
+document.getElementById('goBackBtn').addEventListener('click', () => {
+  document.getElementById('macrosSettingsContent').style.display = 'none';
+  document.getElementById('macrosMainContent').style.display = 'block';
+});
 
   
 // LOGOUT
