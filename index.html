@@ -84,11 +84,7 @@
     .side-menu.open {
       left: 0;
     }
-    .side-menu ul {
-      list-style: none;
-      padding: 20px;
-      margin: 0;
-    }
+
     .side-menu ul li {
       margin-bottom: 15px;
     }
@@ -105,25 +101,34 @@
       color: #007bff;
       background-color: #e9f0ff;
     }
-    /* Hamburger button */
-    .menu-toggle {
+    /* Push sidebar menu content down to avoid overlap with hamburger */
+.side-menu ul {
+  padding-top: 60px; /* space for the hamburger button */
+  padding-left: 20px; /* optional for nice alignment */
+}
+
+/* Style the hamburger button */
+.menu-toggle {
   position: fixed;
-  top: 10px;     /* move closer to top */
-  left: 10px;    /* move to left edge */
-  font-size: 28px; /* YouTube uses a slightly bigger icon */
-  background: transparent;
+  top: 10px;
+  left: 10px;
+  font-size: 28px;
+  background-color: var(--primary); /* use your app's primary blue */
+  color: white;
   border: none;
   cursor: pointer;
   z-index: 1001;
-  padding: 5px 10px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  width: auto;
   transition: background-color 0.3s ease;
-      
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-    .menu-toggle:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
+.menu-toggle:hover {
+  background-color: #0056b3; /* darker blue on hover */
+}
+
     /* Tab content */
     .tab-content {
       display: none;
