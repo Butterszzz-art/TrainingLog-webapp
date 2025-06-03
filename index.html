@@ -191,6 +191,8 @@ select {
     
   </style>
 </head>
+
+  
 <body>
 
 <div id="loginContainer">
@@ -1621,19 +1623,6 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   }
 }
 
- // Show initial tab (e.g., Training Log)
-  showTab("trainingLogTab");
-
-function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.style.display = 'none';
-  });
-
-  // Show selected tab
-  const tab = document.getElementById(tabName);
-  if (tab) tab.style.display = 'block';
-}
 
 
   
@@ -2147,7 +2136,7 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     }
   });
   
-  const menuToggle = document.getElementById("menuToggle");
+const menuToggle = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
   
   menuToggle.addEventListener("click", () => {
@@ -2165,6 +2154,21 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
       sideMenu.classList.remove("open");
     });
   });
+
+  // Show initial tab (e.g., Training Log)
+  showTab("trainingLogTab");
+});
+
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+
+  // Show selected tab
+  const tab = document.getElementById(tabName);
+  if (tab) tab.style.display = 'block';
+}
 
 
   
@@ -2225,6 +2229,8 @@ window.loadSelectedTemplate = loadSelectedTemplate;
 
 
 </script>
+
+  
 </body>
 </html>
 
