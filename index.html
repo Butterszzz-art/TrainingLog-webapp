@@ -95,7 +95,21 @@
       background-color: #e9f0ff;
     }
     /* Hamburger button */
-    
+    .menu-toggle {
+  position: fixed;
+  top: 10px;     /* move closer to top */
+  left: 10px;    /* move to left edge */
+  font-size: 28px; /* YouTube uses a slightly bigger icon */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+      
+}
+
     .menu-toggle:hover {
       background-color: rgba(0, 0, 0, 0.1);
     }
@@ -107,10 +121,15 @@
     .tab-content.active {
       display: block;
     }
+
+    #sidebarLogoutBtn:hover {
+  background-color: #c82333; /* Slightly darker red */
+}
+
   </style>
 </head>
 
-  
+ 
 <body>
 
 <div id="loginContainer">
@@ -122,9 +141,6 @@
 </div>
 
 <div id="appContainer" style="display:none;">
-  <div style="text-align: right; margin-bottom: 10px;" id="logoutSection">
-    <button onclick="logout()">Logout</button>
-  </div>
   
   <h1>Fitness Tracker (<span id="userDisplay"></span>)</h1>
 
@@ -140,6 +156,7 @@
       <li><a href="#" data-tab="macroTab">Macros</a></li>
       <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
       <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
+      <li><button id="sidebarLogoutBtn" onclick="logout()" style="width: 100%; padding: 8px; background-color: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button></li>
     </ul>
   </nav>
 
