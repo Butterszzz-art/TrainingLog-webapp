@@ -130,7 +130,6 @@
 
   <!-- Hamburger button -->
   <button id="menuToggle" class="menu-toggle">☰</button>
- <button id="menuToggle" class="menu-toggle" aria-expanded="false" aria-label="Toggle menu">☰</button>
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
@@ -401,6 +400,18 @@ await fetchUserMacroTargets(currentUser); // define this function below
   
 }
   
+function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove("active");
+    tab.style.display = "none";
+  });
+
+  const tab = document.getElementById(tabName);
+  if (tab) {
+    tab.classList.add("active");
+    tab.style.display = "block";
+  }
+}
   
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
@@ -2066,17 +2077,17 @@ window.addEventListener("DOMContentLoaded", () => {
   updateMacroUI(); // or anything else DOM-dependent
 });    
 
-const menuToggle = document.getElementById("menuToggle");
+    
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
 
   menuToggle.addEventListener("click", () => {
     sideMenu.classList.toggle("open");
-    // Optionally toggle aria-expanded for accessibility
     const expanded = menuToggle.getAttribute("aria-expanded") === "true";
     menuToggle.setAttribute("aria-expanded", String(!expanded));
   });
 
-  // Close menu when clicking outside
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
       sideMenu.classList.remove("open");
@@ -2084,7 +2095,6 @@ const menuToggle = document.getElementById("menuToggle");
     }
   });
 
-  // Handle tab clicks
   const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
   tabLinks.forEach(link => {
     link.addEventListener("click", (e) => {
@@ -2096,22 +2106,14 @@ const menuToggle = document.getElementById("menuToggle");
     });
   });
 
-  // Show initial tab
+  // Show the first tab initially
   showTab("trainingLogTab");
 
+  // Attach your other event listeners here as needed
+  // e.g. document.getElementById("btnAddLog").addEventListener("click", addLogEntry);
 
-function showTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove("active");
-    tab.style.display = "none";
-  });
+});
 
-  const tab = document.getElementById(tabName);
-  if (tab) {
-    tab.classList.add("active");
-    tab.style.display = "block";
-  }
-}
 
 
     
