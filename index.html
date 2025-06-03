@@ -157,6 +157,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+
 }
 #macrosSettingsBtn:hover {
   background-color: #0056b3;
@@ -2188,15 +2189,21 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.getElementById('macrosSettingsBtn').addEventListener('click', () => {
+function openMacroSettings() {
   document.getElementById('macrosMainContent').style.display = 'none';
   document.getElementById('macrosSettingsContent').style.display = 'block';
-});
+}
 
-document.getElementById('goBackBtn').addEventListener('click', () => {
+function closeMacroSettings() {
   document.getElementById('macrosSettingsContent').style.display = 'none';
   document.getElementById('macrosMainContent').style.display = 'block';
-});
+}
+
+const macrosSettingsBtn = document.getElementById('macrosSettingsBtn');
+if (macrosSettingsBtn) macrosSettingsBtn.addEventListener('click', openMacroSettings);
+
+const goBackButton = document.getElementById('goBackBtn');
+if (goBackButton) goBackButton.addEventListener('click', closeMacroSettings);
 
     
     
