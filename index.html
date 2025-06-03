@@ -148,6 +148,27 @@
     #sidebarLogoutBtn:hover {
   background-color: #c82333; /* Slightly darker red */
 }
+
+#macrosSettingsBtn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+#macrosSettingsBtn:hover {
+  background-color: #0056b3;
+}
+
+#goBackBtn {
+  margin-bottom: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
     
     
   </style>
@@ -1660,40 +1681,44 @@ function checkNewDayAndSave() {
 }
 
 function showTabWithSettingsToggle(tabName) {
-  // Hide all tab contents
+  // Hide all tabs
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.style.display = 'none';
     tab.classList.remove('active');
   });
 
-  // Show chosen tab content
+  // Show selected tab
   const tab = document.getElementById(tabName);
   if (tab) {
     tab.style.display = 'block';
     tab.classList.add('active');
   }
 
-  // Toggle Settings button only for Macros tab
+  // Show Settings button only on macros tab
   const settingsBtn = document.getElementById('macrosSettingsBtn');
   if (tabName === 'macrosTab') {
     settingsBtn.style.display = 'inline-block';
   } else {
     settingsBtn.style.display = 'none';
-    // Also hide mini-settings content and show main macros content in case user switched tabs
+
+    // Ensure macros mini-settings hidden and main content visible when switching away
     document.getElementById('macrosSettingsContent').style.display = 'none';
     document.getElementById('macrosMainContent').style.display = 'block';
   }
 }
 
+// Settings button click shows mini settings, hides main content
 document.getElementById('macrosSettingsBtn').addEventListener('click', () => {
   document.getElementById('macrosMainContent').style.display = 'none';
   document.getElementById('macrosSettingsContent').style.display = 'block';
 });
 
+// Go Back button hides mini settings, shows main content
 document.getElementById('goBackBtn').addEventListener('click', () => {
   document.getElementById('macrosSettingsContent').style.display = 'none';
   document.getElementById('macrosMainContent').style.display = 'block';
 });
+
 
   
 // LOGOUT
@@ -2198,7 +2223,7 @@ window.addEventListener("DOMContentLoaded", () => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const tabName = link.getAttribute("data-tab");
-      showTab(tabName);
+      showTabWithSettingsToggle(tabName);
       sideMenu.classList.remove("open");
       menuToggle.setAttribute("aria-expanded", "false");
     });
