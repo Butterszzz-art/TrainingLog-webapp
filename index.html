@@ -1394,7 +1394,7 @@ function saveSliderMacros() {
       Fat:      f,
       Carbs:    c
     };
-    airtableSave(macroTargetsTableName, fields)
+    airtableSave(MacroTargetsTableName, fields)
       .then(id => {
         if (id) {
           showToast("Macro targets saved!");
@@ -2183,7 +2183,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Show the first tab initially
   showTab("logTab");
-
 
 
 
