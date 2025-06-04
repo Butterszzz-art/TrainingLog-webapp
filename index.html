@@ -321,7 +321,7 @@
     <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
 
     <div id="macroMealContainer"></div>
-    <button id="macroMeal" onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
+    <button id="macroMeal" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -2173,7 +2173,11 @@ document.getElementById("proteinSlider").value = 0;
     
 window.addEventListener("DOMContentLoaded", () => {
   updateMacroUI(); // or anything else DOM-dependent
-});    
+  const addMealBtn = document.getElementById("macroMeal");
+  if (addMealBtn) {
+    addMealBtn.addEventListener("click", addMacroMeal);
+  }
+});
 
     
   
