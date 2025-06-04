@@ -300,7 +300,7 @@
 
  <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
-  <button id="macrosSettingsBtn" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
+  <button id="macrosSettingsBtn" onclick="openMacroSettings()" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
     ⚙️ Settings
   </button>
 
@@ -326,7 +326,7 @@
 
   <!-- Settings Mini Tab -->
   <div id="macrosSettingsContent" style="max-width: 600px; margin: 0 auto; display: none;">
-    <button id="goBackBtn" style="margin-bottom: 20px; font-size: 1rem; padding: 8px 16px;">⬅️ Go Back</button>
+    <button id="goBackBtn" onclick="closeMacroSettings()" style="margin-bottom: 20px; font-size: 1rem; padding: 8px 16px;">⬅️ Go Back</button>
 
     <!-- Custom Calories Input moved here -->
     <div style="margin-bottom: 20px;">
@@ -2186,21 +2186,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-function openMacroSettings() {
-  document.getElementById('macrosMainContent').style.display = 'none';
-  document.getElementById('macrosSettingsContent').style.display = 'block';
-}
 
-function closeMacroSettings() {
-  document.getElementById('macrosSettingsContent').style.display = 'none';
-  document.getElementById('macrosMainContent').style.display = 'block';
-}
-
-const macrosSettingsBtn = document.getElementById('macrosSettingsBtn');
-if (macrosSettingsBtn) macrosSettingsBtn.addEventListener('click', openMacroSettings);
-
-const goBackButton = document.getElementById('goBackBtn');
-if (goBackButton) goBackButton.addEventListener('click', closeMacroSettings);
 
     
     
@@ -2226,7 +2212,27 @@ window.removeLogEntry = removeLogEntry;             // ✅ Add this
 window.calculateWorkoutVolume = calculateWorkoutVolume;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
 window.loadTemplateDropdown = loadTemplateDropdown;
-window.loadSelectedTemplate = loadSelectedTemplate;
+function openMacroSettings() {
+  // Hide the main macros content and reveal the settings view
+  document.getElementById('macrosMainContent').style.display = 'none';
+  document.getElementById('macrosSettingsContent').style.display = 'block';
+  // Hide the settings button so only the "Go Back" button shows
+  const btn = document.getElementById('macrosSettingsBtn');
+  if (btn) btn.style.display = 'none';
+}
+
+function closeMacroSettings() {
+  // Return to the main macros view
+  document.getElementById('macrosSettingsContent').style.display = 'none';
+  document.getElementById('macrosMainContent').style.display = 'block';
+  // Restore the settings button visibility
+  const btn = document.getElementById('macrosSettingsBtn');
+  if (btn) btn.style.display = 'block';
+}
+
+// expose helpers for inline handlers
+window.openMacroSettings = openMacroSettings;
+window.closeMacroSettings = closeMacroSettings;
 
 
 
