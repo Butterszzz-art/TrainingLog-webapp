@@ -457,6 +457,7 @@ async function startLogin() {
       renderCardio();
       renderCrossfitWorkouts();
       loadTemplateDropdown(); // ✅ Load saved templates
+      saveDailyMacroProgress(0, 0, 0); // reset progress on login
       renderDailyMacroProgress();
     } else {
       alert(result.message || "Login failed.");
@@ -1575,7 +1576,7 @@ function updateDailyMacroProgress(protein, carbs, fats) {
 }
 
 function loadAndRenderDailyProgress() {
-  const progress = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein: 0, carbs: 0, fats: 0 };
+  const progress = loadDailyMacroProgress();
   // Update macroMeals to match progress so your app state is consistent
   macroMeals = [{ protein: progress.protein, carbs: progress.carbs, fats: progress.fats }];
 
