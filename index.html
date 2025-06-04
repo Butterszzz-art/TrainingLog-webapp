@@ -321,7 +321,7 @@
     <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
 
     <div id="macroMealContainer"></div>
-    <button id="macroMeal" onclick="addMacroMeal()" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
+    <button id="macroMeal" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -373,7 +373,16 @@
 
 <div id="logHistoryTab" class="tab-content" style="display:none;">
   <h2>Log History</h2>
-  <div id="logHistoryContainer"></div>
+  <div id="historyNav" style="margin-bottom:10px;">
+    <button onclick="showHistoryMiniTab('workout')">Workout History</button>
+    <button onclick="showHistoryMiniTab('macro')">Macro History</button>
+  </div>
+  <div id="workoutHistoryMiniTab">
+    <div id="logHistoryContainer"></div>
+  </div>
+  <div id="macroHistoryMiniTab" style="display:none;">
+    <div id="macroHistoryContainer"></div>
+  </div>
 </div>
 
   
@@ -506,6 +515,10 @@ function showTab(tabName) {
   if (tabName === "macroTab") {
     document.getElementById('macrosMainContent').style.display = 'block';
     document.getElementById('macrosSettingsContent').style.display = 'none';
+  }
+
+  if (tabName === "logHistoryTab") {
+    showHistoryMiniTab('workout');
   }
 }
 
@@ -1084,6 +1097,10 @@ function toggleMeal(contentId, btn) {
 }
 
 function submitMeal(idx) {
+  checkMacroReset();
+  if (!localStorage.getItem("macroResetTime")) {
+    localStorage.setItem("macroResetTime", Date.now().toString());
+  }
   const p = Number(document.getElementById(`protein${idx}`).value) || 0;
   const c = Number(document.getElementById(`carbs${idx}`).value) || 0;
   const f = Number(document.getElementById(`fats${idx}`).value) || 0;
@@ -1663,26 +1680,22 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   }
 }
   
-function checkNewDayAndSave() {
-  const lastDate = localStorage.getItem("dailyMacroDate");
-  const today = new Date().toISOString().split('T')[0];
+function checkMacroReset() {
+  const lastReset = parseInt(localStorage.getItem("macroResetTime")) || Date.now();
+  const now = Date.now();
 
-  if (lastDate && lastDate !== today) {
-    // It's a new day, so save previous day's totals before resetting
-
-    const previousTotals = JSON.parse(localStorage.getItem("dailyMacroProgress")) || {};
+  if (now - lastReset >= 86400000) { // 24h
+    const previousTotals = JSON.parse(localStorage.getItem("dailyMacroProgress")) || { protein:0, carbs:0, fats:0 };
     const previousMeals = JSON.parse(localStorage.getItem("dailyMacroMeals")) || [];
+    const date = new Date(lastReset).toISOString().split('T')[0];
+    addMacroHistoryEntry(date, previousMeals, previousTotals);
+    saveDailyMacroLog(currentUser, date, previousMeals, previousTotals);
 
-    // Save previous day log to Airtable
-    saveDailyMacroLog(currentUser, lastDate, previousMeals, previousTotals);
-
-    // Reset localStorage for new day
-    localStorage.setItem("dailyMacroDate", today);
     localStorage.setItem("dailyMacroProgress", JSON.stringify({ protein:0, carbs:0, fats:0 }));
     localStorage.setItem("dailyMacroMeals", JSON.stringify([]));
-  } else if (!lastDate) {
-    // First time user or no date stored
-    localStorage.setItem("dailyMacroDate", today);
+    localStorage.setItem("macroResetTime", now.toString());
+  } else if (!localStorage.getItem("macroResetTime")) {
+    localStorage.setItem("macroResetTime", now.toString());
   }
 }
 
@@ -1866,6 +1879,14 @@ function removeCrossfitExercise(index) {
   
   document.addEventListener("DOMContentLoaded", () => {
 
+    // initial setup for macros
+    checkMacroReset();
+    updateMacroUI();
+    const addMealBtn = document.getElementById("macroMeal");
+    if (addMealBtn) {
+      addMealBtn.addEventListener("click", addMacroMeal);
+    }
+
     // showTab is defined above
 
 // === Airtable Functions ===
@@ -1946,6 +1967,41 @@ function renderLogHistory(logs) {
     }
 
     container.appendChild(dateSection);
+  }
+}
+
+function addMacroHistoryEntry(date, meals, totals) {
+  const key = `macroHistory_${currentUser}`;
+  const history = JSON.parse(localStorage.getItem(key)) || [];
+  history.push({ date, meals, totals });
+  localStorage.setItem(key, JSON.stringify(history));
+}
+
+function renderMacroHistory() {
+  const key = `macroHistory_${currentUser}`;
+  const history = JSON.parse(localStorage.getItem(key)) || [];
+  const container = document.getElementById("macroHistoryContainer");
+  container.innerHTML = "";
+  history.slice().reverse().forEach(entry => {
+    const div = document.createElement("div");
+    const mealsHtml = entry.meals.map((m, i) => `Meal ${i + 1}: P${m.protein}, C${m.carbs}, F${m.fats}`).join("<br>");
+    const totals = entry.totals || { protein:0, carbs:0, fats:0 };
+    const cals = totals.protein * 4 + totals.carbs * 4 + totals.fats * 9;
+    div.innerHTML = `<strong>${entry.date}</strong><br>${mealsHtml}<br>Total: ${cals} kcal`;
+    container.appendChild(div);
+  });
+}
+
+function showHistoryMiniTab(tab) {
+  const workoutTab = document.getElementById("workoutHistoryMiniTab");
+  const macroTab = document.getElementById("macroHistoryMiniTab");
+  if (tab === "macro") {
+    workoutTab.style.display = "none";
+    macroTab.style.display = "block";
+    renderMacroHistory();
+  } else {
+    macroTab.style.display = "none";
+    workoutTab.style.display = "block";
   }
 }
 
@@ -2171,9 +2227,6 @@ document.getElementById("proteinSlider").value = 0;
 
 
     
-window.addEventListener("DOMContentLoaded", () => {
-  updateMacroUI(); // or anything else DOM-dependent
-});    
 
     
   
@@ -2229,9 +2282,10 @@ window.renderWorkouts = renderWorkouts;
 window.toggleWorkoutDetails = toggleWorkoutDetails;
 window.removeWorkout = removeWorkout;               // ✅ Add this
 window.removeLogEntry = removeLogEntry;             // ✅ Add this
-window.calculateWorkoutVolume = calculateWorkoutVolume;
-window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
-window.loadTemplateDropdown = loadTemplateDropdown;
+  window.calculateWorkoutVolume = calculateWorkoutVolume;
+  window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
+  window.loadTemplateDropdown = loadTemplateDropdown;
+  window.showHistoryMiniTab = showHistoryMiniTab;
 function openMacroSettings() {
   // Hide the main macros content and reveal the settings view
   document.getElementById('macrosMainContent').style.display = 'none';
