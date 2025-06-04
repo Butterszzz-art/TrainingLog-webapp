@@ -300,7 +300,7 @@
 
  <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
-  <button id="macrosSettingsBtn" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
+  <button id="macrosSettingsBtn" onclick="openMacroSettings()" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">
     ⚙️ Settings
   </button>
 
@@ -326,7 +326,7 @@
 
   <!-- Settings Mini Tab -->
   <div id="macrosSettingsContent" style="max-width: 600px; margin: 0 auto; display: none;">
-    <button id="goBackBtn" style="margin-bottom: 20px; font-size: 1rem; padding: 8px 16px;">⬅️ Go Back</button>
+    <button id="goBackBtn" onclick="closeMacroSettings()" style="margin-bottom: 20px; font-size: 1rem; padding: 8px 16px;">⬅️ Go Back</button>
 
     <!-- Custom Calories Input moved here -->
     <div style="margin-bottom: 20px;">
@@ -2196,11 +2196,9 @@ function closeMacroSettings() {
   document.getElementById('macrosMainContent').style.display = 'block';
 }
 
-const macrosSettingsBtn = document.getElementById('macrosSettingsBtn');
-if (macrosSettingsBtn) macrosSettingsBtn.addEventListener('click', openMacroSettings);
-
-const goBackButton = document.getElementById('goBackBtn');
-if (goBackButton) goBackButton.addEventListener('click', closeMacroSettings);
+// expose helpers for inline handlers
+window.openMacroSettings = openMacroSettings;
+window.closeMacroSettings = closeMacroSettings;
 
     
     
