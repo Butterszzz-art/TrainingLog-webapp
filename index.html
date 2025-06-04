@@ -1879,6 +1879,14 @@ function removeCrossfitExercise(index) {
   
   document.addEventListener("DOMContentLoaded", () => {
 
+    // initial setup for macros
+    checkMacroReset();
+    updateMacroUI();
+    const addMealBtn = document.getElementById("macroMeal");
+    if (addMealBtn) {
+      addMealBtn.addEventListener("click", addMacroMeal);
+    }
+
     // showTab is defined above
 
 // === Airtable Functions ===
@@ -2219,14 +2227,14 @@ document.getElementById("proteinSlider").value = 0;
 
 
     
-window.addEventListener("DOMContentLoaded", () => {
+
   checkMacroReset();
   updateMacroUI();
   const addMealBtn = document.getElementById("macroMeal");
   if (addMealBtn) {
     addMealBtn.addEventListener("click", addMacroMeal);
   }
-});
+
 
     
   
@@ -2282,9 +2290,10 @@ window.renderWorkouts = renderWorkouts;
 window.toggleWorkoutDetails = toggleWorkoutDetails;
 window.removeWorkout = removeWorkout;               // ✅ Add this
 window.removeLogEntry = removeLogEntry;             // ✅ Add this
-window.calculateWorkoutVolume = calculateWorkoutVolume;
-window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
-window.loadTemplateDropdown = loadTemplateDropdown;
+  window.calculateWorkoutVolume = calculateWorkoutVolume;
+  window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
+  window.loadTemplateDropdown = loadTemplateDropdown;
+  window.showHistoryMiniTab = showHistoryMiniTab;
 function openMacroSettings() {
   // Hide the main macros content and reveal the settings view
   document.getElementById('macrosMainContent').style.display = 'none';
