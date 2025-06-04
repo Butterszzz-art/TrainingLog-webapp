@@ -2228,6 +2228,14 @@ document.getElementById("proteinSlider").value = 0;
 
     
 
+  checkMacroReset();
+  updateMacroUI();
+  const addMealBtn = document.getElementById("macroMeal");
+  if (addMealBtn) {
+    addMealBtn.addEventListener("click", addMacroMeal);
+  }
+
+
     
   
 
