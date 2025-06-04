@@ -2186,19 +2186,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-function openMacroSettings() {
-  document.getElementById('macrosMainContent').style.display = 'none';
-  document.getElementById('macrosSettingsContent').style.display = 'block';
-}
 
-function closeMacroSettings() {
-  document.getElementById('macrosSettingsContent').style.display = 'none';
-  document.getElementById('macrosMainContent').style.display = 'block';
-}
-
-// expose helpers for inline handlers
-window.openMacroSettings = openMacroSettings;
-window.closeMacroSettings = closeMacroSettings;
 
     
     
@@ -2225,6 +2213,20 @@ window.calculateWorkoutVolume = calculateWorkoutVolume;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
 window.loadTemplateDropdown = loadTemplateDropdown;
 window.loadSelectedTemplate = loadSelectedTemplate;
+
+function openMacroSettings() {
+  document.getElementById('macrosMainContent').style.display = 'none';
+  document.getElementById('macrosSettingsContent').style.display = 'block';
+}
+
+function closeMacroSettings() {
+  document.getElementById('macrosSettingsContent').style.display = 'none';
+  document.getElementById('macrosMainContent').style.display = 'block';
+}
+
+// expose helpers for inline handlers
+window.openMacroSettings = openMacroSettings;
+window.closeMacroSettings = closeMacroSettings;
 
 
 
