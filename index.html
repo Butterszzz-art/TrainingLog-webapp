@@ -2211,7 +2211,27 @@ window.removeLogEntry = removeLogEntry;             // ✅ Add this
 window.calculateWorkoutVolume = calculateWorkoutVolume;
 window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
 window.loadTemplateDropdown = loadTemplateDropdown;
-window.loadSelectedTemplate = loadSelectedTemplate;
+function openMacroSettings() {
+  // Hide the main macros content and reveal the settings view
+  document.getElementById('macrosMainContent').style.display = 'none';
+  document.getElementById('macrosSettingsContent').style.display = 'block';
+  // Hide the settings button so only the "Go Back" button shows
+  const btn = document.getElementById('macrosSettingsBtn');
+  if (btn) btn.style.display = 'none';
+}
+
+function closeMacroSettings() {
+  // Return to the main macros view
+  document.getElementById('macrosSettingsContent').style.display = 'none';
+  document.getElementById('macrosMainContent').style.display = 'block';
+  // Restore the settings button visibility
+  const btn = document.getElementById('macrosSettingsBtn');
+  if (btn) btn.style.display = 'block';
+}
+
+// expose helpers for inline handlers
+window.openMacroSettings = openMacroSettings;
+window.closeMacroSettings = closeMacroSettings;
 
 function openMacroSettings() {
   document.getElementById('macrosMainContent').style.display = 'none';
