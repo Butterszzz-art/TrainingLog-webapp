@@ -2193,7 +2193,6 @@ window.addEventListener("DOMContentLoaded", () => {
 }); // closing DOMContentLoaded
 
 
-  
 window.startLogin = startLogin;
 window.startSignup = startSignup;
 window.logout = logout;
@@ -2217,15 +2216,13 @@ window.loadSelectedTemplate = loadSelectedTemplate;
 function openMacroSettings() {
   document.getElementById('macrosMainContent').style.display = 'none';
   document.getElementById('macrosSettingsContent').style.display = 'block';
-  const btn = document.getElementById('macrosSettingsBtn');
-  if (btn) btn.style.display = 'none';
+
 }
 
 function closeMacroSettings() {
   document.getElementById('macrosSettingsContent').style.display = 'none';
   document.getElementById('macrosMainContent').style.display = 'block';
-  const btn = document.getElementById('macrosSettingsBtn');
-  if (btn) btn.style.display = 'block';
+
 }
 
 // expose helpers for inline handlers
