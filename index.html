@@ -1104,19 +1104,19 @@ function saveSimpleTemplate() {
   const name = document.getElementById('newTemplateName').value.trim();
   if (!name || newTemplateExercises.length === 0) return alert('Template info missing');
   const templateData = {
-    title: name,
-    date: new Date().toISOString().split('T')[0],
-    log: newTemplateExercises.map(ex => ({
-      exercise: ex.name,
-      sets: ex.sets,
-      repRange: ex.repRange,
-      rpe: ex.rpe,
-      repsArray: Array(ex.sets || 0).fill(0),
-      weightsArray: Array(ex.sets || 0).fill(0),
-      unit: 'kg'
-    }))
-    log: newTemplateExercises.map(ex => ({ exercise: ex, sets: 0, repsArray: [], weightsArray: [], unit: 'kg' }))
-  };
+  title: name,
+  date: new Date().toISOString().split('T')[0],
+  log: newTemplateExercises.map(ex => ({
+    exercise: ex.name,
+    sets: ex.sets,
+    repRange: ex.repRange,
+    rpe: ex.rpe,
+    repsArray: Array(ex.sets || 0).fill(0),
+    weightsArray: Array(ex.sets || 0).fill(0),
+    unit: 'kg'
+  }))
+};
+
   saveTemplate(currentUser, name, templateData)
     .then(() => {
       newTemplateExercises = [];
