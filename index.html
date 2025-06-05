@@ -1787,9 +1787,6 @@ function renderWorkoutHistory() {
   container.innerHTML = "";
 
 
-  const history = JSON.parse(localStorage.getItem(`workoutHistory_${currentUser}`)) || [];
-  history
-
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const history = JSON.parse(localStorage.getItem(`workoutHistory_${currentUser}`)) || [];
   const all = history.concat(workouts.filter(w => w.log && w.log.length > 0));
