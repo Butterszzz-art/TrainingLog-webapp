@@ -1091,8 +1091,6 @@ function addExerciseToTemplate() {
   rpeInput.value = '';
   const input = document.getElementById('newTemplateExercise');
   if (!input) return;
-  const name = input.value.trim();
-  if (!name) return;
   newTemplateExercises.push(name);
   const list = document.getElementById('newTemplateList');
   if (list) {
