@@ -262,7 +262,15 @@
     <input type="number" id="avgCalories" placeholder="Average Daily Calories" />
     <button onclick="estimateCalories()">Estimate Calories</button>
     <table>
-      <thead><tr><th>Date</th><th>Weight</th><th>Remove</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Weight</th>
+          <th>Calories</th>
+          <th>Cardio (min)</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
       <tbody id="weightBody"></tbody>
     </table>
     <table>
@@ -397,6 +405,7 @@
 </div>
 
 <script src="archiveOldWorkouts.js"></script>
+<script src="progressiveOverload.js"></script>
 <script>
 
   
@@ -709,6 +718,8 @@ function addLogEntry() {
   if (!name) return;
 
   const last = getLastExerciseEntry(name);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const suggestion = getProgressiveOverloadSuggestion(name, workouts);
   const msgDiv = document.getElementById("progressReminder");
   msgDiv.innerHTML = '';
 
@@ -718,7 +729,7 @@ function addLogEntry() {
     msgDiv.innerHTML = `
       <div style="margin:10px 0; color: green; font-weight:bold;">
         Last time: ${reps} reps at ${weights} ${last.unit} <br>
-        Try to beat that today!
+        Try to beat that today!${suggestion ? `<br>Recommended: ${suggestion}` : ''}
       </div>`;
   }
 });
@@ -1593,6 +1604,13 @@ function getTodayCardioCalories() {
     .reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0);
 }
 
+function getCardioMinutesForDate(date) {
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  return log
+    .filter(e => e.date === date)
+    .reduce((sum, e) => sum + (parseFloat(e.duration) || 0), 0);
+}
+
 function saveDailyMacroProgress(protein, carbs, fats) {
   const today = getTodayDateString();
   localStorage.setItem("dailyMacroDate", today);
@@ -1727,6 +1745,18 @@ function checkMacroReset() {
     addMacroHistoryEntry(date, previousMeals, previousTotals);
     saveDailyMacroLog(currentUser, date, previousMeals, previousTotals);
 
+    const calories = previousTotals.protein * 4 + previousTotals.carbs * 4 + previousTotals.fats * 9;
+    const cardioMinutes = getCardioMinutesForDate(date);
+    const wKey = `bodyweightLog_${currentUser}`;
+    const wLog = JSON.parse(localStorage.getItem(wKey)) || [];
+    const wEntry = wLog.find(e => e.date === date);
+    if (wEntry) {
+      wEntry.calories = calories;
+      wEntry.cardio = cardioMinutes;
+      localStorage.setItem(wKey, JSON.stringify(wLog));
+      renderWeights();
+    }
+
     localStorage.setItem("dailyMacroProgress", JSON.stringify({ protein:0, carbs:0, fats:0 }));
     localStorage.setItem("dailyMacroMeals", JSON.stringify([]));
     localStorage.setItem("macroResetTime", now.toString());
@@ -1846,7 +1876,7 @@ function addWeightEntry() {
   const date = new Date().toISOString().split('T')[0];
   if (!weight) return alert("Enter weight");
   const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  log.push({ weight, date });
+  log.push({ weight, date, calories: null, cardio: null });
   localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
   renderWeights();
 }
@@ -1856,7 +1886,7 @@ function renderWeights() {
   const body = document.getElementById("weightBody");
   body.innerHTML = '';
   log.forEach((entry, index) => {
-    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
+    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td>${entry.calories ?? '-'}</td><td>${entry.cardio ?? '-'}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
 }
 
