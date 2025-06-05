@@ -1224,7 +1224,8 @@ function calculateMacroTargets() {
     tdee
   };
 
-  document.getElementById("macroSliders").style.display = "block";
+      // reveal the slider section when saved targets are loaded
+      document.getElementById("adjustMacroSection").style.display = "block";
   document.getElementById("proteinSlider").min = pMin;
   document.getElementById("proteinSlider").max = pMax;
   document.getElementById("proteinSlider").value = pMin;
@@ -1403,18 +1404,22 @@ function toggleTargetForm() {
 
 
 function enforceSliderCaps(changedId, p, f, c, limit) {
-    const sliders = [
-      { id: "proteinSlider", val: p, kc: 4 },
-      { id: "fatSlider",     val: f, kc: 9 },
-      { id: "carbSlider",    val: c, kc: 4 }
-    ];
-    sliders.forEach(s => {
-      if (s.id === changedId) return;
-      const remaining = limit - (p*4 + f*9 + c*4) + s.val * s.kc;
-      const maxAllowed = Math.floor(remaining / s.kc);
-      const range = macroRanges[s.id.replace("Slider","")];
-      document.getElementById(s.id).max = Math.min(range.max, maxAllowed);
-    });
+      const sliders = [
+        { id: "proteinSlider", val: p, kc: 4 },
+        { id: "fatSlider",     val: f, kc: 9 },
+        { id: "carbSlider",    val: c, kc: 4 }
+      ];
+      sliders.forEach(s => {
+        if (s.id === changedId) return;
+        const remaining = limit - (p*4 + f*9 + c*4) + s.val * s.kc;
+        const maxAllowed = Math.floor(remaining / s.kc);
+        let key = s.id.replace("Slider", "");
+        if (key === "carb") key = "carbs"; // match macroRanges naming
+        const range = macroRanges[key];
+        if (range) {
+          document.getElementById(s.id).max = Math.min(range.max, maxAllowed);
+        }
+      });
   }
   
 function saveSliderMacros() {
@@ -1422,19 +1427,11 @@ function saveSliderMacros() {
     const f = Number(document.getElementById("fatSlider").value);
     const c = Number(document.getElementById("carbSlider").value);
     const calTotal = p*4 + f*9 + c*4;
-    const fields = {
-      Username: currentUser,
-      Calories: calTotal,
-      Protein:  p,
-      Fat:      f,
-      Carbs:    c
-    };
-    airtableSave(MacroTargetsTableName, fields)
-      .then(id => {
-        if (id) {
-          showToast("Macro targets saved!");
-          saveMacroTargetsToTop({ calories: calTotal, protein: p, fat: f, carbs: c });
-        }
+      const target = { calories: calTotal, protein: p, fat: f, carbs: c };
+      // persist to Airtable and update local display
+      saveToAirtable(currentUser, target).then(() => {
+        showToast("Macro targets saved!");
+        saveMacroTargetsToTop(target);
       });
   }
 
@@ -2255,7 +2252,8 @@ if (savedUser) {
   if (savedTargets) {
     saveMacroTargetsToTop(savedTargets);
     macroRanges.tdee = savedTargets.calories;
-    document.getElementById("macroSliders").style.display = "block";
+    // show the macro adjustment sliders once ranges are known
+    document.getElementById("adjustMacroSection").style.display = "block";
     document.getElementById("proteinSlider").value = savedTargets.protein;
     document.getElementById("fatSlider").value     = savedTargets.fat;
     document.getElementById("carbSlider").value    = savedTargets.carbs;
@@ -2267,7 +2265,8 @@ const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
     document.getElementById("fatSlider").value = saved.fat;
     document.getElementById("carbSlider").value = saved.carbs;
     macroRanges.tdee = saved.calories;
-    document.getElementById("macroSliders").style.display = "block";
+    // show the macro adjustment sliders when ranges are generated
+    document.getElementById("adjustMacroSection").style.display = "block";
     adjustMacros();
   }
 
