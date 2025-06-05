@@ -2,7 +2,7 @@
   "name": "traininglog",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
+  "main": "archiveOldWorkouts.js",
   "scripts": {
     "test": "jest",
     "start": "node server.js"
