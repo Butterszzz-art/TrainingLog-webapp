@@ -303,6 +303,8 @@
 
 <div id="programTab" class="tab-content">
   <button id="openProgramBtn" onclick="toggleProgramBuilder()">Create Program</button>
+  <button id="openTemplateBtn" onclick="toggleTemplateBuilder()" style="margin-left:10px;">Create Template</button>
+
   <div id="programBuilder" style="display:none; margin-top:10px;">
     <h2 style="margin-top:0;">Program Builder</h2>
     <input type="text" id="programName" placeholder="Program Name" />
@@ -313,6 +315,15 @@
     <button onclick="addDayToProgram()">Add Day</button>
     <ul id="programDaysList"></ul>
     <button onclick="saveProgram()">Save Program</button>
+  </div>
+
+  <div id="templateBuilder" style="display:none; margin-top:10px;">
+    <h2 style="margin-top:0;">Template Builder</h2>
+    <input type="text" id="newTemplateName" placeholder="Template Name" />
+    <input type="text" id="newTemplateExercise" placeholder="Exercise Name" />
+    <button onclick="addExerciseToTemplate()">Add Exercise</button>
+    <ul id="newTemplateList"></ul>
+    <button onclick="saveSimpleTemplate()">Save Template</button>
   </div>
 
   <h3 style="margin-top:20px;">Start Saved Program</h3>
@@ -1030,6 +1041,53 @@ function toggleProgramBuilder() {
   const builder = document.getElementById('programBuilder');
   if (!builder) return;
   builder.style.display = builder.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleTemplateBuilder() {
+  const builder = document.getElementById('templateBuilder');
+  if (!builder) return;
+  builder.style.display = builder.style.display === 'none' ? 'block' : 'none';
+}
+
+let newTemplateExercises = [];
+
+function addExerciseToTemplate() {
+  const input = document.getElementById('newTemplateExercise');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) return;
+  newTemplateExercises.push(name);
+  const list = document.getElementById('newTemplateList');
+  if (list) {
+    const li = document.createElement('li');
+    li.textContent = name;
+    list.appendChild(li);
+  }
+  input.value = '';
+}
+
+function saveSimpleTemplate() {
+  const name = document.getElementById('newTemplateName').value.trim();
+  if (!name || newTemplateExercises.length === 0) return alert('Template info missing');
+  const templateData = {
+    title: name,
+    date: new Date().toISOString().split('T')[0],
+    log: newTemplateExercises.map(ex => ({ exercise: ex, sets: 0, repsArray: [], weightsArray: [], unit: 'kg' }))
+  };
+  saveTemplate(currentUser, name, templateData)
+    .then(() => {
+      newTemplateExercises = [];
+      document.getElementById('newTemplateList').innerHTML = '';
+      document.getElementById('newTemplateName').value = '';
+      toggleTemplateBuilder();
+      loadProgramTemplates();
+      loadTemplateDropdown();
+      alert('Template saved');
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Failed to save template');
+    });
 }
 
 // ===== Program Builder =====
@@ -2522,6 +2580,9 @@ window.startProgram = startProgram;
 window.checkActiveProgram = checkActiveProgram;
 window.toggleProgramBuilder = toggleProgramBuilder;
 window.loadTodayProgram = loadTodayProgram;
+window.toggleTemplateBuilder = toggleTemplateBuilder;
+window.addExerciseToTemplate = addExerciseToTemplate;
+window.saveSimpleTemplate = saveSimpleTemplate;
 
   function showToast(msg) {
     const toast = document.createElement('div');
