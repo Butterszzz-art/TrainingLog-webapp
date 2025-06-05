@@ -444,8 +444,19 @@
 <script>
 
   
-const airtableToken = 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577';
-const airtableBaseId = 'appmjr4IgnEH72K1b';
+let airtableToken = '';
+let airtableBaseId = '';
+
+async function fetchAirtableConfig() {
+  try {
+    const res = await fetch(`${serverUrl}/config`);
+    const cfg = await res.json();
+    airtableToken = cfg.airtableToken;
+    airtableBaseId = cfg.airtableBaseId;
+  } catch (err) {
+    console.error('Failed to load Airtable configuration', err);
+  }
+}
 const usersTableName = 'Users';
 const templatesTableName = 'Templates';
 const MacroTargetsTableName = 'MacroTargets';  
@@ -2250,7 +2261,9 @@ function showHistoryMiniTab(tab) {
 
 
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+
+    await fetchAirtableConfig();
 
     // initial setup for macros
     checkMacroReset();
