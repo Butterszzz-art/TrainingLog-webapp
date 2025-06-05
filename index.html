@@ -1353,6 +1353,8 @@ function renderMacroTargets() {
   document.getElementById("macroFatTarget").textContent = saved.fat;
   document.getElementById("macroCarbsTarget").textContent = saved.carbs;
   document.getElementById("macroCalsTarget").textContent = saved.calories;
+  const calTargetEl = document.getElementById("calTarget");
+  if (calTargetEl) calTargetEl.textContent = saved.calories;
 
   document.getElementById("macroProteinProgress").textContent = 0;
   document.getElementById("macroFatProgress").textContent = 0;
@@ -1468,12 +1470,15 @@ async function saveToAirtable(username, target) {
 }
 
   
- function saveMacroTargetsToTop(target) {
+function saveMacroTargetsToTop(target) {
     localStorage.setItem(`macroTargets_${currentUser}`, JSON.stringify(target));
     document.getElementById("macroCalsTarget").textContent    = target.calories;
     document.getElementById("macroProteinTarget").textContent = target.protein;
     document.getElementById("macroFatTarget").textContent     = target.fat;
     document.getElementById("macroCarbsTarget").textContent   = target.carbs;
+    // also reflect in the adjust section
+    const calTargetEl = document.getElementById("calTarget");
+    if (calTargetEl) calTargetEl.textContent = target.calories;
   }
 
 function renderMacroSlots() {
@@ -1487,6 +1492,8 @@ function renderMacroSlots() {
     document.getElementById("proteinBar").max= saved.protein;
     document.getElementById("fatBar").max    = saved.fat;
     document.getElementById("carbBar").max   = saved.carbs;
+    const calTargetEl = document.getElementById("calTarget");
+    if (calTargetEl) calTargetEl.textContent = saved.calories;
   }
 
   
@@ -1510,6 +1517,13 @@ function applyCustomCalories() {
   macroTargetFat     = fat;
   macroTargetCarbs   = carbs;
 
+  macroRanges = {
+    protein: { min: 0, max: Math.round(protein * 1.2) },
+    fat:     { min: 0, max: Math.round(fat * 1.2) },
+    carbs:   { min: 0, max: Math.round(carbs * 1.2) },
+    tdee:    customCal
+  };
+
   // Set slider values
   document.getElementById("proteinSlider").value = 0;
   document.getElementById("fatSlider").value = 0;
@@ -1520,7 +1534,11 @@ function applyCustomCalories() {
   document.getElementById("fatSlider").max = Math.round(fat * 1.2);
   document.getElementById("carbSlider").max = Math.round(carbs * 1.2);
 
+  const calTargetEl = document.getElementById("calTarget");
+  if (calTargetEl) calTargetEl.textContent = customCal;
+
   updateMacroUI();
+  adjustMacros();
 }
 
  function toggleMacroAdjust() {
