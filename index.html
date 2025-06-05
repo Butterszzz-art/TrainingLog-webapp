@@ -1828,16 +1828,14 @@ function loadDailyMacroProgress() {
 function getTodayCardioCalories() {
   const today = getTodayDateString();
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  return log
-    .filter(e => e.date === today)
-    .reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0);
+  return log.filter(e => e.date === today)
+            .reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0);
 }
 
 function getCardioMinutesForDate(date) {
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  return log
-    .filter(e => e.date === date)
-    .reduce((sum, e) => sum + (parseFloat(e.duration) || 0), 0);
+  return log.filter(e => e.date === date)
+            .reduce((sum, e) => sum + (parseFloat(e.duration) || 0), 0);
 }
 
 function saveDailyMacroProgress(protein, carbs, fats) {
