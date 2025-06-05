@@ -296,11 +296,12 @@
     <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
     <input type="number" id="cardioDuration" placeholder="Duration (min)">
     <input type="number" id="cardioDistance" placeholder="Distance (km)">
+    <input type="number" id="cardioCalories" placeholder="Calories burned (optional)">
     <input type="text" id="cardioNotes" placeholder="Notes (optional)">
     <button onclick="addCardioEntry()">Add Cardio</button>
     <button onclick="completeCardioSession()">Complete Cardio Session</button>
     <table>
-      <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Notes</th><th>Remove</th></tr></thead>
+      <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Calories</th><th>Notes</th><th>Remove</th></tr></thead>
       <tbody id="cardioBody"></tbody>
     </table>
   </div>
@@ -315,7 +316,7 @@
   <div id="macrosMainContent" style="max-width: 600px; margin: 0 auto; text-align: center;">
     <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Targets</h2>
 
-    <p style="font-size: 1.3rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal</p>
+    <p style="font-size: 1.3rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal (<span id="macroCalsNet">0</span> net)</p>
     <progress id="calsBar" value="0" max="100" style="width: 100%; height: 20px; margin-bottom: 20px;"></progress>
 
     <p style="font-size: 1.2rem;">Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
@@ -1253,6 +1254,9 @@ function updateMacroUI() {
 
   const totalCals = totalProtein * 4 + totalCarbs * 4 + totalFats * 9;
 
+  const cardioCals = getTodayCardioCalories();
+  const netCals = Math.max(0, totalCals - cardioCals);
+
   // Update Top Bar Targets and progress
   document.getElementById("macroCalsTarget").textContent = macroTargetCalories;
   document.getElementById("macroProteinTarget").textContent = macroTargetProtein;
@@ -1264,12 +1268,13 @@ function updateMacroUI() {
   document.getElementById("fatBar").max = macroTargetFat;
   document.getElementById("carbBar").max = macroTargetCarbs;
 
-  document.getElementById("calsBar").value = totalCals;
+  document.getElementById("calsBar").value = netCals;
   document.getElementById("proteinBar").value = totalProtein;
   document.getElementById("fatBar").value = totalFats;
   document.getElementById("carbBar").value = totalCarbs;
 
   document.getElementById("macroCalsProgress").textContent = totalCals;
+  document.getElementById("macroCalsNet").textContent = netCals;
   document.getElementById("macroProteinProgress").textContent = totalProtein;
   document.getElementById("macroFatProgress").textContent = totalFats;
   document.getElementById("macroCarbsProgress").textContent = totalCarbs;
@@ -1569,6 +1574,14 @@ function loadDailyMacroProgress() {
   return progress || { protein: 0, carbs: 0, fats: 0 };
 }
 
+function getTodayCardioCalories() {
+  const today = getTodayDateString();
+  const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  return log
+    .filter(e => e.date === today)
+    .reduce((sum, e) => sum + (parseFloat(e.calories) || 0), 0);
+}
+
 function saveDailyMacroProgress(protein, carbs, fats) {
   const today = getTodayDateString();
   localStorage.setItem("dailyMacroDate", today);
@@ -1862,21 +1875,24 @@ function addCardioEntry() {
   const type = document.getElementById("cardioType").value.trim();
   const duration = +document.getElementById("cardioDuration").value;
   const distance = document.getElementById("cardioDistance").value;
+  const calories = +document.getElementById("cardioCalories").value || 0;
   const notes = document.getElementById("cardioNotes").value;
   const date = new Date().toISOString().split('T')[0];
   if (!type || !duration) return alert("Type and Duration are required");
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  log.push({ date, type, duration, distance, notes });
+  log.push({ date, type, duration, distance, calories, notes });
   localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
   renderCardio();
+  updateMacroUI();
 }
 
 function completeCardioSession() {
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
   const date = new Date().toISOString().split('T')[0];
-  log.push({ date, type: 'Session Complete', duration: 0, distance: 0, notes: '' });
+  log.push({ date, type: 'Session Complete', duration: 0, distance: 0, calories: 0, notes: '' });
   localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
   renderCardio();
+  updateMacroUI();
 }
 
 function renderCardio() {
@@ -1884,7 +1900,7 @@ function renderCardio() {
   const body = document.getElementById("cardioBody");
   body.innerHTML = '';
   log.forEach((entry, index) => {
-    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
+    body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.calories || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
 }
 
@@ -1893,6 +1909,7 @@ function removeCardioEntry(index) {
   log.splice(index, 1);
   localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
   renderCardio();
+  updateMacroUI();
 }
 
 
