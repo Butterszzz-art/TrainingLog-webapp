@@ -1779,8 +1779,15 @@ function renderWorkoutHistory() {
   const container = document.getElementById("logHistoryContainer");
   container.innerHTML = "";
 
+
   const history = JSON.parse(localStorage.getItem(`workoutHistory_${currentUser}`)) || [];
   history
+=======
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const history = JSON.parse(localStorage.getItem(`workoutHistory_${currentUser}`)) || [];
+  const all = history.concat(workouts.filter(w => w.log && w.log.length > 0));
+  all
+
     .slice()
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .forEach(workout => {
