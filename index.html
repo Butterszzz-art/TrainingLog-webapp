@@ -387,7 +387,8 @@
 
   
 </div>
-  
+
+<script src="archiveOldWorkouts.js"></script>
 <script>
 
   
@@ -734,6 +735,7 @@ function addLogEntry() {
 
   
 function renderWorkouts() {
+  archiveOldWorkouts(currentUser);
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const container = document.getElementById("workoutsContainer");
 
@@ -819,6 +821,8 @@ function renderWorkouts() {
     const el = document.getElementById(`workoutDetails${index}`);
     if (el) el.style.display = 'block';
   });
+
+  renderWorkoutHistory();
 
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
@@ -1776,10 +1780,11 @@ function renderWorkoutHistory() {
   container.innerHTML = "";
 
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts
-    .filter(w => w.log && w.log.length > 0)
+  const history = JSON.parse(localStorage.getItem(`workoutHistory_${currentUser}`)) || [];
+  const all = history.concat(workouts.filter(w => w.log && w.log.length > 0));
+  all
     .slice()
-    .reverse()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
     .forEach(workout => {
       const div = document.createElement("div");
       div.style.border = "1px solid #ccc";
