@@ -999,6 +999,7 @@ function completeWorkout() {
   workouts.push({ title: `Workout on ${date}`, date, log: [] });
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   renderWorkouts();
+  renderWorkoutHistory();
 }
 
 async function saveWorkoutToBackend(workout) {
@@ -1770,6 +1771,38 @@ function removeWorkout(index) {
   }
 }
 
+function renderWorkoutHistory() {
+  const container = document.getElementById("logHistoryContainer");
+  container.innerHTML = "";
+
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  workouts
+    .filter(w => w.log && w.log.length > 0)
+    .slice()
+    .reverse()
+    .forEach(workout => {
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ccc";
+      div.style.padding = "10px";
+      div.style.marginTop = "10px";
+
+      const exercisesHtml = workout.log
+        .map(entry => {
+          const sets = entry.repsArray
+            .map((rep, i) => `${rep} x ${entry.weightsArray[i] ?? '-'} ${entry.unit || 'kg'}`)
+            .join(', ');
+          return `${entry.exercise}: ${sets}`;
+        })
+        .join('<br>');
+
+      const volume = calculateWorkoutVolume(workout);
+      const unit = workout.log[0]?.unit || 'kg';
+
+      div.innerHTML = `<strong>${workout.title}</strong><br>${exercisesHtml}<br>Total Volume: ${volume} ${unit}`;
+      container.appendChild(div);
+    });
+}
+
 function addWeightEntry() {
   const weight = +document.getElementById("currentWeightInput").value;
   const date = new Date().toISOString().split('T')[0];
@@ -1908,8 +1941,11 @@ function showHistoryMiniTab(tab) {
   } else {
     macroTab.style.display = "none";
     workoutTab.style.display = "block";
+    renderWorkoutHistory();
   }
 }
+
+  
 
 
 
@@ -2287,6 +2323,7 @@ window.removeLogEntry = removeLogEntry;             // ✅ Add this
   window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
   window.loadTemplateDropdown = loadTemplateDropdown;
   window.showHistoryMiniTab = showHistoryMiniTab;
+  window.renderWorkoutHistory = renderWorkoutHistory;
 function openMacroSettings() {
   // Hide the main macros content and reveal the settings view
   document.getElementById('macrosMainContent').style.display = 'none';
