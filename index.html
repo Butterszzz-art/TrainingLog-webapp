@@ -1490,6 +1490,12 @@ function saveMacroTargetsToTop(target) {
     // also reflect in the adjust section
     const calTargetEl = document.getElementById("calTarget");
     if (calTargetEl) calTargetEl.textContent = target.calories;
+    macroRanges = {
+      protein: { min: 0, max: target.protein },
+      fat:     { min: 0, max: target.fat },
+      carbs:   { min: 0, max: target.carbs },
+      tdee:    target.calories
+    };
   }
 
 function renderMacroSlots() {
@@ -1505,6 +1511,12 @@ function renderMacroSlots() {
     document.getElementById("carbBar").max   = saved.carbs;
     const calTargetEl = document.getElementById("calTarget");
     if (calTargetEl) calTargetEl.textContent = saved.calories;
+    macroRanges = {
+      protein: { min: 0, max: saved.protein },
+      fat:     { min: 0, max: saved.fat },
+      carbs:   { min: 0, max: saved.carbs },
+      tdee:    saved.calories
+    };
   }
 
   
@@ -2283,48 +2295,33 @@ if (savedUser) {
   const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
   if (savedTargets) {
     saveMacroTargetsToTop(savedTargets);
-    macroRanges.tdee = savedTargets.calories;
-    // show the macro adjustment sliders once ranges are known
+    macroRanges = {
+      protein: { min: 0, max: savedTargets.protein },
+      fat:     { min: 0, max: savedTargets.fat },
+      carbs:   { min: 0, max: savedTargets.carbs },
+      tdee:    savedTargets.calories
+    };
     document.getElementById("adjustMacroSection").style.display = "block";
     document.getElementById("proteinSlider").value = savedTargets.protein;
     document.getElementById("fatSlider").value     = savedTargets.fat;
     document.getElementById("carbSlider").value    = savedTargets.carbs;
     adjustMacros();
-  }    
-const saved = JSON.parse(localStorage.getItem(`macroTargets_${currentUser}`));
-  if (saved) {
-    document.getElementById("proteinSlider").value = saved.protein;
-    document.getElementById("fatSlider").value = saved.fat;
-    document.getElementById("carbSlider").value = saved.carbs;
-    macroRanges.tdee = saved.calories;
-    // show the macro adjustment sliders when ranges are generated
-    document.getElementById("adjustMacroSection").style.display = "block";
-    adjustMacros();
+  } else {
+    const sliders = [
+      { id: "proteinSlider", label: "proteinVal" },
+      { id: "fatSlider", label: "fatVal" },
+      { id: "carbSlider", label: "carbVal" }
+    ];
+    sliders.forEach(({ id, label }) => {
+      const slider = document.getElementById(id);
+      const display = document.getElementById(label);
+      if (slider && display) {
+        slider.value = 0;
+        display.textContent = "0";
+      }
+    });
+    document.getElementById("macroTotalCals").textContent = "0";
   }
-
- const sliders = [
-    { id: "proteinSlider", label: "proteinVal" },
-    { id: "fatSlider", label: "fatVal" },
-    { id: "carbSlider", label: "carbVal" }
-  ];
-
-  sliders.forEach(({ id, label }) => {
-    const slider = document.getElementById(id);
-    const display = document.getElementById(label);
-    if (slider && display) {
-      slider.value = 0;
-      display.textContent = "0";
-    }
-  });
-  
-  
-document.getElementById("proteinSlider").value = 0;
-  document.getElementById("fatSlider").value = 0;
-  document.getElementById("carbSlider").value = 0;
-  document.getElementById("proteinVal").textContent = "0";
-  document.getElementById("fatVal").textContent = "0";
-  document.getElementById("carbVal").textContent = "0";
-  document.getElementById("macroTotalCals").textContent = "0";
     
 
     
@@ -2386,6 +2383,24 @@ window.removeLogEntry = removeLogEntry;             // ✅ Add this
   window.loadTemplateDropdown = loadTemplateDropdown;
   window.showHistoryMiniTab = showHistoryMiniTab;
   window.renderWorkoutHistory = renderWorkoutHistory;
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.background = '#333';
+    toast.style.color = '#fff';
+    toast.style.padding = '8px 16px';
+    toast.style.borderRadius = '4px';
+    toast.style.zIndex = '1000';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  window.showToast = showToast;
 function openMacroSettings() {
   // Hide the main macros content and reveal the settings view
   document.getElementById('macrosMainContent').style.display = 'none';
