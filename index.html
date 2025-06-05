@@ -405,6 +405,7 @@
 </div>
 
 <script src="archiveOldWorkouts.js"></script>
+<script src="progressiveOverload.js"></script>
 <script>
 
   
@@ -717,6 +718,8 @@ function addLogEntry() {
   if (!name) return;
 
   const last = getLastExerciseEntry(name);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const suggestion = getProgressiveOverloadSuggestion(name, workouts);
   const msgDiv = document.getElementById("progressReminder");
   msgDiv.innerHTML = '';
 
@@ -726,7 +729,7 @@ function addLogEntry() {
     msgDiv.innerHTML = `
       <div style="margin:10px 0; color: green; font-weight:bold;">
         Last time: ${reps} reps at ${weights} ${last.unit} <br>
-        Try to beat that today!
+        Try to beat that today!${suggestion ? `<br>Recommended: ${suggestion}` : ''}
       </div>`;
   }
 });
