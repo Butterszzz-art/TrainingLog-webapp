@@ -424,22 +424,6 @@ const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
 const tabContents = document.querySelectorAll('.tab-content');
 
-menuToggle.addEventListener('click', () => {
-  sideMenu.classList.toggle('open');
-});
-
-sideMenu.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const tabToShow = e.target.getAttribute('data-tab');
-
-    showTab(tabToShow);
-
-    // Close the menu
-    sideMenu.classList.remove('open');
-  });
-});
-
   
 // LOGIN
 async function startLogin() {
