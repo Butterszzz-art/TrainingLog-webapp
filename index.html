@@ -208,6 +208,7 @@
       <li><a href="#" data-tab="cardioTab">Cardio</a></li>
       <li><a href="#" data-tab="macroTab">Macros</a></li>
       <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
+      <li><a href="#" data-tab="programTab">Program</a></li>
       <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()" style="width: 100%; padding: 8px; background-color: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button></li>
     </ul>
@@ -246,6 +247,7 @@
   <button onclick="completeWorkout()">Complete Workout</button>
   <button onclick="saveWorkoutAsTemplate()">Save Current Workout as Template</button>
    <button onclick="loadSelectedTemplate()">Load a Saved Template</button>
+  <button onclick="loadTodayProgram()">Load Program</button>
   
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
@@ -297,6 +299,38 @@
 
   <h3 style="margin-top:30px;">Saved CrossFit Workouts</h3>
   <div id="cfWorkoutsContainer"></div>
+</div>
+
+<div id="programTab" class="tab-content">
+  <button id="openProgramBtn" onclick="toggleProgramBuilder()">Create Program</button>
+  <button id="openTemplateBtn" onclick="toggleTemplateBuilder()" style="margin-left:10px;">Create Template</button>
+  <div id="programBuilder" style="display:none; margin-top:10px;">
+    <h2 style="margin-top:0;">Program Builder</h2>
+    <input type="text" id="programName" placeholder="Program Name" />
+    <input type="date" id="programStart" />
+    <select id="programTemplateSelect">
+      <option value="">Select Template...</option>
+    </select>
+    <button onclick="addDayToProgram()">Add Day</button>
+    <ul id="programDaysList"></ul>
+    <button onclick="saveProgram()">Save Program</button>
+  </div>
+
+  <div id="templateBuilder" style="display:none; margin-top:10px;">
+    <h2 style="margin-top:0;">Template Builder</h2>
+    <input type="text" id="newTemplateName" placeholder="Template Name" />
+    <input type="text" id="newTemplateExercise" placeholder="Exercise Name" />
+    <input type="number" id="newTemplateSets" placeholder="Total Sets" />
+    <input type="text" id="newTemplateReps" placeholder="Rep Range (e.g. 8-12)" />
+    <input type="text" id="newTemplateRPE" placeholder="RIR/RPE" />
+    <button onclick="addExerciseToTemplate()">Add Exercise</button>
+    <ul id="newTemplateList"></ul>
+    <button onclick="saveSimpleTemplate()">Save Template</button>
+  </div>
+
+  <h3 style="margin-top:20px;">Start Saved Program</h3>
+  <select id="programSelect"></select>
+  <button onclick="startProgram()">Start Program</button>
 </div>
 
   <div id="cardioTab" class="tab-content">
@@ -468,6 +502,9 @@ async function startLogin() {
       renderCardio();
       renderCrossfitWorkouts();
       loadTemplateDropdown(); // ✅ Load saved templates
+      loadProgramTemplates();
+      loadProgramDropdown();
+      checkActiveProgram();
       saveDailyMacroProgress(0, 0, 0); // reset progress on login
       renderDailyMacroProgress();
     } else {
@@ -511,6 +548,10 @@ function showTab(tabName) {
     settingsBtn.style.display = "block";
   } else {
     settingsBtn.style.display = "none";
+  }
+
+  if (tabName === "logTab") {
+    checkActiveProgram();
   }
 
   // Always reset macros view to main content on tab change
@@ -996,6 +1037,182 @@ async function sendTemplate() {
 function showTemplateOptions() {
   const selected = document.getElementById("templateSelect").value;
   document.getElementById("templateActions").style.display = selected ? 'block' : 'none';
+}
+
+function toggleProgramBuilder() {
+  const builder = document.getElementById('programBuilder');
+  if (!builder) return;
+  builder.style.display = builder.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleTemplateBuilder() {
+  const builder = document.getElementById('templateBuilder');
+  if (!builder) return;
+  const show = builder.style.display === 'none';
+  builder.style.display = show ? 'block' : 'none';
+  if (show) return;
+  document.getElementById('newTemplateExercise').value = '';
+  document.getElementById('newTemplateSets').value = '';
+  document.getElementById('newTemplateReps').value = '';
+  document.getElementById('newTemplateRPE').value = '';
+  newTemplateExercises = [];
+  document.getElementById('newTemplateList').innerHTML = '';
+}
+
+let newTemplateExercises = [];
+
+function addExerciseToTemplate() {
+  const nameInput = document.getElementById('newTemplateExercise');
+  const setsInput = document.getElementById('newTemplateSets');
+  const repsInput = document.getElementById('newTemplateReps');
+  const rpeInput = document.getElementById('newTemplateRPE');
+  if (!nameInput) return;
+  const name = nameInput.value.trim();
+  if (!name) return;
+  const sets = parseInt(setsInput.value) || 0;
+  const repRange = repsInput.value.trim();
+  const rpe = rpeInput.value.trim();
+  newTemplateExercises.push({ name, sets, repRange, rpe });
+  const list = document.getElementById('newTemplateList');
+  if (list) {
+    const li = document.createElement('li');
+    let txt = `${name}`;
+    if (sets) txt += ` - ${sets} sets`;
+    if (repRange) txt += ` @ ${repRange}`;
+    if (rpe) txt += ` (RIR/RPE: ${rpe})`;
+    li.textContent = txt;
+    list.appendChild(li);
+  }
+  nameInput.value = '';
+  setsInput.value = '';
+  repsInput.value = '';
+  rpeInput.value = '';
+}
+
+function saveSimpleTemplate() {
+  const name = document.getElementById('newTemplateName').value.trim();
+  if (!name || newTemplateExercises.length === 0) return alert('Template info missing');
+  const templateData = {
+    title: name,
+    date: new Date().toISOString().split('T')[0],
+    log: newTemplateExercises.map(ex => ({
+      exercise: ex.name,
+      sets: ex.sets,
+      repRange: ex.repRange,
+      rpe: ex.rpe,
+      repsArray: Array(ex.sets || 0).fill(0),
+      weightsArray: Array(ex.sets || 0).fill(0),
+      unit: 'kg'
+    }))
+  };
+  saveTemplate(currentUser, name, templateData)
+    .then(() => {
+      newTemplateExercises = [];
+      document.getElementById('newTemplateList').innerHTML = '';
+      document.getElementById('newTemplateName').value = '';
+      toggleTemplateBuilder();
+      loadProgramTemplates();
+      loadTemplateDropdown();
+      alert('Template saved');
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Failed to save template');
+    });
+}
+
+// ===== Program Builder =====
+let programDays = [];
+
+function loadProgramTemplates() {
+  const select = document.getElementById("programTemplateSelect");
+  if (!select) return;
+  select.innerHTML = '<option value="">Select Template...</option>';
+  fetchTemplates(currentUser).then(templates => {
+    templates.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(t.data);
+      opt.textContent = t.name;
+      select.appendChild(opt);
+    });
+  });
+}
+
+function addDayToProgram() {
+  const sel = document.getElementById("programTemplateSelect");
+  const val = sel.value;
+  if (!val) return;
+  const data = JSON.parse(val);
+  programDays.push(data);
+  const list = document.getElementById("programDaysList");
+  const li = document.createElement('li');
+  li.textContent = sel.options[sel.selectedIndex].textContent;
+  list.appendChild(li);
+}
+
+function saveProgram() {
+  const name = document.getElementById("programName").value.trim();
+  if (!name || programDays.length === 0) return alert('Program info missing');
+  const programs = JSON.parse(localStorage.getItem(`programs_${currentUser}`)) || [];
+  const id = Date.now();
+  programs.push({ id, name, days: programDays });
+  localStorage.setItem(`programs_${currentUser}`, JSON.stringify(programs));
+  programDays = [];
+  document.getElementById("programDaysList").innerHTML = '';
+  loadProgramDropdown();
+  alert('Program saved');
+}
+
+function loadProgramDropdown() {
+  const select = document.getElementById('programSelect');
+  if (!select) return;
+  select.innerHTML = '';
+  const programs = JSON.parse(localStorage.getItem(`programs_${currentUser}`)) || [];
+  programs.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+}
+
+function startProgram() {
+  const select = document.getElementById('programSelect');
+  const id = select.value;
+  const start = document.getElementById('programStart').value || new Date().toISOString().split('T')[0];
+  if (!id) return alert('Select a program');
+  localStorage.setItem(`activeProgram_${currentUser}`, JSON.stringify({ programId: Number(id), startDate: start }));
+  alert('Program started');
+  checkActiveProgram();
+}
+
+function checkActiveProgram() {
+  const active = JSON.parse(localStorage.getItem(`activeProgram_${currentUser}`));
+  if (!active) return;
+  const programs = JSON.parse(localStorage.getItem(`programs_${currentUser}`)) || [];
+  const program = programs.find(p => p.id === active.programId);
+  if (!program) return;
+  const start = new Date(active.startDate);
+  const today = new Date();
+  const diff = Math.floor((today.setHours(0,0,0,0) - start.setHours(0,0,0,0)) / 86400000);
+  if (diff < 0 || diff >= program.days.length) {
+    localStorage.removeItem(`activeProgram_${currentUser}`);
+    return;
+  }
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const dayTemplate = program.days[diff];
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (!workouts.some(w => w.date === todayStr)) {
+    const tpl = JSON.parse(JSON.stringify(dayTemplate));
+    tpl.date = todayStr;
+    workouts.push(tpl);
+    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  }
+  renderWorkouts();
+}
+
+function loadTodayProgram() {
+  checkActiveProgram();
 }
 
 
@@ -2289,6 +2506,9 @@ if (savedUser) {
   renderCardio();
   renderCrossfitWorkouts();
   loadTemplateDropdown();
+  loadProgramTemplates();
+  loadProgramDropdown();
+  checkActiveProgram();
 }
 
 
@@ -2382,7 +2602,18 @@ window.removeLogEntry = removeLogEntry;             // ✅ Add this
   window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
   window.loadTemplateDropdown = loadTemplateDropdown;
   window.showHistoryMiniTab = showHistoryMiniTab;
-  window.renderWorkoutHistory = renderWorkoutHistory;
+window.renderWorkoutHistory = renderWorkoutHistory;
+window.loadProgramTemplates = loadProgramTemplates;
+window.addDayToProgram = addDayToProgram;
+window.saveProgram = saveProgram;
+window.loadProgramDropdown = loadProgramDropdown;
+window.startProgram = startProgram;
+window.checkActiveProgram = checkActiveProgram;
+window.toggleProgramBuilder = toggleProgramBuilder;
+window.loadTodayProgram = loadTodayProgram;
+window.toggleTemplateBuilder = toggleTemplateBuilder;
+window.addExerciseToTemplate = addExerciseToTemplate;
+window.saveSimpleTemplate = saveSimpleTemplate;
 
   function showToast(msg) {
     const toast = document.createElement('div');
