@@ -1092,8 +1092,7 @@ function addExerciseToTemplate() {
   const input = document.getElementById('newTemplateExercise');
   if (!input) return;
   newTemplateExercises.push(name);
-  const list = document.getElementById('newTemplateList');
-  if (list) {
+  {
     const li = document.createElement('li');
     li.textContent = name;
     list.appendChild(li);
