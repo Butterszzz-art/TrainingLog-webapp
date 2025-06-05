@@ -321,6 +321,9 @@
     <h2 style="margin-top:0;">Template Builder</h2>
     <input type="text" id="newTemplateName" placeholder="Template Name" />
     <input type="text" id="newTemplateExercise" placeholder="Exercise Name" />
+    <input type="number" id="newTemplateSets" placeholder="Total Sets" />
+    <input type="text" id="newTemplateReps" placeholder="Rep Range (e.g. 8-12)" />
+    <input type="text" id="newTemplateRPE" placeholder="RIR/RPE" />
     <button onclick="addExerciseToTemplate()">Add Exercise</button>
     <ul id="newTemplateList"></ul>
     <button onclick="saveSimpleTemplate()">Save Template</button>
@@ -1046,12 +1049,46 @@ function toggleProgramBuilder() {
 function toggleTemplateBuilder() {
   const builder = document.getElementById('templateBuilder');
   if (!builder) return;
+  const show = builder.style.display === 'none';
+  builder.style.display = show ? 'block' : 'none';
+  if (show) return;
+  document.getElementById('newTemplateExercise').value = '';
+  document.getElementById('newTemplateSets').value = '';
+  document.getElementById('newTemplateReps').value = '';
+  document.getElementById('newTemplateRPE').value = '';
+  newTemplateExercises = [];
+  document.getElementById('newTemplateList').innerHTML = '';
   builder.style.display = builder.style.display === 'none' ? 'block' : 'none';
 }
 
 let newTemplateExercises = [];
 
 function addExerciseToTemplate() {
+  const nameInput = document.getElementById('newTemplateExercise');
+  const setsInput = document.getElementById('newTemplateSets');
+  const repsInput = document.getElementById('newTemplateReps');
+  const rpeInput = document.getElementById('newTemplateRPE');
+  if (!nameInput) return;
+  const name = nameInput.value.trim();
+  if (!name) return;
+  const sets = parseInt(setsInput.value) || 0;
+  const repRange = repsInput.value.trim();
+  const rpe = rpeInput.value.trim();
+  newTemplateExercises.push({ name, sets, repRange, rpe });
+  const list = document.getElementById('newTemplateList');
+  if (list) {
+    const li = document.createElement('li');
+    let txt = `${name}`;
+    if (sets) txt += ` - ${sets} sets`;
+    if (repRange) txt += ` @ ${repRange}`;
+    if (rpe) txt += ` (RIR/RPE: ${rpe})`;
+    li.textContent = txt;
+    list.appendChild(li);
+  }
+  nameInput.value = '';
+  setsInput.value = '';
+  repsInput.value = '';
+  rpeInput.value = '';
   const input = document.getElementById('newTemplateExercise');
   if (!input) return;
   const name = input.value.trim();
@@ -1072,6 +1109,15 @@ function saveSimpleTemplate() {
   const templateData = {
     title: name,
     date: new Date().toISOString().split('T')[0],
+    log: newTemplateExercises.map(ex => ({
+      exercise: ex.name,
+      sets: ex.sets,
+      repRange: ex.repRange,
+      rpe: ex.rpe,
+      repsArray: Array(ex.sets || 0).fill(0),
+      weightsArray: Array(ex.sets || 0).fill(0),
+      unit: 'kg'
+    }))
     log: newTemplateExercises.map(ex => ({ exercise: ex, sets: 0, repsArray: [], weightsArray: [], unit: 'kg' }))
   };
   saveTemplate(currentUser, name, templateData)
