@@ -866,19 +866,6 @@ function renderWorkouts() {
 }
 
   
-function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const entry = workouts[workoutIndex].log[entryIndex];
-
-  if (type === 'rep') {
-    entry.repsArray[setIndex] = +value;
-  } else if (type === 'weight') {
-    entry.weightsArray[setIndex] = +value;
-  }
-
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
-  renderWorkouts();
-}
 
 function addSetToLog(workoutIndex, entryIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
