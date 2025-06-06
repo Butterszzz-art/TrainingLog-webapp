@@ -1089,15 +1089,6 @@ function addExerciseToTemplate() {
   setsInput.value = '';
   repsInput.value = '';
   rpeInput.value = '';
-  const input = document.getElementById('newTemplateExercise');
-  if (!input) return;
-  newTemplateExercises.push(name);
-  {
-    const li = document.createElement('li');
-    li.textContent = name;
-    list.appendChild(li);
-  }
-  input.value = '';
 }
 
 function saveSimpleTemplate() {
