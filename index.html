@@ -658,6 +658,22 @@ function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
 
 
 
+function editGoalValue(workoutIndex, entryIndex, type, value) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const entry = workouts[workoutIndex].log[entryIndex];
+
+  if (type === 'goal') {
+    entry.goal = +value;
+  } else if (type === 'repGoal') {
+    entry.repGoal = +value;
+  }
+
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
+
+
+
   
 let currentSetCount = 0;
 
@@ -814,8 +830,11 @@ function renderWorkouts() {
             ${setIndex === 0 ? `
               <td rowspan="${sets}">${entry.date}</td>
               <td rowspan="${sets}">
-                ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}
-                ${entry.repGoal ? `<br>(Rep Goal: ${entry.repGoal})` : ''}
+                ${entry.goal ? Math.min(100, Math.round((weightsArray[0] / entry.goal) * 100)) + '%' : '-'}<br>
+                <input type="number" value="${entry.goal !== undefined ? entry.goal : ''}"
+                       onchange="editGoalValue(${workoutIndex}, ${entryIndex}, 'goal', this.value)" style="width:60px;" />
+                <input type="number" value="${entry.repGoal !== undefined ? entry.repGoal : ''}"
+                       onchange="editGoalValue(${workoutIndex}, ${entryIndex}, 'repGoal', this.value)" style="width:60px;" />
               </td>
               <td rowspan="${sets}">
                 <button onclick="removeLogEntry(${workoutIndex}, ${entryIndex})" class="remove-btn">❌</button><br>
