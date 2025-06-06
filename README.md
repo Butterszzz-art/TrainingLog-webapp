@@ -31,6 +31,9 @@ npm start
 The web app can optionally read Airtable credentials from a local
 `config.js` module. Copy `config.example.js` to `config.js` and fill in your
 values:
+`config.js` contains private credentials. The file is ignored by Git so you
+can keep your token out of version control.
+
 The web app reads Airtable credentials from a small `config.js` file at
 runtime. Copy `config.example.js` to `config.js` and fill in your values:
 
