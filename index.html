@@ -1249,8 +1249,10 @@ function loadTodayProgram() {
 function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  workouts.push({ title: `Workout on ${date}`, date, log: [] });
-  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  if (!workouts.some(w => w.date === date)) {
+    workouts.push({ title: `Workout on ${date}`, date, log: [] });
+    localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  }
   renderWorkouts();
   renderWorkoutHistory();
 }
