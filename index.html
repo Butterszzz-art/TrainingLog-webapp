@@ -689,7 +689,6 @@ window.showTab = showTab;
 let serverUrl = 'https://traininglog-backend.onrender.com';
 // If SERVER_URL is provided in config.js, requests will be sent there.
 // Otherwise requests will be relative to the current page.
-const serverUrl = typeof window.SERVER_URL === 'string' ? window.SERVER_URL : '';
 let currentUser = null;
   
 function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
