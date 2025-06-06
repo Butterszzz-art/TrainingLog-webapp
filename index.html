@@ -452,7 +452,9 @@
 <script src="config.js"></script>
 <script>
 
-  
+let currentUser = null;
+let savedUser = localStorage.getItem("fitnessAppUser");
+
 let airtableToken = '';
 let airtableBaseId = '';
 
@@ -1929,6 +1931,7 @@ function loadDailyMacroProgress() {
 }
 
 function getTodayCardioCalories() {
+  if (!currentUser) return 0;
   const today = getTodayDateString();
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
   return log.filter(e => e.date === today)
@@ -1936,6 +1939,7 @@ function getTodayCardioCalories() {
 }
 
 function getCardioMinutesForDate(date) {
+  if (!currentUser) return 0;
   const log = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
   return log.filter(e => e.date === date)
             .reduce((sum, e) => sum + (parseFloat(e.duration) || 0), 0);
@@ -2615,8 +2619,7 @@ function loadCrossfitTemplate() {
 }
     
     
-  const savedUser = localStorage.getItem("fitnessAppUser");
-if (savedUser) {
+  if (savedUser) {
   currentUser = savedUser;
   document.getElementById("userDisplay").textContent = savedUser;
   document.getElementById("loginContainer").style.display = "none";
