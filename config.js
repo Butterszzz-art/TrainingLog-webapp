@@ -2,8 +2,6 @@
 // config.js is gitignored so your token stays private.
 // Optionally set SERVER_URL if your backend exposes a /config endpoint.
 
-export const SERVER_URL = 'https://traininglog-backend.onrender.com';
-export const airtableConfig = {
 
 window.SERVER_URL = 'https://traininglog-backend.onrender.com';
 window.airtableConfig = {
