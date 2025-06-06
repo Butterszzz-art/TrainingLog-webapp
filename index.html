@@ -457,11 +457,31 @@ let airtableBaseId = '';
 async function fetchAirtableConfig() {
   try {
     const res = await fetch(`${serverUrl}/config`);
-    const cfg = await res.json();
-    airtableToken = cfg.airtableToken;
-    airtableBaseId = cfg.airtableBaseId;
+    if (res.ok) {
+      const cfg = await res.json();
+      airtableToken = cfg.airtableToken;
+      airtableBaseId = cfg.airtableBaseId;
+      if (airtableToken && airtableBaseId) return;
+    }
   } catch (err) {
-    console.error('Failed to load Airtable configuration', err);
+    console.warn('Server config fetch failed', err);
+  }
+
+  if (!airtableToken || !airtableBaseId) {
+    try {
+      const mod = await import('./config.js');
+      if (mod.SERVER_URL) serverUrl = mod.SERVER_URL;
+      if (mod.airtableConfig) {
+        airtableToken = mod.airtableConfig.airtableToken || airtableToken;
+        airtableBaseId = mod.airtableConfig.airtableBaseId || airtableBaseId;
+      }
+    } catch (err) {
+      // optional config.js not found
+    }
+  }
+
+  if (!airtableToken || !airtableBaseId) {
+    console.error('Failed to load Airtable configuration');
   }
 }
 const usersTableName = 'Users';
@@ -646,7 +666,8 @@ window.toggleWorkoutDetails = toggleWorkoutDetails;
 // Expose showTab globally for sidebar navigation
 window.showTab = showTab;
 
-const serverUrl = 'https://traininglog-backend.onrender.com'; // your server address
+// Default backend server. A local config.js file can override this.
+let serverUrl = 'https://traininglog-backend.onrender.com';
 let currentUser = null;
   
 function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {

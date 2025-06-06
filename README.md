@@ -26,3 +26,28 @@ Run the server with:
 npm start
 ```
 
+## Front-End Configuration
+
+The web app can optionally read Airtable credentials from a local
+`config.js` module. Copy `config.example.js` to `config.js` and fill in your
+values:
+
+```bash
+cp config.example.js config.js
+# edit config.js and set AIRTABLE_TOKEN and AIRTABLE_BASE_ID
+```
+
+The file exports two constants:
+
+```javascript
+export const SERVER_URL = 'http://localhost:3000';
+export const airtableConfig = {
+  airtableToken: 'yourToken',
+  airtableBaseId: 'yourBase'
+};
+```
+
+Optionally, set `SERVER_URL` to point at the Express backend that exposes the
+`/config` route. When no backend is reachable, the page falls back to the
+values provided in `config.js`.
+
