@@ -241,6 +241,13 @@
   <option value="">Select Template...</option>
 </select>
 
+  <div id="restTimerSection" style="margin-top:10px;">
+    <input type="number" id="restMinutes" placeholder="Rest Minutes" style="width:80px;" />
+    <input type="number" id="restSeconds" placeholder="Rest Seconds" style="width:80px;" />
+    <button onclick="startRestTimer()">Start Rest Timer</button>
+    <span id="restTimerDisplay" style="margin-left:10px;"></span>
+  </div>
+
   
   <!-- Action buttons -->
   <button onclick="addLogEntry()">Add to Log</button>
@@ -755,7 +762,7 @@ function addLogEntry() {
 
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
-    workouts.push({ title: `Workout on ${date}`, date, log: [] });
+    workouts.push({ title: `Workout on ${date}`, date, log: [], restBreaks: [] });
   }
 
   workouts[workouts.length - 1].log.push({
@@ -865,8 +872,9 @@ function renderWorkouts() {
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
-          <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
+            <p style="font-weight:bold; margin-top:10px;">Total Volume: ${calculateWorkoutVolume(workout)} ${workout.log[0]?.unit || 'kg'}</p>
+            ${workout.restBreaks && workout.restBreaks.length ? `<p>Restbreaks: ${workout.restBreaks.join(', ')} minutes</p>` : ''}
+            <button class="remove-btn" onclick="removeWorkout(${workoutIndex})">Delete Workout</button>
         </div>
       </div>
     `;
@@ -898,6 +906,50 @@ function addSetToLog(workoutIndex, entryIndex) {
   renderWorkouts();
 }
 window.addSetToLog = addSetToLog;
+
+let restInterval;
+function startRestTimer() {
+  const minutes = +document.getElementById('restMinutes').value || 0;
+  const seconds = +document.getElementById('restSeconds').value || 0;
+  const totalSeconds = minutes * 60 + seconds;
+  if (!totalSeconds) {
+    alert('Enter rest time');
+    return;
+  }
+  let remaining = totalSeconds;
+  const display = document.getElementById('restTimerDisplay');
+  display.textContent = formatRestTime(remaining);
+  clearInterval(restInterval);
+  restInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(restInterval);
+      display.textContent = 'Rest Over!';
+      logRestBreak(totalSeconds / 60);
+    } else {
+      display.textContent = formatRestTime(remaining);
+    }
+  }, 1000);
+}
+
+function formatRestTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function logRestBreak(mins) {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const date = new Date().toISOString().split('T')[0];
+  if (workouts.length === 0 || !workouts[workouts.length - 1].log) {
+    workouts.push({ title: `Workout on ${date}`, date, log: [], restBreaks: [] });
+  }
+  const workout = workouts[workouts.length - 1];
+  if (!workout.restBreaks) workout.restBreaks = [];
+  workout.restBreaks.push(parseFloat(mins.toFixed(2)));
+  localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  renderWorkouts();
+}
 
 
 // Save a workout template to Airtable
@@ -1220,7 +1272,7 @@ function completeWorkout() {
   const date = new Date().toISOString().split('T')[0];
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   if (!workouts.some(w => w.date === date)) {
-    workouts.push({ title: `Workout on ${date}`, date, log: [] });
+    workouts.push({ title: `Workout on ${date}`, date, log: [], restBreaks: [] });
     localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   }
   renderWorkouts();
@@ -2100,10 +2152,11 @@ function renderWorkoutHistory() {
         })
         .join('<br>');
 
-      const volume = calculateWorkoutVolume(workout);
-      const unit = workout.log[0]?.unit || 'kg';
+        const volume = calculateWorkoutVolume(workout);
+        const unit = workout.log[0]?.unit || 'kg';
+        const restInfo = workout.restBreaks && workout.restBreaks.length ? `<br>Restbreaks: ${workout.restBreaks.join(', ')} minutes` : '';
 
-      div.innerHTML = `<strong>${workout.title}</strong><br>${exercisesHtml}<br>Total Volume: ${volume} ${unit}`;
+        div.innerHTML = `<strong>${workout.title}</strong><br>${exercisesHtml}<br>Total Volume: ${volume} ${unit}${restInfo}`;
       container.appendChild(div);
     });
 }
@@ -2624,16 +2677,17 @@ window.sendTemplate = sendTemplate;
 window.renderWorkouts = renderWorkouts;
 window.toggleWorkoutDetails = toggleWorkoutDetails;
 window.removeWorkout = removeWorkout;               // ✅ Add this
-window.removeLogEntry = removeLogEntry;             // ✅ Add this
+  window.removeLogEntry = removeLogEntry;             // ✅ Add this
   window.calculateWorkoutVolume = calculateWorkoutVolume;
   window.saveWorkoutAsTemplate = saveWorkoutAsTemplate;
   window.loadTemplateDropdown = loadTemplateDropdown;
   window.showHistoryMiniTab = showHistoryMiniTab;
-window.renderWorkoutHistory = renderWorkoutHistory;
-window.loadProgramTemplates = loadProgramTemplates;
-window.addDayToProgram = addDayToProgram;
-window.saveProgram = saveProgram;
-window.loadProgramDropdown = loadProgramDropdown;
+  window.renderWorkoutHistory = renderWorkoutHistory;
+  window.loadProgramTemplates = loadProgramTemplates;
+  window.addDayToProgram = addDayToProgram;
+  window.saveProgram = saveProgram;
+  window.loadProgramDropdown = loadProgramDropdown;
+  window.startRestTimer = startRestTimer;
 window.startProgram = startProgram;
 window.checkActiveProgram = checkActiveProgram;
 window.toggleProgramBuilder = toggleProgramBuilder;
