@@ -766,26 +766,7 @@ function addLogEntry() {
   // ✅ Reset set counter
   currentSetCount = 0;
 
-  document.getElementById("exercise").addEventListener("blur", () => {
-  const name = document.getElementById("exercise").value.trim();
-  if (!name) return;
 
-  const last = getLastExerciseEntry(name);
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const suggestion = getProgressiveOverloadSuggestion(name, workouts);
-  const msgDiv = document.getElementById("progressReminder");
-  msgDiv.innerHTML = '';
-
-  if (last) {
-    const reps = last.repsArray.join(', ');
-    const weights = last.weightsArray.join(', ');
-    msgDiv.innerHTML = `
-      <div style="margin:10px 0; color: green; font-weight:bold;">
-        Last time: ${reps} reps at ${weights} ${last.unit} <br>
-        Try to beat that today!${suggestion ? `<br>Recommended: ${suggestion}` : ''}
-      </div>`;
-  }
-});
 
 }
 
@@ -1297,6 +1278,27 @@ function getLastExerciseEntry(exerciseName) {
   }
 
   return lastMatch;
+}
+
+function handleExerciseBlur() {
+  const name = document.getElementById("exercise").value.trim();
+  if (!name) return;
+
+  const last = getLastExerciseEntry(name);
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const suggestion = getProgressiveOverloadSuggestion(name, workouts);
+  const msgDiv = document.getElementById("progressReminder");
+  msgDiv.innerHTML = '';
+
+  if (last) {
+    const reps = last.repsArray.join(', ');
+    const weights = last.weightsArray.join(', ');
+    msgDiv.innerHTML = `
+      <div style="margin:10px 0; color: green; font-weight:bold;">
+        Last time: ${reps} reps at ${weights} ${last.unit} <br>
+        Try to beat that today!${suggestion ? `<br>Recommended: ${suggestion}` : ''}
+      </div>`;
+  }
 }
 
 
@@ -2279,6 +2281,11 @@ function showHistoryMiniTab(tab) {
     const addMealBtn = document.getElementById("macroMeal");
     if (addMealBtn) {
       addMealBtn.addEventListener("click", addMacroMeal);
+    }
+
+    const exerciseInput = document.getElementById("exercise");
+    if (exerciseInput) {
+      exerciseInput.addEventListener("blur", handleExerciseBlur);
     }
 
     // showTab is defined above
