@@ -3,6 +3,9 @@
 
 export const SERVER_URL = '';
 export const airtableConfig = {
+=======
+window.SERVER_URL = '';
+window.airtableConfig = {
   airtableToken: '',
   airtableBaseId: ''
 };

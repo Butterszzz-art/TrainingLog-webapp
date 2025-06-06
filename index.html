@@ -448,6 +448,8 @@
 
 <script src="archiveOldWorkouts.js"></script>
 <script src="progressiveOverload.js"></script>
+<!-- Optional runtime configuration -->
+<script src="config.js"></script>
 <script>
 
   
@@ -480,6 +482,23 @@ async function fetchAirtableConfig() {
     }
   }
 
+  if (serverUrl) {
+    try {
+      const res = await fetch(`${serverUrl}/config`);
+      if (res.ok) {
+        const cfg = await res.json();
+        airtableToken = cfg.airtableToken;
+        airtableBaseId = cfg.airtableBaseId;
+        if (airtableToken && airtableBaseId) return;
+      }
+    } catch (err) {
+      console.warn('Server config fetch failed', err);
+    }
+  }
+  if (window.airtableConfig) {
+    airtableToken = window.airtableConfig.airtableToken || airtableToken;
+    airtableBaseId = window.airtableConfig.airtableBaseId || airtableBaseId;
+  }
   if (!airtableToken || !airtableBaseId) {
     console.error('Failed to load Airtable configuration');
   }
@@ -668,6 +687,9 @@ window.showTab = showTab;
 
 // Default backend server. A local config.js file can override this.
 let serverUrl = 'https://traininglog-backend.onrender.com';
+// If SERVER_URL is provided in config.js, requests will be sent there.
+// Otherwise requests will be relative to the current page.
+const serverUrl = typeof window.SERVER_URL === 'string' ? window.SERVER_URL : '';
 let currentUser = null;
   
 function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
