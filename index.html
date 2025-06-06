@@ -956,26 +956,28 @@ async function fetchTemplates(username) {
     data: JSON.parse(record.fields.TemplateData)
   }));
 }
+
+function populateTemplateSelect(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return Promise.resolve();
+  select.innerHTML = '<option value="">Select Template...</option>';
+  return fetchTemplates(currentUser).then(templates => {
+    templates.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(t.data);
+      opt.textContent = t.name;
+      select.appendChild(opt);
+    });
+  });
+}
   
 
 // Populate the dropdown
 function loadTemplateDropdown() {
-  const select = document.getElementById("templateSelect");
-  select.innerHTML = '<option value="">Select Template...</option>';
-
-  fetchTemplates(currentUser)
-    .then(templates => {
-      templates.forEach(template => {
-        const option = document.createElement("option");
-        option.value = JSON.stringify(template.data);
-        option.textContent = template.name;
-        select.appendChild(option);
-      });
-    })
-    .catch(err => {
-      console.error("Template loading failed:", err);
-      alert("Could not load templates.");
-    });
+  populateTemplateSelect("templateSelect").catch(err => {
+    console.error("Template loading failed:", err);
+    alert("Could not load templates.");
+  });
 }
 
 // Save last workout as template
@@ -1154,17 +1156,7 @@ function saveSimpleTemplate() {
 let programDays = [];
 
 function loadProgramTemplates() {
-  const select = document.getElementById("programTemplateSelect");
-  if (!select) return;
-  select.innerHTML = '<option value="">Select Template...</option>';
-  fetchTemplates(currentUser).then(templates => {
-    templates.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = JSON.stringify(t.data);
-      opt.textContent = t.name;
-      select.appendChild(opt);
-    });
-  });
+  populateTemplateSelect("programTemplateSelect");
 }
 
 function addDayToProgram() {
