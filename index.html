@@ -1059,17 +1059,23 @@ function toggleProgramBuilder() {
 
 function toggleTemplateBuilder() {
   const builder = document.getElementById('templateBuilder');
+  const btn = document.getElementById('openTemplateBtn');
   if (!builder) return;
-  const show = builder.style.display === 'none';
-  builder.style.display = show ? 'block' : 'none';
-  if (show) return;
-  document.getElementById('newTemplateExercise').value = '';
-  document.getElementById('newTemplateSets').value = '';
-  document.getElementById('newTemplateReps').value = '';
-  document.getElementById('newTemplateRPE').value = '';
-  newTemplateExercises = [];
-  document.getElementById('newTemplateList').innerHTML = '';
-  builder.style.display = builder.style.display === 'none' ? 'block' : 'none';
+
+  const shouldShow = builder.style.display === 'none' || builder.style.display === '';
+  if (shouldShow) {
+    builder.style.display = 'block';
+    if (btn) btn.textContent = 'Hide Template';
+  } else {
+    builder.style.display = 'none';
+    if (btn) btn.textContent = 'Create Template';
+    document.getElementById('newTemplateExercise').value = '';
+    document.getElementById('newTemplateSets').value = '';
+    document.getElementById('newTemplateReps').value = '';
+    document.getElementById('newTemplateRPE').value = '';
+    newTemplateExercises = [];
+    document.getElementById('newTemplateList').innerHTML = '';
+  }
 }
 
 let newTemplateExercises = [];
