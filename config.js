@@ -7,6 +7,6 @@ export const airtableConfig = {
 =======
 window.SERVER_URL = '';
 window.airtableConfig = {
-  airtableToken: '',
-  airtableBaseId: ''
+  airtableToken: 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577',
+  airtableBaseId: 'appmjr4IgnEH72K1b'
 };
