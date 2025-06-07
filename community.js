@@ -27,6 +27,15 @@ async function createGroup(name) {
       console.warn('createGroup failed', e);
     }
   }
+
+let groups = JSON.parse(localStorage.getItem('communityGroups')) || [];
+
+function saveGroups() {
+  localStorage.setItem('communityGroups', JSON.stringify(groups));
+}
+
+function createGroup(name) {
+  if (!name) return null;
   const g = { id: Date.now(), name, members: [], posts: [] };
   groups.push(g);
   saveGroups();
@@ -65,6 +74,9 @@ async function addPost(groupId, user, text) {
       console.warn('addPost failed', e);
     }
   }
+function addPost(groupId, user, text) {
+  const g = groups.find(gr => gr.id === groupId);
+  if (!g) return;
   g.posts.push({ user, text, date: new Date().toISOString() });
   saveGroups();
 }
@@ -142,6 +154,13 @@ if (typeof window !== 'undefined') {
   window.loadGroupProgress = fetchProgress;
   window.loadPosts = fetchPosts;
   window.loadGroupStats = loadGroupStats;
+  module.exports = { calculateLeaderboard, createGroup, getGroups, addPost };
+}
+if (typeof window !== 'undefined') {
+  window.createGroup = createGroup;
+  window.loadGroups = () => renderGroups(getGroups());
+  window.showCreateGroup = showCreateGroup;
+  window.addPostToGroup = addPost;
 }
 
 function renderGroups(list) {
@@ -199,5 +218,10 @@ function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
   createGroup(name).then(() => renderGroups(groups));
+function showCreateGroup() {
+  const name = prompt('Group name?');
+  if (!name) return;
+  createGroup(name);
+  renderGroups(groups);
 }
 

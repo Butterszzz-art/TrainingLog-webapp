@@ -42,6 +42,14 @@ app.post('/community/groups', (req, res) => {
     posts: [],
     programId: null
   };
+app.get('/api/groups', (req, res) => {
+  res.json(groups);
+});
+
+app.post('/api/groups', (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'name required' });
+  const group = { id: groups.length + 1, name, members: [] };
   groups.push(group);
   res.json(group);
 });
