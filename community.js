@@ -108,6 +108,55 @@ async function shareProgram(groupId, programData) {
   }
 }
 
+// Invite a user to join a group
+async function inviteUserToGroup(groupId, invitedUserId) {
+  if (!invitedUserId || typeof fetch === 'undefined') return;
+  try {
+    const res = await fetch(`/community/groups/${groupId}/invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invitedUserId })
+    });
+    if (res.ok) {
+      const g = groups.find(gr => gr.id === groupId);
+      if (g) {
+        if (!Array.isArray(g.members)) g.members = [];
+        g.members.push(invitedUserId);
+        saveGroups();
+      }
+      alert('Invitation sent');
+      openGroup(groupId);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Failed to invite user');
+    }
+  } catch (e) {
+    console.warn('inviteUserToGroup failed', e);
+    alert('Failed to invite user');
+  }
+}
+
+// Share a program with a group and show confirmation
+async function shareProgramToGroup(groupId, programData) {
+  if (!programData || typeof fetch === 'undefined' || !window.currentUser) return;
+  try {
+    const res = await fetch(`/community/groups/${groupId}/share`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderId: window.currentUser, programData })
+    });
+    if (res.ok) {
+      alert('Program shared');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Failed to share program');
+    }
+  } catch (e) {
+    console.warn('shareProgramToGroup failed', e);
+    alert('Failed to share program');
+  }
+}
+
 async function fetchProgress(groupId) {
   try {
     const res = await fetch(`/community/groups/${groupId}/progress`);
@@ -154,12 +203,16 @@ async function openGroup(id) {
     .join('');
   detail.innerHTML = `
     <h3>${group.name}</h3>
+    <div>
+      <input id="inviteUserInput" placeholder="User ID" />
+      <button onclick="inviteUserToGroup(${id}, document.getElementById('inviteUserInput').value)">Invite</button>
+    </div>
     <div id="groupPosts">${postsHtml}</div>
     <textarea id="newPostText"></textarea>
     <button onclick="addPostToGroup(${id}, window.currentUser, document.getElementById('newPostText').value)">Post</button>
     <h4>Share Program</h4>
     <textarea id="shareProgramData"></textarea>
-    <button onclick="shareProgramToGroup(${id}, document.getElementById('shareProgramData').value)">Share</button>
+    <button onclick="shareProgramInput(${id}, document.getElementById('shareProgramData').value)">Share</button>
     <button onclick="loadGroupStats(${id})">Load Progress</button>
     <div id="groupProgress"></div>
   `;
@@ -187,7 +240,7 @@ function addPostToGroup(id, user, text) {
   openGroup(id);
 }
 
-function shareProgramToGroup(id, dataStr) {
+function shareProgramInput(id, dataStr) {
   if (!dataStr) return;
   let parsed;
   try {
@@ -196,7 +249,7 @@ function shareProgramToGroup(id, dataStr) {
     console.warn('Invalid program data', e);
     return;
   }
-  shareProgram(id, parsed);
+  shareProgramToGroup(id, parsed);
 }
 
 function showCreateGroup() {
@@ -208,4 +261,6 @@ function showCreateGroup() {
 window.loadGroups = loadGroups;
 window.showCreateGroup = showCreateGroup;
 window.addPostToGroup = addPostToGroup;
+window.shareProgramInput = shareProgramInput;
+window.inviteUserToGroup = inviteUserToGroup;
 window.shareProgramToGroup = shareProgramToGroup;
