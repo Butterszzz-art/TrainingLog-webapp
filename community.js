@@ -1,5 +1,4 @@
-// Community features (incomplete placeholder)
-
+// Groups array and localStorage handling
 let groups = [];
 if (typeof localStorage !== 'undefined') {
   groups = JSON.parse(localStorage.getItem('communityGroups')) || [];
@@ -11,6 +10,7 @@ function saveGroups() {
   }
 }
 
+// Async createGroup to call backend or fallback to local
 async function createGroup(name) {
   if (!name) return null;
   if (typeof fetch !== 'undefined' && window && window.currentUser) {
@@ -22,20 +22,13 @@ async function createGroup(name) {
       });
       const g = await res.json();
       groups.push(g);
+      saveGroups();
       return g;
     } catch (e) {
       console.warn('createGroup failed', e);
     }
   }
-
-let groups = JSON.parse(localStorage.getItem('communityGroups')) || [];
-
-function saveGroups() {
-  localStorage.setItem('communityGroups', JSON.stringify(groups));
-}
-
-function createGroup(name) {
-  if (!name) return null;
+  // fallback local group creation
   const g = { id: Date.now(), name, members: [], posts: [] };
   groups.push(g);
   saveGroups();
@@ -64,6 +57,7 @@ function loadGroups() {
   return fetchGroups(window.currentUser).then(renderGroups);
 }
 
+// Add post locally and via backend
 async function addPost(groupId, user, text) {
   const g = groups.find(gr => gr.id === groupId);
   if (!g) return;
@@ -78,9 +72,6 @@ async function addPost(groupId, user, text) {
       console.warn('addPost failed', e);
     }
   }
-function addPost(groupId, user, text) {
-  const g = groups.find(gr => gr.id === groupId);
-  if (!g) return;
   g.posts.push({ user, text, date: new Date().toISOString() });
   saveGroups();
 }
@@ -135,37 +126,6 @@ function calculateLeaderboard(members) {
     consistent: byConsistent.slice(0,3).map(m => m.name),
     improving: byImprove.slice(0,3).map(m => m.name)
   };
-}
-
-if (typeof module !== 'undefined') {
-  module.exports = {
-    calculateLeaderboard,
-    createGroup,
-    getGroups,
-    addPost,
-    fetchGroups,
-    fetchPosts,
-    shareProgram,
-    fetchProgress
-  };
-}
-if (typeof window !== 'undefined') {
-  window.createGroup = createGroup;
-  window.loadGroups = loadGroups;
-  window.loadGroups = () => fetchGroups(window.currentUser).then(renderGroups);
-  window.showCreateGroup = showCreateGroup;
-  window.addPostToGroup = addPost;
-  window.shareProgramToGroup = shareProgram;
-  window.loadGroupProgress = fetchProgress;
-  window.loadPosts = fetchPosts;
-  window.loadGroupStats = loadGroupStats;
-  module.exports = { calculateLeaderboard, createGroup, getGroups, addPost };
-}
-if (typeof window !== 'undefined') {
-  window.createGroup = createGroup;
-  window.loadGroups = () => renderGroups(getGroups());
-  window.showCreateGroup = showCreateGroup;
-  window.addPostToGroup = addPost;
 }
 
 function renderGroups(list) {
@@ -223,10 +183,4 @@ function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
   createGroup(name).then(() => renderGroups(groups));
-  }
-function showCreateGroup() {
-  const name = prompt('Group name?');
-  if (!name) return;
-  createGroup(name);
-  renderGroups(groups);
 }
