@@ -44,11 +44,9 @@ function getGroups() {
 async function fetchGroups(userId) {
   if (!userId || typeof fetch === 'undefined') return getGroups();
   try {
-   const res = await fetch(`${serverUrl}/community/groups`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
-});
+    const res = await fetch(`${serverUrl}/community/groups?userId=${encodeURIComponent(userId)}`, {
+      method: 'GET'
+    });
     if (res.ok) {
       groups = await res.json();
       saveGroups();
@@ -58,6 +56,88 @@ async function fetchGroups(userId) {
   }
   return groups;
 }
+
+async function fetchPosts(groupId) {
+  try {
+    const res = await fetch(`${serverUrl}/community/groups/${groupId}/posts`, {
+      method: 'GET'
+    });
+    if (res.ok) {
+      const posts = await res.json();
+      const g = groups.find(gr => gr.id === groupId);
+      if (g) {
+        g.posts = posts;
+        saveGroups();
+      }
+      return posts;
+    }
+  } catch (e) {
+    console.warn('fetchPosts failed', e);
+  }
+  const g = groups.find(gr => gr.id === groupId);
+  return (g && g.posts) || [];
+}
+
+async function inviteUserToGroup(groupId, invitedUserId) {
+  if (!invitedUserId || typeof fetch === 'undefined') return;
+  try {
+    const res = await fetch(`${serverUrl}/community/groups/${groupId}/invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invitedUserId })
+    });
+    if (res.ok) {
+      const g = groups.find(gr => gr.id === groupId);
+      if (g) {
+        if (!Array.isArray(g.members)) g.members = [];
+        g.members.push(invitedUserId);
+        saveGroups();
+      }
+      alert('Invitation sent');
+      openGroup(groupId);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Failed to invite user');
+    }
+  } catch (e) {
+    console.warn('inviteUserToGroup failed', e);
+    alert('Failed to invite user');
+  }
+}
+
+async function shareProgramToGroup(groupId, programData) {
+  if (!programData || typeof fetch === 'undefined' || !window.currentUser) return;
+  try {
+    const res = await fetch(`${serverUrl}/community/groups/${groupId}/share`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderId: window.currentUser, programData })
+    });
+    if (res.ok) {
+      alert('Program shared');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Failed to share program');
+    }
+  } catch (e) {
+    console.warn('shareProgramToGroup failed', e);
+    alert('Failed to share program');
+  }
+}
+
+
+async function fetchProgress(groupId) {
+  try {
+    const res = await fetch(`${serverUrl}/community/groups/${groupId}/progress`, {
+      method: 'GET'
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.warn('fetchProgress failed', e);
+  }
+  return null;
+}
+
 
 function loadGroups() {
   return fetchGroups(window.currentUser).then(renderGroups);
@@ -82,69 +162,10 @@ async function addPost(groupId, user, text) {
   saveGroups();
 }
 
-async function fetchPosts(groupId) {
-  try {
-   const res = await fetch(`${serverUrl}/community/groups`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
-});
-    if (res.ok) {
-      const posts = await res.json();
-      const g = groups.find(gr => gr.id === groupId);
-      if (g) {
-        g.posts = posts;
-        saveGroups();
-      }
-      return posts;
-    }
-  } catch (e) {
-    console.warn('fetchPosts failed', e);
-  }
-  const g = groups.find(gr => gr.id === groupId);
-  return (g && g.posts) || [];
-}
 
-async function shareProgram(groupId, programData) {
-  if (typeof fetch === 'undefined' || !window.currentUser) return;
-  try {
-    await fetch(`${serverUrl}/community/groups/${groupId}/share`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ senderId: window.currentUser, programData })
-    });
-  } catch (e) {
-    console.warn('shareProgram failed', e);
-  }
-}
 
-// Invite a user to join a group
-async function inviteUserToGroup(groupId, invitedUserId) {
-  if (!invitedUserId || typeof fetch === 'undefined') return;
-  try {
-    const res = await fetch(`${serverUrl}/community/groups`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
-});
-    if (res.ok) {
-      const g = groups.find(gr => gr.id === groupId);
-      if (g) {
-        if (!Array.isArray(g.members)) g.members = [];
-        g.members.push(invitedUserId);
-        saveGroups();
-      }
-      alert('Invitation sent');
-      openGroup(groupId);
-    } else {
-      const err = await res.json().catch(() => ({}));
-      alert(err.error || 'Failed to invite user');
-    }
-  } catch (e) {
-    console.warn('inviteUserToGroup failed', e);
-    alert('Failed to invite user');
-  }
-}
+
+
 
 // Share a program with a group and show confirmation
 async function shareProgramToGroup(groupId, programData) {
@@ -167,19 +188,6 @@ async function shareProgramToGroup(groupId, programData) {
   }
 }
 
-async function fetchProgress(groupId) {
-  try {
-    const res = await fetch(`${serverUrl}/community/groups`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
-});
-    if (res.ok) return await res.json();
-  } catch (e) {
-    console.warn('fetchProgress failed', e);
-  }
-  return null;
-}
 
 function calculateLeaderboard(members) {
   if (!Array.isArray(members)) return { consistent: [], improving: [] };
