@@ -766,10 +766,7 @@ window.toggleWorkoutDetails = toggleWorkoutDetails;
 // Expose showTab globally for sidebar navigation
 window.showTab = showTab;
 
-// Default backend server. A local config.js file can override this.
-let serverUrl = 'https://traininglog-backend.onrender.com';
-// If SERVER_URL is provided in config.js, requests will be sent there.
-// Otherwise requests will be relative to the current page.
+
   
 function editSetValue(workoutIndex, entryIndex, type, value, setIndex) {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
