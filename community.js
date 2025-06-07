@@ -179,6 +179,26 @@ async function loadGroupStats(id) {
     <p>Most Improving: ${lb.improving.join(', ')}</p>`;
 }
 
+// wrapper helpers for inline onclick handlers
+function addPostToGroup(id, user, text) {
+  if (!text) return;
+  addPost(id, user, text);
+  // re-render group to show new post
+  openGroup(id);
+}
+
+function shareProgramToGroup(id, dataStr) {
+  if (!dataStr) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(dataStr);
+  } catch (e) {
+    console.warn('Invalid program data', e);
+    return;
+  }
+  shareProgram(id, parsed);
+}
+
 function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
@@ -187,3 +207,5 @@ function showCreateGroup() {
 
 window.loadGroups = loadGroups;
 window.showCreateGroup = showCreateGroup;
+window.addPostToGroup = addPostToGroup;
+window.shareProgramToGroup = shareProgramToGroup;
