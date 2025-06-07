@@ -223,6 +223,7 @@ function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
   createGroup(name).then(() => renderGroups(groups));
+  }
 function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
