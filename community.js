@@ -4,6 +4,8 @@ if (typeof localStorage !== 'undefined') {
   groups = JSON.parse(localStorage.getItem('communityGroups')) || [];
 }
 
+let serverUrl = 'https://traininglog-backend.onrender.com';
+
 function saveGroups() {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('communityGroups', JSON.stringify(groups));
@@ -15,11 +17,11 @@ async function createGroup(name) {
   if (!name) return null;
   if (typeof fetch !== 'undefined' && window && window.currentUser) {
     try {
-      const res = await fetch('/community/groups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, creatorId: window.currentUser })
-      });
+      const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
       const g = await res.json();
       groups.push(g);
       saveGroups();
@@ -42,7 +44,11 @@ function getGroups() {
 async function fetchGroups(userId) {
   if (!userId || typeof fetch === 'undefined') return getGroups();
   try {
-    const res = await fetch(`/community/groups?userId=${encodeURIComponent(userId)}`);
+   const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
     if (res.ok) {
       groups = await res.json();
       saveGroups();
@@ -63,7 +69,7 @@ async function addPost(groupId, user, text) {
   if (!g) return;
   if (typeof fetch !== 'undefined') {
     try {
-      await fetch(`/community/groups/${groupId}/posts`, {
+      await fetch(`${serverUrl}/community/groups/${groupId}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user, text })
@@ -78,7 +84,11 @@ async function addPost(groupId, user, text) {
 
 async function fetchPosts(groupId) {
   try {
-    const res = await fetch(`/community/groups/${groupId}/posts`);
+   const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
     if (res.ok) {
       const posts = await res.json();
       const g = groups.find(gr => gr.id === groupId);
@@ -98,7 +108,7 @@ async function fetchPosts(groupId) {
 async function shareProgram(groupId, programData) {
   if (typeof fetch === 'undefined' || !window.currentUser) return;
   try {
-    await fetch(`/community/groups/${groupId}/share`, {
+    await fetch(`${serverUrl}/community/groups/${groupId}/share`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ senderId: window.currentUser, programData })
@@ -112,11 +122,11 @@ async function shareProgram(groupId, programData) {
 async function inviteUserToGroup(groupId, invitedUserId) {
   if (!invitedUserId || typeof fetch === 'undefined') return;
   try {
-    const res = await fetch(`/community/groups/${groupId}/invite`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ invitedUserId })
-    });
+    const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
     if (res.ok) {
       const g = groups.find(gr => gr.id === groupId);
       if (g) {
@@ -140,11 +150,11 @@ async function inviteUserToGroup(groupId, invitedUserId) {
 async function shareProgramToGroup(groupId, programData) {
   if (!programData || typeof fetch === 'undefined' || !window.currentUser) return;
   try {
-    const res = await fetch(`/community/groups/${groupId}/share`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ senderId: window.currentUser, programData })
-    });
+   const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
     if (res.ok) {
       alert('Program shared');
     } else {
@@ -159,7 +169,11 @@ async function shareProgramToGroup(groupId, programData) {
 
 async function fetchProgress(groupId) {
   try {
-    const res = await fetch(`/community/groups/${groupId}/progress`);
+    const res = await fetch(`${serverUrl}/community/groups`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, creatorId: window.currentUser })
+});
     if (res.ok) return await res.json();
   } catch (e) {
     console.warn('fetchProgress failed', e);
