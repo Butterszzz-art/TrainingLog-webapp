@@ -1,6 +1,11 @@
 # TrainingLog
 
 This project contains a simple fitness tracker.
+It now includes a **Community** tab for experimenting with group
+workouts. Users can create groups in the browser and post simple
+updates. A small leaderboard helper ranks members based on provided
+consistency and improvement scores. These features are purely
+client-side placeholders.
 
 ## Running Tests
 
