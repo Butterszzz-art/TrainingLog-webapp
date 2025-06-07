@@ -689,6 +689,10 @@ function showTab(tabName) {
     checkActiveProgram();
   }
 
+  if (tabName === "communityTab") {
+    loadGroups();
+  }
+
   // Always reset macros view to main content on tab change
   if (tabName === "macroTab") {
     document.getElementById('macrosMainContent').style.display = 'block';
