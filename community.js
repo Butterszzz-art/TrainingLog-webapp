@@ -60,6 +60,10 @@ async function fetchGroups(userId) {
   return groups;
 }
 
+function loadGroups() {
+  return fetchGroups(window.currentUser).then(renderGroups);
+}
+
 async function addPost(groupId, user, text) {
   const g = groups.find(gr => gr.id === groupId);
   if (!g) return;
@@ -147,6 +151,7 @@ if (typeof module !== 'undefined') {
 }
 if (typeof window !== 'undefined') {
   window.createGroup = createGroup;
+  window.loadGroups = loadGroups;
   window.loadGroups = () => fetchGroups(window.currentUser).then(renderGroups);
   window.showCreateGroup = showCreateGroup;
   window.addPostToGroup = addPost;
@@ -224,4 +229,3 @@ function showCreateGroup() {
   createGroup(name);
   renderGroups(groups);
 }
-
