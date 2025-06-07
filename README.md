@@ -1,6 +1,27 @@
 # TrainingLog
 
 This project contains a simple fitness tracker.
+It now includes a **Community** tab for experimenting with group
+workouts. Users can create groups in the browser and post simple
+updates. A small leaderboard helper ranks members based on provided
+consistency and improvement scores. These features are purely
+client-side placeholders.
+
+## Community API
+
+When running the Express server, a small set of community endpoints is
+available:
+
+- `POST /community/groups` – create a new group by name. Include a
+  `creatorId` field in the body and the creator is added to the group.
+- `GET /community/groups?userId=USER` – list the groups that contain the
+  specified user.
+- `POST /community/groups/:groupId/share` – share a program with the
+  group.
+- `GET /community/groups/:groupId/progress` – return a summary of member
+  progress and a simple leaderboard.
+- `POST /community/groups/:groupId/posts` – add a comment to the group
+  (use `GET` on the same path to fetch posts).
 
 ## Running Tests
 
