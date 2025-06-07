@@ -184,3 +184,6 @@ function showCreateGroup() {
   if (!name) return;
   createGroup(name).then(() => renderGroups(groups));
 }
+
+window.loadGroups = loadGroups;
+window.showCreateGroup = showCreateGroup;
