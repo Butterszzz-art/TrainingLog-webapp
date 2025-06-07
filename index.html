@@ -4,53 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fitness Tracker App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-color: #f9f9fb;
       --text-color: #222;
       --primary: #007bff;
+      --primary-dark: #0056b3;
       --danger: #dc3545;
       --card-bg: #fff;
       --border-color: #ddd;
       --shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       padding: 20px;
       margin: 0 auto;
       max-width: 900px;
     }
-    input, button {
+    h2 {
+      font-size: 1.8rem;
+      line-height: 1.4;
+      margin-top: 0;
+    }
+    h3 {
+      font-size: 1.4rem;
+      line-height: 1.4;
+    }
+    input, select, textarea {
       padding: 10px;
-      margin-top: 8px;
-      margin-bottom: 12px;
+      margin: 12px 0;
       width: 100%;
       box-sizing: border-box;
       border-radius: 6px;
       border: 1px solid var(--border-color);
-      font-size: 14px;
+      font-size: 16px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     }
+    input::placeholder,
+    textarea::placeholder {
+      color: #888;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.3);
+    }
+
     button {
+      padding: 10px 16px;
+      margin: 12px 0;
+      box-sizing: border-box;
+      border-radius: 6px;
       background-color: var(--primary);
       color: #fff;
       border: none;
       cursor: pointer;
+      font-size: 15px;
+      box-shadow: var(--shadow);
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
     button:hover {
-      background-color: #0056b3;
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
     }
 
-    .menu-toggle {
-  width: auto !important;
-  padding: 5px 10px !important;
-  border-radius: 4px !important;
-  font-size: 28px !important;
- background-color: var(--primary); /* blue background */ !important;
-  border: none !important;
-  cursor: pointer !important;
-}
 
     table {
       width: 100%;
@@ -86,6 +106,19 @@
       left: 0;
     }
 
+    @media (min-width: 768px) {
+      .side-menu {
+        left: 0;
+      }
+      body {
+        margin-left: 250px;
+        max-width: none;
+      }
+      #menuToggle {
+        display: none;
+      }
+    }
+
     .menu-title {
       font-size: 20px;
       font-weight: bold;
@@ -102,6 +135,7 @@
 
 .side-menu ul li {
   margin-bottom: 15px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
 }
 
 .side-menu ul li a {
@@ -112,7 +146,7 @@
   display: block; /* make the entire item clickable */
   padding: 8px 12px; /* add some padding for better hover area */
   border-radius: 6px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .side-menu ul li a:hover,
@@ -147,15 +181,30 @@
     /* Tab content */
     .tab-content {
       display: none;
-      padding: 20px 0;
+      padding: 20px;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+      margin-bottom: 20px;
     }
     .tab-content.active {
       display: block;
     }
 
+    #sidebarLogoutBtn {
+      width: 100%;
+      padding: 10px;
+      background-color: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
     #sidebarLogoutBtn:hover {
-  background-color: #c82333; /* Slightly darker red */
-}
+      background-color: #c82333; /* Slightly darker red */
+    }
 
 #macrosSettingsBtn {
   background-color: var(--primary);
@@ -186,7 +235,7 @@
  
 <body>
 
-<div id="loginContainer">
+<div id="loginContainer" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;">
   <h2>Login to Your Fitness Tracker</h2>
   <input type="text" id="username" placeholder="Enter Username" />
   <input type="password" id="password" placeholder="Enter Password" />
@@ -203,14 +252,14 @@
   <nav id="sideMenu" class="side-menu">
     <div class="menu-title">Fitness Tracker (<span id="userDisplay"></span>)</div>
     <ul>
-      <li><a href="#" data-tab="logTab">Training Log</a></li>
-      <li><a href="#" data-tab="weightTab">Bodyweight</a></li>
-      <li><a href="#" data-tab="cardioTab">Cardio</a></li>
-      <li><a href="#" data-tab="macroTab">Macros</a></li>
-      <li><a href="#" data-tab="crossfitTab">CrossFit</a></li>
-      <li><a href="#" data-tab="programTab">Program</a></li>
-      <li><a href="#" data-tab="logHistoryTab">Log History</a></li>
-      <li><button id="sidebarLogoutBtn" onclick="logout()" style="width: 100%; padding: 8px; background-color: var(--danger); color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button></li>
+      <li><a href="#" data-tab="logTab">📋 Training Log</a></li>
+      <li><a href="#" data-tab="weightTab">⚖️ Bodyweight</a></li>
+      <li><a href="#" data-tab="cardioTab">🏃 Cardio</a></li>
+      <li><a href="#" data-tab="macroTab">🍽️ Macros</a></li>
+      <li><a href="#" data-tab="crossfitTab">💪 CrossFit</a></li>
+      <li><a href="#" data-tab="programTab">🗓️ Program</a></li>
+      <li><a href="#" data-tab="logHistoryTab">📜 Log History</a></li>
+      <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
     </ul>
   </nav>
 
