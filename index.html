@@ -245,7 +245,8 @@
 
     
     
-  </style>
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
  
@@ -275,6 +276,7 @@
       <li><a href="#" data-tab="crossfitTab">💪 CrossFit</a></li>
       <li><a href="#" data-tab="programTab">🗓️ Program</a></li>
       <li><a href="#" data-tab="communityTab">👥 Community</a></li>
+      <li><a href="#" data-tab="progressTab">📈 Progress</a></li>
       <li><a href="#" data-tab="logHistoryTab">📜 Log History</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
     </ul>
@@ -503,6 +505,26 @@
 
 
 
+  <div id="progressTab" class="tab-content" style="display:none;">
+    <h2>Progress Overview</h2>
+    <div class="chart-section">
+      <button id="workoutChartBtn" onclick="toggleWorkoutChart()" style="margin-bottom:10px;">Hide Workout Progress</button>
+      <canvas id="workoutChart" style="max-width:100%;"></canvas>
+    </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="cardioChartBtn" onclick="toggleCardioChart()" style="margin-bottom:10px;">Hide Cardio Progress</button>
+      <canvas id="cardioChart" style="max-width:100%;"></canvas>
+    </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="weightChartBtn" onclick="toggleWeightChart()" style="margin-bottom:10px;">Hide Bodyweight Progress</button>
+      <canvas id="weightChart" style="max-width:100%;"></canvas>
+    </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="exerciseProgressBtn" onclick="toggleExerciseProgress()" style="margin-bottom:10px;">Hide Exercise Progress</button>
+      <div id="exerciseProgressContainer"></div>
+    </div>
+  </div>
+
 <div id="logHistoryTab" class="tab-content" style="display:none;">
   <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
@@ -701,6 +723,10 @@ function showTab(tabName) {
 
   if (tabName === "logHistoryTab") {
     showHistoryMiniTab('workout');
+  }
+
+  if (tabName === "progressTab") {
+    renderProgressCharts();
   }
 }
 
@@ -1006,6 +1032,9 @@ function renderWorkouts() {
   });
 
   renderWorkoutHistory();
+  if (document.getElementById('progressTab').classList.contains('active')) {
+    renderProgressCharts();
+  }
 
   window.renderWorkouts = renderWorkouts;
   window.toggleWorkoutDetails = toggleWorkoutDetails;
@@ -2299,6 +2328,9 @@ function renderWeights() {
   log.forEach((entry, index) => {
     body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td>${entry.calories ?? '-'}</td><td>${entry.cardio ?? '-'}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
+  if (document.getElementById('progressTab').classList.contains('active')) {
+    renderProgressCharts();
+  }
 }
 
 function removeWeightEntry(index) {
@@ -2354,6 +2386,9 @@ function renderCardio() {
   log.forEach((entry, index) => {
     body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.calories || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
+  if (document.getElementById('progressTab').classList.contains('active')) {
+    renderProgressCharts();
+  }
 }
 
 function removeCardioEntry(index) {
@@ -2362,6 +2397,125 @@ function removeCardioEntry(index) {
   localStorage.setItem(`cardioLog_${currentUser}`, JSON.stringify(log));
   renderCardio();
   updateMacroUI();
+}
+
+let workoutChart, cardioChart, weightChart;
+
+function toggleWorkoutChart() {
+  const chart = document.getElementById('workoutChart');
+  const btn = document.getElementById('workoutChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Workout Progress';
+}
+
+function toggleCardioChart() {
+  const chart = document.getElementById('cardioChart');
+  const btn = document.getElementById('cardioChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Cardio Progress';
+}
+
+function toggleWeightChart() {
+  const chart = document.getElementById('weightChart');
+  const btn = document.getElementById('weightChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Bodyweight Progress';
+}
+
+function toggleExerciseProgress() {
+  const container = document.getElementById('exerciseProgressContainer');
+  const btn = document.getElementById('exerciseProgressBtn');
+  const hidden = container.style.display === 'none';
+  container.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Exercise Progress';
+}
+
+function renderExerciseProgress() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const progressMap = {};
+
+  // gather last two entries for each exercise
+  workouts.sort((a, b) => a.date.localeCompare(b.date));
+  workouts.forEach(w => {
+    (w.log || []).forEach(e => {
+      if (!progressMap[e.exercise]) progressMap[e.exercise] = [];
+      progressMap[e.exercise].push(e);
+      if (progressMap[e.exercise].length > 2) {
+        progressMap[e.exercise].shift();
+      }
+    });
+  });
+
+  const container = document.getElementById('exerciseProgressContainer');
+  container.innerHTML = '';
+
+  Object.entries(progressMap).forEach(([name, entries]) => {
+    if (entries.length < 2) return;
+    const prev = entries[0];
+    const latest = entries[1];
+
+    const prevText = `${prev.weightsArray[0]} ${prev.unit || ''} x ${prev.repsArray[0]}`;
+    const latestText = `${latest.weightsArray[0]} ${latest.unit || ''} x ${latest.repsArray[0]}`;
+
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>${name}</strong> <del>${prevText}</del> → ${latestText}`;
+    container.appendChild(p);
+  });
+}
+
+function renderProgressCharts() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const workoutData = workouts.map(w => ({
+    date: w.date,
+    volume: calculateWorkoutVolume(w)
+  })).sort((a,b)=>a.date.localeCompare(b.date));
+  const wDates = workoutData.map(d=>d.date);
+  const wVols = workoutData.map(d=>d.volume);
+
+  const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
+  cardio.sort((a,b)=>a.date.localeCompare(b.date));
+  const cDates = cardio.map(e=>e.date);
+  const cDur = cardio.map(e=>e.duration);
+
+  const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
+  weights.sort((a,b)=>a.date.localeCompare(b.date));
+  const bwDates = weights.map(e=>e.date);
+  const bw = weights.map(e=>e.weight);
+  const start = bw[0] || 0;
+  const change = bw.map(v=>v - start);
+
+  if (workoutChart) workoutChart.destroy();
+  if (cardioChart) cardioChart.destroy();
+  if (weightChart) weightChart.destroy();
+
+  const ctx1 = document.getElementById('workoutChart').getContext('2d');
+  workoutChart = new Chart(ctx1, {
+    type: 'line',
+    data: { labels: wDates, datasets: [{ label: 'Volume', data: wVols, borderColor: 'blue', fill:false }] },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+
+  const ctx2 = document.getElementById('cardioChart').getContext('2d');
+  cardioChart = new Chart(ctx2, {
+    type: 'line',
+    data: { labels: cDates, datasets: [{ label: 'Duration (min)', data: cDur, borderColor: 'green', fill:false }] },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+
+  const ctx3 = document.getElementById('weightChart').getContext('2d');
+  weightChart = new Chart(ctx3, {
+    type: 'line',
+    data: { labels: bwDates, datasets: [
+      { label: 'Weight', data: bw, borderColor: 'orange', fill:false },
+      { label: 'Change', data: change, borderColor: 'red', fill:false }
+    ] },
+    options: { scales: { y: { beginAtZero: false } } }
+  });
+
+  renderExerciseProgress();
 }
 
 
@@ -2815,6 +2969,12 @@ window.loadTodayProgram = loadTodayProgram;
 window.toggleTemplateBuilder = toggleTemplateBuilder;
 window.addExerciseToTemplate = addExerciseToTemplate;
 window.saveSimpleTemplate = saveSimpleTemplate;
+window.renderProgressCharts = renderProgressCharts;
+window.toggleWorkoutChart = toggleWorkoutChart;
+window.toggleCardioChart = toggleCardioChart;
+window.toggleWeightChart = toggleWeightChart;
+window.toggleExerciseProgress = toggleExerciseProgress;
+window.renderExerciseProgress = renderExerciseProgress;
 
   function showToast(msg) {
     const toast = document.createElement('div');
