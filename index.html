@@ -507,6 +507,18 @@
 
   <div id="progressTab" class="tab-content" style="display:none;">
     <h2>Progress Overview</h2>
+    <div class="chart-section">
+      <button id="workoutChartBtn" onclick="toggleWorkoutChart()" style="margin-bottom:10px;">Hide Workout Progress</button>
+      <canvas id="workoutChart" style="max-width:100%;"></canvas>
+    </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="cardioChartBtn" onclick="toggleCardioChart()" style="margin-bottom:10px;">Hide Cardio Progress</button>
+      <canvas id="cardioChart" style="max-width:100%;"></canvas>
+    </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="weightChartBtn" onclick="toggleWeightChart()" style="margin-bottom:10px;">Hide Bodyweight Progress</button>
+      <canvas id="weightChart" style="max-width:100%;"></canvas>
+    </div>
     <canvas id="workoutChart" style="max-width:100%;"></canvas>
     <canvas id="cardioChart" style="max-width:100%; margin-top:20px;"></canvas>
     <canvas id="weightChart" style="max-width:100%; margin-top:20px;"></canvas>
@@ -2388,6 +2400,30 @@ function removeCardioEntry(index) {
 
 let workoutChart, cardioChart, weightChart;
 
+function toggleWorkoutChart() {
+  const chart = document.getElementById('workoutChart');
+  const btn = document.getElementById('workoutChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Workout Progress';
+}
+
+function toggleCardioChart() {
+  const chart = document.getElementById('cardioChart');
+  const btn = document.getElementById('cardioChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Cardio Progress';
+}
+
+function toggleWeightChart() {
+  const chart = document.getElementById('weightChart');
+  const btn = document.getElementById('weightChartBtn');
+  const hidden = chart.style.display === 'none';
+  chart.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Bodyweight Progress';
+}
+
 function renderProgressCharts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const workoutData = workouts.map(w => ({
@@ -2890,6 +2926,9 @@ window.toggleTemplateBuilder = toggleTemplateBuilder;
 window.addExerciseToTemplate = addExerciseToTemplate;
 window.saveSimpleTemplate = saveSimpleTemplate;
 window.renderProgressCharts = renderProgressCharts;
+window.toggleWorkoutChart = toggleWorkoutChart;
+window.toggleCardioChart = toggleCardioChart;
+window.toggleWeightChart = toggleWeightChart;
 
   function showToast(msg) {
     const toast = document.createElement('div');
