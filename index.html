@@ -519,6 +519,10 @@
       <button id="weightChartBtn" onclick="toggleWeightChart()" style="margin-bottom:10px;">Hide Bodyweight Progress</button>
       <canvas id="weightChart" style="max-width:100%;"></canvas>
     </div>
+    <div class="chart-section" style="margin-top:20px;">
+      <button id="exerciseProgressBtn" onclick="toggleExerciseProgress()" style="margin-bottom:10px;">Hide Exercise Progress</button>
+      <div id="exerciseProgressContainer"></div>
+    </div>
     <canvas id="workoutChart" style="max-width:100%;"></canvas>
     <canvas id="cardioChart" style="max-width:100%; margin-top:20px;"></canvas>
     <canvas id="weightChart" style="max-width:100%; margin-top:20px;"></canvas>
@@ -2424,6 +2428,47 @@ function toggleWeightChart() {
   btn.textContent = (hidden ? 'Hide' : 'Show') + ' Bodyweight Progress';
 }
 
+function toggleExerciseProgress() {
+  const container = document.getElementById('exerciseProgressContainer');
+  const btn = document.getElementById('exerciseProgressBtn');
+  const hidden = container.style.display === 'none';
+  container.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Exercise Progress';
+}
+
+function renderExerciseProgress() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const progressMap = {};
+
+  // gather last two entries for each exercise
+  workouts.sort((a, b) => a.date.localeCompare(b.date));
+  workouts.forEach(w => {
+    (w.log || []).forEach(e => {
+      if (!progressMap[e.exercise]) progressMap[e.exercise] = [];
+      progressMap[e.exercise].push(e);
+      if (progressMap[e.exercise].length > 2) {
+        progressMap[e.exercise].shift();
+      }
+    });
+  });
+
+  const container = document.getElementById('exerciseProgressContainer');
+  container.innerHTML = '';
+
+  Object.entries(progressMap).forEach(([name, entries]) => {
+    if (entries.length < 2) return;
+    const prev = entries[0];
+    const latest = entries[1];
+
+    const prevText = `${prev.weightsArray[0]} ${prev.unit || ''} x ${prev.repsArray[0]}`;
+    const latestText = `${latest.weightsArray[0]} ${latest.unit || ''} x ${latest.repsArray[0]}`;
+
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>${name}</strong> <del>${prevText}</del> → ${latestText}`;
+    container.appendChild(p);
+  });
+}
+
 function renderProgressCharts() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const workoutData = workouts.map(w => ({
@@ -2472,6 +2517,8 @@ function renderProgressCharts() {
     ] },
     options: { scales: { y: { beginAtZero: false } } }
   });
+
+  renderExerciseProgress();
 }
 
 
@@ -2929,6 +2976,8 @@ window.renderProgressCharts = renderProgressCharts;
 window.toggleWorkoutChart = toggleWorkoutChart;
 window.toggleCardioChart = toggleCardioChart;
 window.toggleWeightChart = toggleWeightChart;
+window.toggleExerciseProgress = toggleExerciseProgress;
+window.renderExerciseProgress = renderExerciseProgress;
 
   function showToast(msg) {
     const toast = document.createElement('div');
