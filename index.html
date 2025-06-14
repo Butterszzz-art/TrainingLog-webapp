@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fitness Tracker App</title>
+  <title>Pocket Coach</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -253,23 +253,30 @@
 <body>
 
 <div id="loginContainer" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
-  <h2>Login to Your Fitness Tracker</h2>
+  <h2>Login to Pocket Coach</h2>
   <input type="text" id="username" placeholder="Enter Username" />
   <input type="password" id="password" placeholder="Enter Password" />
   <button onclick="startLogin()">Login</button>
   <button onclick="startSignup()">Sign Up</button>
 </div>
+<div id="dashboardContainer" style="display:none; text-align:center;">
+  <h2>Welcome to Pocket Coach</h2>
+  <button onclick="openSection('pocketFit')">PocketFit</button>
+  <button onclick="openSection('pocketLifestyle')">PocketLifestyle</button>
+  <button onclick="openSection('pocketFinance')">PocketFinance</button>
+</div>
 
-<div id="appContainer" style="display:none;">
+<div id="pocketFitContainer" style="display:none;">
   
   <!-- Hamburger button -->
   <button id="menuToggle" class="menu-toggle">☰</button>
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
-    <div class="menu-title">Fitness Tracker (<span id="userDisplay"></span>)</div>
+    <div class="menu-title">PocketFit (<span id="userDisplay"></span>)</div>
     <ul>
       <li><a href="#" data-tab="logTab">📋 Training Log</a></li>
+      <li><a href="#" onclick="openDashboard()">🏠 Dashboard</a></li>
       <li><a href="#" data-tab="weightTab">⚖️ Bodyweight</a></li>
       <li><a href="#" data-tab="cardioTab">🏃 Cardio</a></li>
       <li><a href="#" data-tab="macroTab">🍽️ Macros</a></li>
@@ -545,6 +552,16 @@
 
   
 </div>
+<div id="pocketLifestyleContainer" style="display:none; text-align:center;">
+  <h2>PocketLifestyle</h2>
+  <p>Coming Soon</p>
+  <button onclick="openDashboard()">Back to Dashboard</button>
+</div>
+<div id="pocketFinanceContainer" style="display:none; text-align:center;">
+  <h2>PocketFinance</h2>
+  <p>Coming Soon</p>
+  <button onclick="openDashboard()">Back to Dashboard</button>
+</div>
 
 <script src="archiveOldWorkouts.js"></script>
 <script src="progressiveOverload.js"></script>
@@ -692,7 +709,7 @@ async function startLogin() {
 
       document.getElementById("userDisplay").textContent = username;
       document.getElementById("loginContainer").style.display = "none";
-      document.getElementById("appContainer").style.display = "block";
+      document.getElementById("dashboardContainer").style.display = "block";
 
       showTab('logTab');
       window.renderWorkouts(); // ✅ Render workouts
@@ -2278,6 +2295,21 @@ function logout() {
   localStorage.removeItem("fitnessAppUser");
   location.reload();
 }
+function openSection(section) {
+  document.getElementById("dashboardContainer").style.display = "none";
+  document.getElementById("pocketFitContainer").style.display = section === "pocketFit" ? "block" : "none";
+  document.getElementById("pocketLifestyleContainer").style.display = section === "pocketLifestyle" ? "block" : "none";
+  document.getElementById("pocketFinanceContainer").style.display = section === "pocketFinance" ? "block" : "none";
+  if (section === "pocketFit") showTab("logTab");
+}
+
+function openDashboard() {
+  document.getElementById("pocketFitContainer").style.display = "none";
+  document.getElementById("pocketLifestyleContainer").style.display = "none";
+  document.getElementById("pocketFinanceContainer").style.display = "none";
+  document.getElementById("dashboardContainer").style.display = "block";
+}
+
   
 // ===== TRAINING LOG & TEMPLATES =====
 
@@ -2901,7 +2933,7 @@ function loadCrossfitTemplate() {
   currentUser = savedUser;
   document.getElementById("userDisplay").textContent = savedUser;
   document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
+  document.getElementById("dashboardContainer").style.display = "block";
   showTab("logTab");
   renderWorkouts();
   renderWeights();
@@ -2986,6 +3018,8 @@ function loadCrossfitTemplate() {
 }); // closing DOMContentLoaded
 
 
+window.openSection = openSection;
+window.openDashboard = openDashboard;
 window.startLogin = startLogin;
 window.startSignup = startSignup;
 window.logout = logout;
