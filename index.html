@@ -289,7 +289,8 @@
   
   <h2>Resistance Exercise Log</h2>
 
-  <input type="text" id="exercise" placeholder="Exercise" />
+  <input type="text" id="exercise" placeholder="Exercise" list="exerciseSuggestions" />
+  <datalist id="exerciseSuggestions"></datalist>
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
 
   <!-- Dynamically generated inputs will appear here -->
@@ -623,6 +624,44 @@ let macroRanges = {
   tdee:    0
 };
 
+const defaultExercises = [
+  'Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Barbell Row',
+  'Pull Up', 'Dip', 'Curl', 'Lunge', 'Leg Press', 'Leg Curl',
+  'Leg Extension', 'Calf Raise'
+];
+let userExercises = [];
+
+function updateExerciseSuggestions() {
+  const list = document.getElementById('exerciseSuggestions');
+  if (!list) return;
+  list.innerHTML = '';
+  const all = Array.from(new Set([...defaultExercises, ...userExercises]));
+  all.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    list.appendChild(opt);
+  });
+}
+
+function loadUserExercises() {
+  if (!currentUser) return;
+  const data = JSON.parse(localStorage.getItem(`exercises_${currentUser}`)) || [];
+  userExercises = Array.isArray(data) ? data : [];
+  updateExerciseSuggestions();
+}
+
+function saveUserExercise(name) {
+  if (!currentUser || !name) return;
+  const key = `exercises_${currentUser}`;
+  const data = JSON.parse(localStorage.getItem(key)) || [];
+  if (!data.includes(name)) {
+    data.push(name);
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  userExercises = data;
+  updateExerciseSuggestions();
+}
+
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
 const tabContents = document.querySelectorAll('.tab-content');
@@ -665,6 +704,7 @@ async function startLogin() {
       loadProgramTemplates();
       loadProgramDropdown();
       checkActiveProgram();
+      loadUserExercises();
       saveDailyMacroProgress(0, 0, 0); // reset progress on login
       renderDailyMacroProgress();
     } else {
@@ -925,6 +965,7 @@ function addLogEntry() {
   });
 
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  saveUserExercise(exercise);
   renderWorkouts();
 
   // ✅ Clear form inputs
@@ -1284,6 +1325,7 @@ function addExerciseToTemplate() {
   const repRange = repsInput.value.trim();
   const rpe = rpeInput.value.trim();
   newTemplateExercises.push({ name, sets, repRange, rpe });
+  saveUserExercise(name);
   const list = document.getElementById('newTemplateList');
   if (list) {
     const li = document.createElement('li');
@@ -2595,6 +2637,8 @@ function showHistoryMiniTab(tab) {
 
     await fetchAirtableConfig();
 
+    updateExerciseSuggestions();
+
     // initial setup for macros
     checkMacroReset();
     updateMacroUI();
@@ -2714,6 +2758,7 @@ function saveCrossfitWorkout() {
     const weight = +document.getElementById(`cfExerciseWeight${i}`).value || 0;
     if (exerciseName && sets && reps) {
       exercises.push({ exerciseName, sets, reps, weight });
+      saveUserExercise(exerciseName.trim());
     }
   });
 
@@ -2866,6 +2911,7 @@ function loadCrossfitTemplate() {
   loadProgramTemplates();
   loadProgramDropdown();
   checkActiveProgram();
+  loadUserExercises();
 }
 
 
