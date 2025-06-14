@@ -312,7 +312,7 @@
  
 <body>
 
-<div id="loginContainer" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
+<div id="loginContainer" class="section active" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
   <h2>Login to Pocket Coach</h2>
   <input type="text" id="username" placeholder="Enter Username" />
   <input type="password" id="password" placeholder="Enter Password" />
@@ -3035,22 +3035,28 @@ function loadCrossfitTemplate() {
 }
     
     
+  const loginEl = document.getElementById("loginContainer");
+  const dash = document.getElementById("dashboardContainer");
+
   if (savedUser) {
-  currentUser = savedUser;
-  document.getElementById("userDisplay").textContent = savedUser;
-  document.getElementById("loginContainer").style.display = "none";
-  document.getElementById("dashboardContainer").style.display = "block";
-  showTab("logTab");
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-  renderCrossfitWorkouts();
-  loadTemplateDropdown();
-  loadProgramTemplates();
-  loadProgramDropdown();
-  checkActiveProgram();
-  loadUserExercises();
-}
+    currentUser = savedUser;
+    document.getElementById("userDisplay").textContent = savedUser;
+    loginEl.style.display = "none";
+    animateSwitch(dash);
+    showTab("logTab");
+    renderWorkouts();
+    renderWeights();
+    renderCardio();
+    renderCrossfitWorkouts();
+    loadTemplateDropdown();
+    loadProgramTemplates();
+    loadProgramDropdown();
+    checkActiveProgram();
+    loadUserExercises();
+  } else {
+    activeSection = loginEl;
+    loginEl.classList.add("active");
+  }
 
 
   const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
