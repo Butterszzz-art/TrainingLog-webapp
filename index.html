@@ -3069,9 +3069,8 @@ function loadCrossfitTemplate() {
   loadTemplateDropdown();
   loadProgramTemplates();
   loadProgramDropdown();
-  checkActiveProgram();
-  loadUserExercises();
-})
+    checkActiveProgram();
+    loadUserExercises();
 
 
   const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
