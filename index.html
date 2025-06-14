@@ -194,9 +194,18 @@
       border-radius: 10px;
       margin-bottom: 20px;
       color: #000;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .tab-content.active {
       display: block;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .tab-content.fade-out {
+      opacity: 0;
+      transform: scale(0.9);
     }
 
     #sidebarLogoutBtn {
@@ -243,6 +252,57 @@
   background-color: var(--primary-dark);
 }
 
+/* Section transition styles */
+.section {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.section.active {
+  opacity: 1;
+  transform: scale(1);
+}
+.section.fade-out {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Loading button styles */
+.loading-btn {
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+.loading-btn.disabled,
+.loading-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.loading-btn .spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  margin-left: -8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-top-color: var(--text-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+.loading-btn.loading .spinner {
+  display: block;
+}
+.loading-btn.loading span {
+  visibility: hidden;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
     
     
 </style>
@@ -256,17 +316,17 @@
   <h2>Login to Pocket Coach</h2>
   <input type="text" id="username" placeholder="Enter Username" />
   <input type="password" id="password" placeholder="Enter Password" />
-  <button onclick="startLogin()">Login</button>
-  <button onclick="startSignup()">Sign Up</button>
+  <button id="loginButton" class="loading-btn" onclick="startLogin()"><span>Login</span><span class="spinner"></span></button>
+  <button id="signupButton" class="loading-btn" onclick="startSignup()"><span>Sign Up</span><span class="spinner"></span></button>
 </div>
-<div id="dashboardContainer" style="display:none; text-align:center;">
+<div id="dashboardContainer" class="section" style="display:none; text-align:center;">
   <h2>Welcome to Pocket Coach</h2>
   <button onclick="openSection('pocketFit')">PocketFit</button>
   <button onclick="openSection('pocketLifestyle')">PocketLifestyle</button>
   <button onclick="openSection('pocketFinance')">PocketFinance</button>
 </div>
 
-<div id="pocketFitContainer" style="display:none;">
+<div id="pocketFitContainer" class="section" style="display:none;">
   
   <!-- Hamburger button -->
   <button id="menuToggle" class="menu-toggle">☰</button>
@@ -292,7 +352,7 @@
 
 <div id="progressReminder"></div>
 
-<div id="logTab" class="tab-content active">
+<div id="logTab" class="tab-content">
   
   <h2>Resistance Exercise Log</h2>
 
@@ -417,7 +477,7 @@
   <button onclick="startProgram()">Start Program</button>
 </div>
 
-<div id="communityTab" class="tab-content" style="display:none;">
+<div id="communityTab" class="tab-content">
   <h2>Community</h2>
   <div id="groupList"></div>
   <button onclick="showCreateGroup()">Create Group</button>
@@ -440,7 +500,7 @@
     </table>
   </div>
 
- <div id="macroTab" class="tab-content" style="display:none; position: relative; padding: 20px;">
+ <div id="macroTab" class="tab-content" style="position: relative; padding: 20px;">
   <!-- Settings Button, top right, only shown on Macros tab -->
 <button id="macrosSettingsBtn" onclick="openMacroSettings()" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">>
     ⚙️ Settings
@@ -513,7 +573,7 @@
 
 
 
-  <div id="progressTab" class="tab-content" style="display:none;">
+  <div id="progressTab" class="tab-content">
     <h2>Progress Overview</h2>
     <div class="chart-section">
       <button id="workoutChartBtn" onclick="toggleWorkoutChart()" style="margin-bottom:10px;">Hide Workout Progress</button>
@@ -536,7 +596,7 @@
     <canvas id="weightChart" style="max-width:100%; margin-top:20px;"></canvas>
   </div>
 
-<div id="logHistoryTab" class="tab-content" style="display:none;">
+<div id="logHistoryTab" class="tab-content">
   <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
     <button onclick="showHistoryMiniTab('workout')">Workout History</button>
@@ -552,12 +612,12 @@
 
   
 </div>
-<div id="pocketLifestyleContainer" style="display:none; text-align:center;">
+<div id="pocketLifestyleContainer" class="section" style="display:none; text-align:center;">
   <h2>PocketLifestyle</h2>
   <p>Coming Soon</p>
   <button onclick="openDashboard()">Back to Dashboard</button>
 </div>
-<div id="pocketFinanceContainer" style="display:none; text-align:center;">
+<div id="pocketFinanceContainer" class="section" style="display:none; text-align:center;">
   <h2>PocketFinance</h2>
   <p>Coming Soon</p>
   <button onclick="openDashboard()">Back to Dashboard</button>
@@ -572,6 +632,8 @@
 
 let currentUser = null;
 let savedUser = localStorage.getItem("fitnessAppUser");
+let activeSection = null;
+let activeTab = null;
 
 let airtableToken = '';
 let airtableBaseId = '';
@@ -681,11 +743,23 @@ function saveUserExercise(name) {
 
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
-const tabContents = document.querySelectorAll('.tab-content');
+
+function setLoading(btn, state) {
+  if (!btn) return;
+  if (state) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+  } else {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
 
   
 // LOGIN
 async function startLogin() {
+  const btn = document.getElementById('loginButton');
+  setLoading(btn, true);
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -709,7 +783,7 @@ async function startLogin() {
 
       document.getElementById("userDisplay").textContent = username;
       document.getElementById("loginContainer").style.display = "none";
-      document.getElementById("dashboardContainer").style.display = "block";
+      animateSwitch(document.getElementById('dashboardContainer'));
 
       showTab('logTab');
       window.renderWorkouts(); // ✅ Render workouts
@@ -732,6 +806,8 @@ async function startLogin() {
     alert("Error connecting to server.");
 
     await loadTemplateDropdown(); // ✅ Load templates after login
+  } finally {
+    setLoading(btn, false);
   }
 
 if (savedUser) {
@@ -744,18 +820,10 @@ await fetchUserMacroTargets(currentUser); // define this function below
 }
   
 function showTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove("active");
-    tab.style.display = "none";
-  });
-
-  // Show the selected tab
   const tab = document.getElementById(tabName);
-  if (tab) {
-    tab.classList.add("active");
-    tab.style.display = "block";
-  }
+  if (!tab) return;
+
+  animateTabSwitch(tab);
 
   // Show settings button only for the macros tab
   const settingsBtn = document.getElementById("macrosSettingsBtn");
@@ -815,6 +883,8 @@ async function fetchUserMacroTargets(username) {
 
 // SIGNUP
 async function startSignup() {
+  const btn = document.getElementById('signupButton');
+  setLoading(btn, true);
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -840,6 +910,8 @@ async function startSignup() {
   } catch (error) {
     console.error('Signup error:', error);
     alert("Error connecting to server.");
+  } finally {
+    setLoading(btn, false);
   }
 }
   
@@ -2295,19 +2367,42 @@ function logout() {
   localStorage.removeItem("fitnessAppUser");
   location.reload();
 }
+function animateSwitch(newEl) {
+  if (activeSection && activeSection !== newEl) {
+    activeSection.classList.add('fade-out');
+    setTimeout(() => {
+      activeSection.style.display = 'none';
+      activeSection.classList.remove('fade-out', 'active');
+    }, 400);
+  }
+  newEl.style.display = 'block';
+  requestAnimationFrame(() => newEl.classList.add('active'));
+  activeSection = newEl;
+}
+
+function animateTabSwitch(newTab) {
+  if (activeTab && activeTab !== newTab) {
+    activeTab.classList.add('fade-out');
+    setTimeout(() => {
+      activeTab.style.display = 'none';
+      activeTab.classList.remove('fade-out', 'active');
+    }, 300);
+  }
+  newTab.style.display = 'block';
+  requestAnimationFrame(() => newTab.classList.add('active'));
+  activeTab = newTab;
+}
+
 function openSection(section) {
-  document.getElementById("dashboardContainer").style.display = "none";
-  document.getElementById("pocketFitContainer").style.display = section === "pocketFit" ? "block" : "none";
-  document.getElementById("pocketLifestyleContainer").style.display = section === "pocketLifestyle" ? "block" : "none";
-  document.getElementById("pocketFinanceContainer").style.display = section === "pocketFinance" ? "block" : "none";
-  if (section === "pocketFit") showTab("logTab");
+  document.getElementById('dashboardContainer').style.display = 'none';
+  const el = document.getElementById(section + 'Container');
+  animateSwitch(el);
+  if (section === 'pocketFit') showTab('logTab');
 }
 
 function openDashboard() {
-  document.getElementById("pocketFitContainer").style.display = "none";
-  document.getElementById("pocketLifestyleContainer").style.display = "none";
-  document.getElementById("pocketFinanceContainer").style.display = "none";
-  document.getElementById("dashboardContainer").style.display = "block";
+  const dash = document.getElementById('dashboardContainer');
+  animateSwitch(dash);
 }
 
   
