@@ -167,26 +167,6 @@ async function addPost(groupId, user, text) {
 
 
 
-// Share a program with a group and show confirmation
-async function shareProgramToGroup(groupId, programData) {
-  if (!programData || typeof fetch === 'undefined' || !window.currentUser) return;
-  try {
-   const res = await fetch(`${serverUrl}/community/groups`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
-});
-    if (res.ok) {
-      alert('Program shared');
-    } else {
-      const err = await res.json().catch(() => ({}));
-      alert(err.error || 'Failed to share program');
-    }
-  } catch (e) {
-    console.warn('shareProgramToGroup failed', e);
-    alert('Failed to share program');
-  }
-}
 
 
 function calculateLeaderboard(members) {
@@ -280,9 +260,14 @@ function showCreateGroup() {
   createGroup(name).then(() => renderGroups(groups));
 }
 
-window.loadGroups = loadGroups;
-window.showCreateGroup = showCreateGroup;
-window.addPostToGroup = addPostToGroup;
-window.shareProgramInput = shareProgramInput;
-window.inviteUserToGroup = inviteUserToGroup;
-window.shareProgramToGroup = shareProgramToGroup;
+if (typeof window !== 'undefined') {
+  window.loadGroups = loadGroups;
+  window.showCreateGroup = showCreateGroup;
+  window.addPostToGroup = addPostToGroup;
+  window.shareProgramInput = shareProgramInput;
+  window.inviteUserToGroup = inviteUserToGroup;
+  window.shareProgramToGroup = shareProgramToGroup;
+}
+
+// allow tests to import functions
+module.exports = { calculateLeaderboard };
