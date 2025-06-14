@@ -755,6 +755,17 @@ function setLoading(btn, state) {
   }
 }
 
+function setLoading(btn, state) {
+  if (!btn) return;
+  if (state) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+  } else {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
   
 // LOGIN
 async function startLogin() {
