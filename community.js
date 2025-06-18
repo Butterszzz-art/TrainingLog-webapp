@@ -270,4 +270,6 @@ if (typeof window !== 'undefined') {
 }
 
 // allow tests to import functions
-module.exports = { calculateLeaderboard };
+if (typeof module !== 'undefined') {
+  module.exports = { calculateLeaderboard };
+}
