@@ -29,6 +29,7 @@
       margin: 0 auto;
       max-width: 900px;
       transition: margin-left 0.3s ease;
+      overflow-x: hidden;
     }
     body.sidebar-open {
       overflow: hidden;
@@ -110,7 +111,7 @@
       overflow-y: auto;
       box-sizing: border-box;
       transition: left 0.3s ease;
-      z-index: 1050;
+      z-index: 1000;
       padding-top: 60px;
     }
     .side-menu.open {
@@ -266,7 +267,11 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
     }
     #pocketFitContainer {
+      width: 100vw;
+      min-height: 100vh;
+      overflow-x: hidden;
       transition: margin-left 0.3s ease;
+      margin-left: 0;
     }
 .section.active {
   opacity: 1;
