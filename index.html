@@ -116,7 +116,7 @@
       z-index: 1000;
       padding-top: 60px;
     }
-    .body-with-sidebar .side-menu {
+    .side-menu.open {
       transform: translateX(0);
     }
 
@@ -126,6 +126,12 @@
     }
     .body-with-sidebar .main-content {
       margin-left: 250px;
+    }
+
+    /* Push the main content when sidebar is open */
+    .body-with-sidebar #appContainer {
+      margin-left: 250px;
+      transition: margin-left 0.3s ease;
     }
 
     @media (min-width: 768px) {
@@ -354,7 +360,7 @@
 <div id="pocketFitContainer" class="section" style="display:none;">
   
   <!-- Hamburger button -->
-  <button id="menuToggle" class="menu-toggle">☰</button>
+  <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
@@ -3105,14 +3111,14 @@ function loadCrossfitTemplate() {
   
 
   menuToggle.addEventListener("click", () => {
-    document.body.classList.toggle("body-with-sidebar");
-    // update aria-expanded
-    const isOpen = document.body.classList.contains("body-with-sidebar");
-    menuToggle.setAttribute("aria-expanded", isOpen);
+    const isOpen = sideMenu.classList.toggle("open");
+    document.body.classList.toggle("body-with-sidebar", isOpen);
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
   });
 
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+      sideMenu.classList.remove("open");
       document.body.classList.remove("body-with-sidebar");
       menuToggle.setAttribute("aria-expanded", "false");
     }
@@ -3124,6 +3130,7 @@ function loadCrossfitTemplate() {
       e.preventDefault();
       const tabName = link.getAttribute("data-tab");
       showTab(tabName);
+      sideMenu.classList.remove("open");
       document.body.classList.remove("body-with-sidebar");
       menuToggle.setAttribute("aria-expanded", "false");
     });
