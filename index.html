@@ -845,42 +845,18 @@ await fetchUserMacroTargets(currentUser); // define this function below
 }
   
 function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+    tab.style.display = 'none';
+  });
+
   const tab = document.getElementById(tabName);
   if (!tab) return;
 
-  animateTabSwitch(tab);
-
-  // Show settings button only for the macros tab
-  const settingsBtn = document.getElementById("macrosSettingsBtn");
-  if (!settingsBtn) return;
-
-  if (tabName === "macroTab") {
-    settingsBtn.style.display = "block";
-  } else {
-    settingsBtn.style.display = "none";
-  }
-
-  if (tabName === "logTab") {
-    checkActiveProgram();
-  }
-
-  if (tabName === "communityTab") {
-    loadGroups();
-  }
-
-  // Always reset macros view to main content on tab change
-  if (tabName === "macroTab") {
-    document.getElementById('macrosMainContent').style.display = 'block';
-    document.getElementById('macrosSettingsContent').style.display = 'none';
-  }
-
-  if (tabName === "logHistoryTab") {
-    showHistoryMiniTab('workout');
-  }
-
-  if (tabName === "progressTab") {
-    renderProgressCharts();
-  }
+  tab.style.display = 'block';
+  requestAnimationFrame(() => {
+    tab.classList.add('active');
+  });
 }
 
 
