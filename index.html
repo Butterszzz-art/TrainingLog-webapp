@@ -32,7 +32,7 @@
       transition: margin-left 0.3s ease;
       overflow-x: hidden;
     }
-    body.body-with-sidebar {
+    body.sidebar-open {
       overflow: hidden;
     }
     h2 {
@@ -105,13 +105,13 @@
       position: fixed;
       top: 0;
       left: 0;
+      transform: translateX(-250px);
       width: 250px;
       height: 100%;
       background-color: var(--sidebar-bg);
       box-shadow: 2px 0 5px rgba(0,0,0,0.3);
       overflow-y: auto;
       box-sizing: border-box;
-      transform: translateX(-100%);
       transition: transform 0.3s ease;
       z-index: 1000;
       padding-top: 60px;
@@ -124,14 +124,17 @@
     .main-content {
       transition: margin-left 0.3s ease;
     }
-    .body-with-sidebar .main-content {
+    body.sidebar-open .main-content {
       margin-left: 250px;
     }
 
     /* Push the main content when sidebar is open */
-    .body-with-sidebar #appContainer {
-      margin-left: 250px;
+    #appContainer {
+      margin-left: 0;
       transition: margin-left 0.3s ease;
+    }
+    body.sidebar-open #appContainer {
+      margin-left: 250px;
     }
 
     @media (min-width: 768px) {
@@ -3111,28 +3114,24 @@ function loadCrossfitTemplate() {
   
 
   menuToggle.addEventListener("click", () => {
-    const isOpen = sideMenu.classList.toggle("open");
-    document.body.classList.toggle("body-with-sidebar", isOpen);
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
+    sideMenu.classList.toggle("open");
+    document.body.classList.toggle("sidebar-open");
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
   });
 
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
       sideMenu.classList.remove("open");
-      document.body.classList.remove("body-with-sidebar");
+      document.body.classList.remove("sidebar-open");
       menuToggle.setAttribute("aria-expanded", "false");
     }
   });
 
-  const tabLinks = sideMenu.querySelectorAll("a[data-tab]");
-  tabLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const tabName = link.getAttribute("data-tab");
-      showTab(tabName);
+  sideMenu.querySelectorAll("a[data-tab]").forEach(link => {
+    link.addEventListener("click", () => {
       sideMenu.classList.remove("open");
-      document.body.classList.remove("body-with-sidebar");
-      menuToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("sidebar-open");
     });
   });
 
