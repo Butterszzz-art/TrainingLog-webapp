@@ -28,6 +28,10 @@
       padding: 20px;
       margin: 0 auto;
       max-width: 900px;
+      transition: margin-left 0.3s ease;
+    }
+    body.sidebar-open {
+      overflow-x: hidden;
     }
     h2 {
       font-size: 1.8rem;
@@ -104,6 +108,7 @@
       background-color: var(--sidebar-bg);
       box-shadow: 2px 0 5px rgba(0,0,0,0.3);
       overflow-y: auto;
+      box-sizing: border-box;
       transition: left 0.3s ease;
       z-index: 1000;
       padding-top: 60px;
@@ -116,8 +121,10 @@
       .side-menu {
         left: 0;
       }
-      body {
+      #pocketFitContainer {
         margin-left: 250px;
+      }
+      body {
         max-width: none;
       }
       #menuToggle {
@@ -253,11 +260,14 @@
 }
 
 /* Section transition styles */
-.section {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
+    .section {
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #pocketFitContainer {
+      transition: margin-left 0.3s ease;
+    }
 .section.active {
   opacity: 1;
   transform: scale(1);
@@ -3107,12 +3117,14 @@ function loadCrossfitTemplate() {
     sideMenu.classList.toggle("open");
     const expanded = menuToggle.getAttribute("aria-expanded") === "true";
     menuToggle.setAttribute("aria-expanded", String(!expanded));
+    document.body.classList.toggle("sidebar-open", sideMenu.classList.contains("open"));
   });
 
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
       sideMenu.classList.remove("open");
       menuToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("sidebar-open");
     }
   });
 
@@ -3124,6 +3136,7 @@ function loadCrossfitTemplate() {
       showTab(tabName);
       sideMenu.classList.remove("open");
       menuToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("sidebar-open");
     });
   });
 
