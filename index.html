@@ -794,9 +794,7 @@ async function startLogin() {
 
       document.getElementById("userDisplay").textContent = username;
       document.getElementById("loginContainer").style.display = "none";
-      animateSwitch(document.getElementById('dashboardContainer'));
-
-      showTab('logTab');
+      openSection('pocketFit');
       window.renderWorkouts(); // ✅ Render workouts
       renderMacroTargets();
       renderWeights();
@@ -2379,6 +2377,7 @@ function logout() {
   location.reload();
 }
 function animateSwitch(newEl) {
+  console.log('animateSwitch called for', newEl.id);
   if (activeSection && activeSection !== newEl) {
     activeSection.classList.add('fade-out');
     setTimeout(() => {
@@ -2387,7 +2386,17 @@ function animateSwitch(newEl) {
     }, 400);
   }
   newEl.style.display = 'block';
-  requestAnimationFrame(() => newEl.classList.add('active'));
+  requestAnimationFrame(() => {
+    newEl.classList.add('active');
+    console.log('active class added to', newEl.id);
+  });
+  setTimeout(() => {
+    if (!newEl.classList.contains('active')) {
+      console.warn('Forcing active class on', newEl.id);
+      newEl.style.display = 'block';
+      newEl.classList.add('active');
+    }
+  }, 500);
   activeSection = newEl;
 }
 
@@ -3037,13 +3046,13 @@ function loadCrossfitTemplate() {
     
   const loginEl = document.getElementById("loginContainer");
   const dash = document.getElementById("dashboardContainer");
+  const fit = document.getElementById("pocketFitContainer");
 
   if (savedUser) {
     currentUser = savedUser;
     document.getElementById("userDisplay").textContent = savedUser;
     loginEl.style.display = "none";
-    animateSwitch(dash);
-    showTab("logTab");
+    openSection('pocketFit');
     renderWorkouts();
     renderWeights();
     renderCardio();
@@ -3057,20 +3066,6 @@ function loadCrossfitTemplate() {
     activeSection = loginEl;
     loginEl.classList.add("active");
   }
-  currentUser = savedUser;
-  document.getElementById("userDisplay").textContent = savedUser;
-  document.getElementById("loginContainer").style.display = "none";
-  animateSwitch(dash);
-  showTab("logTab");
-  renderWorkouts();
-  renderWeights();
-  renderCardio();
-  renderCrossfitWorkouts();
-  loadTemplateDropdown();
-  loadProgramTemplates();
-  loadProgramDropdown();
-    checkActiveProgram();
-    loadUserExercises();
 
 
   const savedTargets = JSON.parse(localStorage.getItem(`macroTargets_${savedUser}`));
