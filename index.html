@@ -338,6 +338,8 @@
 #fabContainer {
   position: fixed;
   bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   right: 20px;
   z-index: 999;
 }
@@ -351,6 +353,9 @@
   border: none;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .fab-menu {
   display: flex;
@@ -460,6 +465,8 @@
     <div id="fabMenu" class="fab-menu hidden">
       <button onclick="addLogEntry()">➕ Add to Log</button>
       <button onclick="completeWorkout()">✅ Complete Workout</button>
+      <button onclick="saveWorkoutAsTemplate()">📦 Save Current Workout as Template</button>
+      <button onclick="loadSelectedTemplate()">📂 Load a Saved Template</button>
       <button onclick="saveWorkoutAsTemplate()">📦 Save Template</button>
       <button onclick="loadSelectedTemplate()">📂 Load Template</button>
       <button onclick="loadTodayProgram()">🏃 Load Program</button>
