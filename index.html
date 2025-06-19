@@ -366,15 +366,85 @@
 .fab-menu.hidden {
   display: none;
 }
-.fab-menu button {
-  padding: 8px 12px;
-  border: none;
-  background-color: #fff;
-  color: var(--text-color);
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  text-align: left;
-}
+  .fab-menu button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #fff;
+    color: var(--text-color);
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    text-align: left;
+  }
+
+  /* FAB button */
+  #fabContainer .fab {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  #fabContainer .fab-icon {
+    display: block;
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+  }
+
+  /* FAB menu grid */
+  #fabContainer .fab-menu {
+    position: fixed;
+    top: 72px;
+    left: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    gap: 12px;
+    padding: 8px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+  }
+  #fabContainer .fab-menu.hidden {
+    display: none;
+  }
+
+  /* FAB items */
+  #fabContainer .fab-item {
+    width: 56px;
+    height: 56px;
+    background: var(--card-bg);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+  }
+  #fabContainer .fab-item:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+  #fabContainer .fab-item .icon {
+    font-size: 20px;
+  }
+  #fabContainer .fab-item .label {
+    font-size: 10px;
+    margin-top: 2px;
+  }
 
     
     
@@ -461,15 +531,32 @@
   
   <!-- Floating action menu -->
   <div id="fabContainer">
-    <button id="fabToggle" class="fab">＋</button>
+    <button id="fabToggle" class="fab"><span class="fab-icon">☰</span></button>
     <div id="fabMenu" class="fab-menu hidden">
-      <button onclick="addLogEntry()">➕ Add to Log</button>
-      <button onclick="completeWorkout()">✅ Complete Workout</button>
-      <button onclick="saveWorkoutAsTemplate()">📦 Save Current Workout as Template</button>
-      <button onclick="loadSelectedTemplate()">📂 Load a Saved Template</button>
-      <button onclick="saveWorkoutAsTemplate()">📦 Save Template</button>
-      <button onclick="loadSelectedTemplate()">📂 Load Template</button>
-      <button onclick="loadTodayProgram()">🏃 Load Program</button>
+      <button class="fab-item" onclick="addLogEntry()">
+        <span class="icon">➕</span>
+        <span class="label">Add</span>
+      </button>
+      <button class="fab-item" onclick="addWeightEntry()">
+        <span class="icon">⚖️</span>
+        <span class="label">Weight</span>
+      </button>
+      <button class="fab-item" onclick="addCardioEntry()">
+        <span class="icon">🏃</span>
+        <span class="label">Cardio</span>
+      </button>
+      <button class="fab-item" onclick="addMacroMeal()">
+        <span class="icon">🍽️</span>
+        <span class="label">Meal</span>
+      </button>
+      <button class="fab-item" onclick="saveWorkoutAsTemplate()">
+        <span class="icon">💾</span>
+        <span class="label">Save</span>
+      </button>
+      <button class="fab-item" onclick="loadSavedTemplate()">
+        <span class="icon">📂</span>
+        <span class="label">Load</span>
+      </button>
     </div>
   </div>
   
@@ -2426,9 +2513,12 @@ window.closeMacroSettings = closeMacroSettings;
 
 
   // Toggle FAB menu
-  document.getElementById('fabToggle').addEventListener('click', () => {
-    const menu = document.getElementById('fabMenu');
-    menu.classList.toggle('hidden');
+  const fabToggle = document.getElementById('fabToggle');
+  const fabMenu   = document.getElementById('fabMenu');
+  fabToggle.addEventListener('click', () => {
+    fabMenu.classList.toggle('hidden');
+    fabToggle.querySelector('.fab-icon').style.transform =
+      fabMenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(90deg)';
   });
   
 // LOGOUT
