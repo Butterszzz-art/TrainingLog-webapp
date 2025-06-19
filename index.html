@@ -410,6 +410,56 @@
   margin-top: 2px;
 }
 
+/* Narrower inputs and calendar widget */
+#exercise,
+#sets,
+#goal,
+#repGoal,
+#weightUnit,
+#entryDate {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+#trainingProgressCalendar {
+  width: 90%;
+  max-width: 500px;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+#trainingProgressCalendar table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#trainingProgressCalendar th,
+#trainingProgressCalendar td {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+#trainingProgressCalendar td {
+  cursor: pointer;
+}
+
+.calendar-widget {
+  margin: 20px auto;
+  width: 60%;
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
     
     
 </style>
@@ -481,9 +531,14 @@
     <option value="lbs">lbs</option>
   </select>
 
+  <!-- Date selector -->
+  <input type="date" id="entryDate" class="calendar-widget slide-up" />
+
   <select id="templateSelect" onchange="loadSelectedTemplate()" style="margin-top: 10px;">
   <option value="">Select Template...</option>
 </select>
+
+  <div id="trainingProgressCalendar" class="slide-up"></div>
 
   <div id="restTimerSection" style="margin-top:10px;">
     <input type="number" id="restMinutes" placeholder="Rest Minutes" style="width:80px;" />
@@ -1129,7 +1184,8 @@ function addLogEntry() {
   const goal = +document.getElementById("goal").value;
   const repGoal = +document.getElementById("repGoal").value;
   const unit = document.getElementById("weightUnit").value || 'kg';
-  const date = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById("entryDate");
+  const date = dateInput && dateInput.value ? dateInput.value : new Date().toISOString().split('T')[0];
 
 
   if (!exercise || !sets || isNaN(sets) || sets < 1) {
@@ -1169,7 +1225,9 @@ function addLogEntry() {
 
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
   saveUserExercise(exercise);
+  trackWorkoutDate(date);
   renderWorkouts();
+  updateTrainingCalendar();
 
   // ✅ Clear form inputs
   document.getElementById("exercise").value = '';
@@ -1177,6 +1235,9 @@ function addLogEntry() {
   document.getElementById("goal").value = '';
   document.getElementById("repGoal").value = '';
   document.getElementById("setInputsContainer").innerHTML = '';
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
 
   // ✅ Reset set counter
   currentSetCount = 0;
@@ -2829,6 +2890,147 @@ function renderProgressCharts() {
 }
 
 
+// ===== Training Progress Calendar =====
+let calendarMonth;
+let calendarYear;
+
+function getLocalStorage(key) {
+  return JSON.parse(localStorage.getItem(`${key}_${currentUser}`)) || [];
+}
+
+function getActiveProgram() {
+  return JSON.parse(localStorage.getItem(`activeProgram_${currentUser}`));
+}
+
+function getProgramDayDates(startDate) {
+  if (!startDate) return [];
+  const programs = JSON.parse(localStorage.getItem(`programs_${currentUser}`)) || [];
+  const active = getActiveProgram();
+  if (!active) return [];
+  const program = programs.find(p => p.id === active.programId);
+  if (!program) return [];
+  const dates = [];
+  for (let i = 0; i < program.days.length; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+
+function trackWorkoutDate(date) {
+  const key = `workoutDates_${currentUser}`;
+  const dates = JSON.parse(localStorage.getItem(key)) || [];
+  if (!dates.includes(date)) {
+    dates.push(date);
+    localStorage.setItem(key, JSON.stringify(dates));
+  }
+}
+
+function goToDate(date) {
+  const input = document.getElementById('entryDate');
+  if (input) input.value = date;
+}
+
+function renderTrainingCalendar(month, year) {
+  const cal = document.getElementById('trainingProgressCalendar');
+  if (!cal) return;
+  const trackedDates = getLocalStorage('workoutDates');
+  const active = getActiveProgram();
+  const programDates = active ? getProgramDayDates(active.startDate) : [];
+
+  cal.innerHTML = '';
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  const header = document.createElement('div');
+  header.className = 'calendar-header';
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'center';
+  header.style.padding = '10px';
+
+  const prev = document.createElement('button');
+  prev.textContent = '<';
+  prev.onclick = () => {
+    const m = month === 0 ? 11 : month - 1;
+    const y = month === 0 ? year - 1 : year;
+    calendarMonth = m;
+    calendarYear = y;
+    renderTrainingCalendar(m, y);
+  };
+
+  const next = document.createElement('button');
+  next.textContent = '>';
+  next.onclick = () => {
+    const m = month === 11 ? 0 : month + 1;
+    const y = month === 11 ? year + 1 : year;
+    calendarMonth = m;
+    calendarYear = y;
+    renderTrainingCalendar(m, y);
+  };
+
+  const title = document.createElement('div');
+  title.textContent = firstDay.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  header.appendChild(prev);
+  header.appendChild(title);
+  header.appendChild(next);
+  cal.appendChild(header);
+
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const trHead = document.createElement('tr');
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    const th = document.createElement('th');
+    th.textContent = d;
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  let row = document.createElement('tr');
+  for (let i = 0; i < firstDay.getDay(); i++) {
+    row.appendChild(document.createElement('td'));
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const current = new Date(year, month, day);
+    const str = current.toISOString().split('T')[0];
+    const td = document.createElement('td');
+    td.textContent = day;
+    if (trackedDates.includes(str)) td.style.background = '#FFE0B2';
+    if (programDates.includes(str)) td.style.background = '#FF7043';
+    if (str === new Date().toISOString().split('T')[0]) td.style.border = '2px solid var(--primary)';
+    td.onclick = () => goToDate(str);
+    row.appendChild(td);
+    if (current.getDay() === 6) {
+      tbody.appendChild(row);
+      row = document.createElement('tr');
+    }
+  }
+  if (row.children.length) {
+    while (row.children.length < 7) row.appendChild(document.createElement('td'));
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+  cal.appendChild(table);
+}
+
+function initTrainingCalendar() {
+  const now = new Date();
+  calendarMonth = now.getMonth();
+  calendarYear = now.getFullYear();
+  renderTrainingCalendar(calendarMonth, calendarYear);
+}
+
+function updateTrainingCalendar() {
+  renderTrainingCalendar(calendarMonth, calendarYear);
+}
+
+
 // ========= CROSSFIT TRACKER =========
 
 let crossfitExercises = [];
@@ -2903,6 +3105,11 @@ function showHistoryMiniTab(tab) {
     await fetchAirtableConfig();
 
     updateExerciseSuggestions();
+
+    const dateInput = document.getElementById('entryDate');
+    if (dateInput) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
 
     // initial setup for macros
     checkMacroReset();
@@ -3258,6 +3465,7 @@ function loadCrossfitTemplate() {
   });
 
   // Show the first tab initially
+  initTrainingCalendar();
   showTab("logTab");
 
 
@@ -3309,6 +3517,7 @@ window.toggleCardioChart = toggleCardioChart;
 window.toggleWeightChart = toggleWeightChart;
 window.toggleExerciseProgress = toggleExerciseProgress;
 window.renderExerciseProgress = renderExerciseProgress;
+window.goToDate = goToDate;
 
   function showToast(msg) {
     const toast = document.createElement('div');
