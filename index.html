@@ -128,12 +128,12 @@
       margin-left: 250px;
     }
 
-    /* Push the main content when sidebar is open */
+    /* Main content shift when sidebar is open */
     #appContainer {
-      margin-left: 0;
       transition: margin-left 0.3s ease;
+      margin-left: 0;
     }
-    body.sidebar-open #appContainer {
+    #appContainer.shifted {
       margin-left: 250px;
     }
 
@@ -3118,11 +3118,19 @@ function loadCrossfitTemplate() {
     const shouldOpen =
       force !== undefined ? force : !sideMenu.classList.contains("open");
     sideMenu.classList.toggle("open", shouldOpen);
-    document.body.classList.toggle("sidebar-open", shouldOpen);
+    document.getElementById("appContainer").classList.toggle("shifted", shouldOpen);
     menuToggle.setAttribute("aria-expanded", String(shouldOpen));
   }
 
-  menuToggle.addEventListener("click", () => toggleSidebar());
+  menuToggle.addEventListener("click", () => {
+    // toggle sidebar panel
+    sideMenu.classList.toggle("open");
+    // push/pull main content
+    document.getElementById("appContainer").classList.toggle("shifted");
+    // update aria attribute
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
+  });
 
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
