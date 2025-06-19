@@ -775,8 +775,6 @@ function saveUserExercise(name) {
   updateExerciseSuggestions();
 }
 
-const menuToggle = document.getElementById('menuToggle');
-const sideMenu = document.getElementById('sideMenu');
 
 function setLoading(btn, state) {
   if (!btn) return;
@@ -3113,25 +3111,31 @@ function loadCrossfitTemplate() {
     
   
 
-  menuToggle.addEventListener("click", () => {
-    sideMenu.classList.toggle("open");
-    document.body.classList.toggle("sidebar-open");
-    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
-    menuToggle.setAttribute("aria-expanded", String(!expanded));
-  });
+  const menuToggle = document.getElementById("menuToggle");
+  const sideMenu = document.getElementById("sideMenu");
+
+  function toggleSidebar(force) {
+    const shouldOpen =
+      force !== undefined ? force : !sideMenu.classList.contains("open");
+    sideMenu.classList.toggle("open", shouldOpen);
+    document.body.classList.toggle("sidebar-open", shouldOpen);
+    menuToggle.setAttribute("aria-expanded", String(shouldOpen));
+  }
+
+  menuToggle.addEventListener("click", () => toggleSidebar());
 
   document.addEventListener("click", (e) => {
     if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-      sideMenu.classList.remove("open");
-      document.body.classList.remove("sidebar-open");
-      menuToggle.setAttribute("aria-expanded", "false");
+      toggleSidebar(false);
     }
   });
 
-  sideMenu.querySelectorAll("a[data-tab]").forEach(link => {
-    link.addEventListener("click", () => {
-      sideMenu.classList.remove("open");
-      document.body.classList.remove("sidebar-open");
+  sideMenu.querySelectorAll("a[data-tab]").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tabName = link.getAttribute("data-tab");
+      showTab(tabName);
+      toggleSidebar(false);
     });
   });
 
