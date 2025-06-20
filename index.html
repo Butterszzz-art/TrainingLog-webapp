@@ -423,26 +423,26 @@
   display: block;
 }
 
-#trainingProgressCalendar {
-  width: 90%;
-  max-width: 500px;
+#training-calendar {
+  width: 100%;
+  max-width: 400px;
   margin: 20px auto;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
-#trainingProgressCalendar table {
+#training-calendar table {
   width: 100%;
   border-collapse: collapse;
 }
-#trainingProgressCalendar th,
-#trainingProgressCalendar td {
+#training-calendar th,
+#training-calendar td {
   padding: 6px;
   text-align: center;
   border: 1px solid var(--border-color);
 }
-#trainingProgressCalendar td {
+#training-calendar td {
   cursor: pointer;
 }
 
@@ -462,6 +462,30 @@
 
     
     
+#resistance-section{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  align-items:flex-start;
+}
+#resistance-inputs{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+#resistance-inputs input,
+#resistance-inputs select{
+  width:100%;
+  max-width:300px;
+}
+#training-calendar{
+  width:100%;
+  max-width:400px;
+  height:auto;
+  margin-top:0;
+}
+.highlight-past{background-color:#FFE0B2;}
+.highlight-today{background-color:#FF7043;}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -514,6 +538,8 @@
   
   <h2>Resistance Exercise Log</h2>
 
+<div id="resistance-section">
+  <div id="resistance-inputs">
   <input type="text" id="exercise" placeholder="Exercise" list="exerciseSuggestions" />
   <datalist id="exerciseSuggestions"></datalist>
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
@@ -538,7 +564,6 @@
   <option value="">Select Template...</option>
 </select>
 
-  <div id="trainingProgressCalendar" class="slide-up"></div>
 
   <div id="restTimerSection" style="margin-top:10px;">
     <input type="number" id="restMinutes" placeholder="Rest Minutes" style="width:80px;" />
@@ -578,6 +603,9 @@
       </button>
     </div>
   </div>
+</div>
+<div id="training-calendar" class="slide-up"></div>
+</div>
   
   <!-- Logs will render below this -->
   <div id="workoutsContainer" style="margin-top: 20px;"></div>
@@ -2933,7 +2961,7 @@ function goToDate(date) {
 }
 
 function renderTrainingCalendar(month, year) {
-  const cal = document.getElementById('trainingProgressCalendar');
+  const cal = document.getElementById('training-calendar');
   if (!cal) return;
   const trackedDates = getLocalStorage('workoutDates');
   const active = getActiveProgram();
@@ -3001,8 +3029,8 @@ function renderTrainingCalendar(month, year) {
     const str = current.toISOString().split('T')[0];
     const td = document.createElement('td');
     td.textContent = day;
-    if (trackedDates.includes(str)) td.style.background = '#FFE0B2';
-    if (programDates.includes(str)) td.style.background = '#FF7043';
+    if (trackedDates.includes(str)) td.classList.add("highlight-past");
+    if (programDates.includes(str)) td.classList.add("highlight-today");
     if (str === new Date().toISOString().split('T')[0]) td.style.border = '2px solid var(--primary)';
     td.onclick = () => goToDate(str);
     row.appendChild(td);
