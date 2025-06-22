@@ -369,10 +369,28 @@
     transition: transform 0.3s ease;
   }
 
-  /* Positioning for the main FAB toggle button and any additional FAB-style buttons */
-  #fabToggle,
+  /* Positioning for additional FAB-style buttons */
   .fab-button {
     bottom: 80px;
+  }
+
+  /* Styling for the main FAB toggle */
+  .fab-toggle {
+    position: absolute;
+    bottom: 60px;
+    right: 50%;
+    transform: translateX(50%);
+    width: 56px;
+    height: 56px;
+    font-size: 2rem;
+    border-radius: 50%;
+    background: #007bff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 0;
   }
 #fabContainer .fab-icon {
   transition: transform 0.3s ease;
@@ -601,7 +619,7 @@
   
   <!-- Floating action menu -->
   <div id="fabContainer">
-    <button id="fabToggle" class="fab"><span class="fab-icon">☰</span></button>
+    <button id="fabToggle" class="fab fab-toggle"><span class="fab-icon">+</span></button>
     <div id="fabMenu" class="fab-menu">
       <button class="fab-item" onclick="addLogEntry()">
         <span class="icon">➕</span>
