@@ -530,6 +530,10 @@
 }
 .highlight-past{background-color:#FFE0B2;}
 .highlight-today{background-color:#FF7043;}
+/* Progress Tab layout */
+.progress-charts { width: 65%; float: left; }
+.calendar-container { width: 30%; float: right; min-height: 300px; margin-left: 5%; }
+#progressTab:after { content: ""; display: block; clear: both; }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -834,6 +838,7 @@
 
   <div id="progressTab" class="tab-content">
     <h2>Progress Overview</h2>
+    <div class="progress-charts">
     <div class="chart-section">
       <button id="workoutChartBtn" onclick="toggleWorkoutChart()" style="margin-bottom:10px;">Hide Workout Progress</button>
       <canvas id="workoutChart" style="max-width:100%;"></canvas>
@@ -853,6 +858,10 @@
     <canvas id="workoutChart" style="max-width:100%;"></canvas>
     <canvas id="cardioChart" style="max-width:100%; margin-top:20px;"></canvas>
     <canvas id="weightChart" style="max-width:100%; margin-top:20px;"></canvas>
+    </div>
+    <div id="calendarContainer" class="calendar-container">
+      <!-- calendar will render here -->
+    </div>
   </div>
 
 <div id="logHistoryTab" class="tab-content">
@@ -3635,7 +3644,21 @@ window.closeMacroSettings = closeMacroSettings;
 
 </script>
 
-  
+    <!-- include a lightweight calendar library -->
+    <link rel="stylesheet" href="https://unpkg.com/fullcalendar@5.11.3/main.min.css" />
+    <script src="https://unpkg.com/fullcalendar@5.11.3/main.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendarContainer');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          height: 'auto'
+        });
+        calendar.render();
+      });
+    </script>
+
+
 </body>
 </html>
 
