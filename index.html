@@ -353,11 +353,11 @@
   transform: translateX(-50%);
   z-index: 1001;
 }
-#fabContainer .fab {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: var(--primary);
+  #fabContainer .fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary);
   color: #fff;
   border: none;
   display: flex;
@@ -365,9 +365,15 @@
   justify-content: center;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease;
-}
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+
+  /* Positioning for the main FAB toggle button and any additional FAB-style buttons */
+  #fabToggle,
+  .fab-button {
+    bottom: 80px;
+  }
 #fabContainer .fab-icon {
   transition: transform 0.3s ease;
 }
