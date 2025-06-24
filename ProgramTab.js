@@ -8,42 +8,39 @@ const savePrograms = (programs) => localStorage.setItem('programs', JSON.stringi
 function CalendarPreview({ startDate, frequency, onSelect }) {
   const start = startDate ? new Date(startDate) : new Date();
   const weeks = [];
-  for (let w=0; w<4; w++) {
+  for (let w = 0; w < 4; w++) {
     const days = [];
-    for (let d=0; d<7; d++) {
+    for (let d = 0; d < 7; d++) {
       const date = new Date(start);
-      date.setDate(start.getDate() + w*7 + d);
+      date.setDate(start.getDate() + w * 7 + d);
       days.push(date);
     }
     weeks.push(days);
   }
-  return (
-    <table className="calendar-preview">
-      <thead>
-        <tr>{DAYS.map(d=><th key={d}>{d}</th>)}</tr>
-      </thead>
-      <tbody>
-        {weeks.map((week,i)=>(
-          <tr key={i}>
-            {week.map(date=>{
-              const day= DAYS[date.getDay()===0?6:date.getDay()-1];
-              const selected = frequency.includes(day);
-              return (
-                <td
-                  key={date.toISOString()}
-                  className={selected ? 'scheduled' : ''}
-                  onClick={()=>onSelect(day)}
-                >
-                  {date.getDate()}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+
+  // instead of JSX, use React.createElement:
+  return React.createElement(
+    'table',
+    { className: 'calendar-preview' },
+    weeks.map((week, wi) =>
+      React.createElement(
+        'tr',
+        { key: wi },
+        week.map((day, di) =>
+          React.createElement(
+            'td',
+            {
+              key: di,
+              onClick: () => onSelect(day),
+            },
+            day.getDate()
+          )
+        )
+      )
+    )
   );
 }
+
 
 export default function ProgramTab() {
   const [programs, setPrograms] = useState(loadPrograms());
