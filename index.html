@@ -3000,7 +3000,7 @@ async function showWorkoutProgress(data) {
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
   const trend = trendPoints(vols);
-  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(vols, 4));
+  const forecast = Array(Math.max(0, dates.length - 1)).fill(null).concat(forecastNext(vols, 4));
   renderLineChart(dates.concat(new Array(4).fill('')), 'Total Volume', vols.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
@@ -3012,7 +3012,7 @@ async function showCardioProgress() {
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
   const trend = trendPoints(mins);
-  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(mins, 4));
+  const forecast = Array(Math.max(0, dates.length - 1)).fill(null).concat(forecastNext(mins, 4));
   renderLineChart(dates.concat(new Array(4).fill('')), 'Cardio Minutes', mins.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
@@ -3024,7 +3024,7 @@ async function showBodyweightProgress() {
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
   const trend = trendPoints(weights);
-  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(weights, 4));
+  const forecast = Array(Math.max(0, dates.length - 1)).fill(null).concat(forecastNext(weights, 4));
   renderLineChart(dates.concat(new Array(4).fill('')), 'Bodyweight', weights.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
