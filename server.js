@@ -1,10 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -17,6 +19,14 @@ app.get('/config', (req, res) => {
     airtableToken: process.env.AIRTABLE_TOKEN || 'patHs7yemB2TYuOOc.6ed847f094d08b1d30710f9f5763d909d1841a2e7dc63fbdac208133a39ae577',
     airtableBaseId: process.env.AIRTABLE_BASE_ID || 'appmjr4IgnEH72K1b'
   });
+});
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username && password) {
+    return res.json({ success: true });
+  }
+  res.status(401).json({ success: false, message: 'Invalid credentials' });
 });
 
 // Groups API
