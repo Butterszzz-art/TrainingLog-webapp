@@ -722,40 +722,7 @@
   <div id="cfWorkoutsContainer"></div>
 </div>
 
-<div id="programTab" class="tab-content">
-  <button id="openProgramBtn" onclick="toggleProgramBuilder()">Create Program</button>
-  <button id="openTemplateBtn" onclick="toggleTemplateBuilder()" style="margin-left:10px;">Create Template</button>
-
-  <div id="programBuilder" style="display:none; margin-top:10px;">
-    <h2 style="margin-top:0;">Program Builder</h2>
-    <input type="text" id="programName" placeholder="Program Name" />
-    <input type="date" id="programStart" />
-    <select id="programTemplateSelect">
-      <option value="">Select Template...</option>
-    </select>
-    <button onclick="addDayToProgram()">Add Day</button>
-    <ul id="programDaysList"></ul>
-    <button onclick="saveProgram()">Save Program</button>
-  </div>
-
-  <div id="templateBuilder" style="display:none; margin-top:10px;">
-    <h2 style="margin-top:0;">Template Builder</h2>
-    <input type="text" id="newTemplateName" placeholder="Template Name" />
-    <input type="text" id="newTemplateExercise" placeholder="Exercise Name" />
-    <input type="number" id="newTemplateSets" placeholder="Total Sets" />
-    <input type="text" id="newTemplateReps" placeholder="Rep Range (e.g. 8-12)" />
-    <input type="text" id="newTemplateRPE" placeholder="RIR/RPE" />
-    <button onclick="addExerciseToTemplate()">Add Exercise</button>
-    <ul id="newTemplateList"></ul>
-    <button onclick="saveSimpleTemplate()">Save Template</button>
-  </div>
-
-  <h3 style="margin-top:20px;">Start Saved Program</h3>
-  <select id="programSelect"></select>
-  <button onclick="startProgram()">Start Program</button>
-<div id="volumeTargetSection"><h3>Weekly Volume Targets</h3><div id="volumeInputs"></div><button onclick="saveVolumeTargets()">Save Targets</button><div id="volumeProgress"></div></div>
-<div id="periodizationSection"><h3>Periodization Templates</h3><select id="splitType"><option value="ppl">Push/Pull/Legs</option><option value="bro">Bro Split</option><option value="upperLower">Upper/Lower</option></select><select id="progressionType"><option value="linear">Linear</option><option value="undulating">Undulating</option><option value="block">Block</option></select><button onclick="generatePeriodization()">Generate</button><div id="periodizationPreview"></div></div>
-</div>
+<div id="programTab" class="tab-content"><div id="programTabReactRoot"></div></div>
 
 <div id="communityTab" class="tab-content">
   <h2>Community</h2>
