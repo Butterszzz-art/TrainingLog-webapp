@@ -40,6 +40,7 @@ export default function ProgramTab() {
     startDate: '',
     frequency: [],
     progressionType: 'linear',
+    splitMode: 'synchronous',
     progressionSettings: {
       linear: {
         increment: 2.5,
@@ -113,6 +114,7 @@ export default function ProgramTab() {
       startDate: program.startDate,
       frequency: program.frequency,
       progressionType: program.progressionType,
+      splitMode: program.splitMode,
       progressionSettings: program.progressionSettings[program.progressionType],
       days: program.days.map((d, i) => ({
         name: d.name,
@@ -180,30 +182,7 @@ export default function ProgramTab() {
       ...program,
       startDate: e.target.value
     })
-  })), /*#__PURE__*/React.createElement("div", null, "Frequency:", DAYS.map(d => /*#__PURE__*/React.createElement("label", {
-    key: d,
-    style: {
-      marginRight: '6px'
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: program.frequency.includes(d),
-    onChange: () => handleFreqToggle(d)
-  }), " ", d))), /*#__PURE__*/React.createElement("div", null, "Progression Type:", ['linear', 'undulating', 'block'].map(t => /*#__PURE__*/React.createElement("label", {
-    key: t,
-    style: {
-      marginRight: '10px'
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "radio",
-    name: "progType",
-    value: t,
-    checked: program.progressionType === t,
-    onChange: () => setProgram({
-      ...program,
-      progressionType: t
-    })
-  }), " ", t))), program.progressionType === 'linear' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+  })), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "Frequency"), /*#__PURE__*/React.createElement("div", { className: "frequency-grid" }, DAYS.map(d => /*#__PURE__*/React.createElement("label", { key: d }, /*#__PURE__*/React.createElement("input", { type: "checkbox", checked: program.frequency.includes(d), onChange: () => handleFreqToggle(d) }), " ", d)))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "Progression Type"), ['linear', 'undulating', 'block'].map(t => /*#__PURE__*/React.createElement("label", { key: t, style: { marginRight: '10px' } }, /*#__PURE__*/React.createElement("input", { type: "radio", name: "progType", value: t, checked: program.progressionType === t, onChange: () => setProgram({ ...program, progressionType: t }) }), " ", t))), /*#__PURE__*/React.createElement("fieldset", null, /*#__PURE__*/React.createElement("legend", null, "Split Mode"), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("input", { type: "radio", name: "splitMode", value: "synchronous", checked: program.splitMode === 'synchronous', onChange: () => setProgram({ ...program, splitMode: 'synchronous' }) }), " Synchronous"), /*#__PURE__*/React.createElement("label", { style: { marginLeft: '10px' } }, /*#__PURE__*/React.createElement("input", { type: "radio", name: "splitMode", value: "asynchronous", checked: program.splitMode === 'asynchronous', onChange: () => setProgram({ ...program, splitMode: 'asynchronous' }) }), " Asynchronous"))), program.progressionType === 'linear' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     title: "Amount to add each interval"
   }, "Increment ", /*#__PURE__*/React.createElement("input", {
     type: "number",
