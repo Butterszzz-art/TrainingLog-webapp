@@ -16,10 +16,8 @@
       width: 100%;
     }
     :root {
-      --bg-color: #000000;
-      --text-color: #000000;
       --bg-color: #F9F9FB;
-      --text-color: #FFFFFF;
+      --text-color: #000000;
       --secondary-text: #B0B9C3;
       --primary: #2F80ED;
       --primary-dark: #1B64C2;
@@ -29,6 +27,22 @@
       --sidebar-bg: #0D2A55;
       --highlight: #F2994A;
       --shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    body.theme-dark {
+      --bg-color: #121212;
+      --text-color: #FFFFFF;
+      --card-bg: #1E1E1E;
+      --border-color: #333;
+      --sidebar-bg: #000000;
+    }
+
+    body.theme-neon {
+      --bg-color: #000000;
+      --text-color: #39FF14;
+      --card-bg: #001100;
+      --border-color: #39FF14;
+      --sidebar-bg: #003300;
     }
     body {
       font-family: 'Poppins', sans-serif;
@@ -774,6 +788,9 @@
 
     <div id="macroMealContainer"></div>
     <button id="macroMeal" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
+    <button onclick="scanBarcode()" style="width:100%;font-size:1rem;">📷 Scan Barcode</button>
+    <input id="recipeUrl" placeholder="Import recipe URL" style="width:100%;padding:6px;margin-top:10px;"/>
+    <button onclick="importRecipe(recipeUrl.value).then(r=>console.log(r))" style="width:100%;font-size:1rem;">Import Recipe</button>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -785,6 +802,16 @@
       <label for="customCalories">Custom Calorie Intake (optional):</label><br>
       <input id="customCalories" type="number" placeholder="Enter custom calorie target" style="width: 100%; padding: 8px; margin-top: 6px;"/>
       <button onclick="applyCustomCalories()" style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Insert Calories</button>
+    </div>
+
+    <!-- Theme selection -->
+    <div style="margin-bottom:20px;">
+      <label for="themeSelect">Color Theme:</label><br>
+      <select id="themeSelect" onchange="applyTheme(this.value)" style="width:100%;padding:8px;margin-top:6px;">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="neon">Neon Dark</option>
+      </select>
     </div>
 
     <!-- Adjust Macros -->
@@ -817,6 +844,7 @@
         <option value="1.9">Extremely Active</option>
       </select>
       <button onclick="calculateMacroTargets()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Calculate Targets</button>
+      <button onclick="console.log(planWeek([]))" style="width:100%;font-size:1rem;margin-top:10px;">Plan Week</button>
     </div>
   </div>
 </div>
@@ -887,6 +915,10 @@
 <script src="progressGoals.js"></script>
 <script src="progressAI.js"></script>
 <script src="gamification.js"></script>
+<script type="module" src="offline.js"></script>
+<script type="module" src="autoProgression.js"></script>
+<script type="module" src="periodization.js"></script>
+<script type="module" src="macrosFeatures.js"></script>
 <script>
 
 let currentUser = null;
@@ -1300,6 +1332,11 @@ function addLogEntry() {
   updatePRs(currentUser, { log: [{ exercise, weightsArray, repsArray }] }, calculateWorkoutVolume);
   updateGoalProgress(currentUser, 'volume', calculateWorkoutVolume({ log: [{ weightsArray, repsArray }] }));
   renderPRs();
+  const prog = analyzeProgress ? analyzeProgress(currentUser) : [];
+  const deload = prog.find(p => p.type === 'deload');
+  if (deload) {
+    showToast(`Deload recommended for ${deload.exercise}`);
+  }
   renderMilestones();
   renderGoalBar();
   showCoachInsights();
@@ -1816,14 +1853,20 @@ function completeWorkout() {
 }
 
 async function saveWorkoutToBackend(workout) {
-  await fetch(`${serverUrl}/saveWorkout`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: currentUser,
-      workout
-    })
-  });
+  const action = {
+    url: `${serverUrl}/saveWorkout`,
+    options: {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser, workout })
+    }
+  };
+  try {
+    await fetch(action.url, action.options);
+  } catch (err) {
+    console.warn('offline - queueing workout', err);
+    if (window.queueAction) queueAction(action);
+  }
 }
 
 async function loadWorkoutsFromBackend() {
@@ -1875,6 +1918,20 @@ function handleExerciseBlur() {
         Last time: ${reps} reps at ${weights} ${last.unit} <br>
         Try to beat that today!${suggestion ? `<br>Recommended: ${suggestion}` : ''}
       </div>`;
+
+    // auto-fill today's sets with progression
+    document.getElementById('sets').value = last.sets || last.repsArray.length;
+    generateSetInputs(last.sets || last.repsArray.length);
+    last.repsArray.forEach((r, i) => {
+      const inc = suggestion && suggestion.includes('rep') ? r + 1 : r;
+      document.getElementById(`reps_${i}`).value = inc;
+    });
+    last.weightsArray.forEach((w, i) => {
+      let val = w;
+      if (suggestion && suggestion.includes('2.5')) val = w + 2.5;
+      document.getElementById(`weight_${i}`).value = val;
+    });
+    document.getElementById('weightUnit').value = last.unit || 'kg';
   }
 }
 
@@ -3277,6 +3334,11 @@ function showHistoryMiniTab(tab) {
 
   document.addEventListener("DOMContentLoaded", async () => {
 
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+    const sel = document.getElementById('themeSelect');
+    if (sel) sel.value = savedTheme;
+
     await fetchAirtableConfig();
 
     updateExerciseSuggestions();
@@ -3716,6 +3778,15 @@ window.exportCSV = exportCSV;
   }
 
   window.showToast = showToast;
+
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
+    if (theme === 'dark') document.body.classList.add('theme-dark');
+    else if (theme === 'neon') document.body.classList.add('theme-neon');
+    localStorage.setItem('theme', theme);
+  }
+
+  window.applyTheme = applyTheme;
 function openMacroSettings() {
   // Hide the main macros content and reveal the settings view
   document.getElementById('macrosMainContent').style.display = 'none';

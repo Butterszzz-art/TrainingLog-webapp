@@ -28,7 +28,7 @@ function updatePRs(user, workout, volumeCalc) {
   workout.log.forEach(e => {
     const vol = volumeCalc ? volumeCalc({ log: [e] }) : 0;
     const orm = computeOneRepMax(e.weightsArray, e.repsArray);
-    const pr = prs[e.exercise] || { oneRM: 0, volume: 0 };
+    const pr = prs[e.exercise] || { oneRM: 0, volume: 0, history: [] };
     if (orm > pr.oneRM) {
       pr.oneRM = orm;
       updated = true;
@@ -37,6 +37,8 @@ function updatePRs(user, workout, volumeCalc) {
       pr.volume = vol;
       updated = true;
     }
+    pr.history.push({ date: Date.now(), oneRM: orm });
+    if (pr.history.length > 10) pr.history.shift();
     prs[e.exercise] = pr;
   });
   if (updated) savePRs(user, prs);
