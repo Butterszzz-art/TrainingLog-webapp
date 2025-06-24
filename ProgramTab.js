@@ -18,7 +18,6 @@ function CalendarPreview({ startDate, frequency, onSelect }) {
     weeks.push(days);
   }
 
-  // instead of JSX, use React.createElement:
   return React.createElement(
     'table',
     { className: 'calendar-preview' },
