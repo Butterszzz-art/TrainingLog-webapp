@@ -18,10 +18,12 @@ modules expose periodization and meal planning utilities.
 When running the Express server, a small set of community endpoints is
 available:
 
-- `POST /community/groups` – create a new group by name. Include a
-  `creatorId` field in the body and the creator is added to the group.
+- `POST /community/groups` – create a new group. Include `name`,
+  `creatorId` and optional `goal` and `tags` fields and the creator is added
+  to the group.
 - `GET /community/groups?userId=USER` – list the groups that contain the
-  specified user.
+  specified user. Additional query params `goal`, `tag` and `search` can be
+  used to filter groups.
 - `POST /community/groups/:groupId/share` – share a program with the
   group.
 - `GET /community/groups/:groupId/progress` – return a summary of member

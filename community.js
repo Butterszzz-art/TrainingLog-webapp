@@ -13,14 +13,14 @@ function saveGroups() {
 }
 
 // Async createGroup to call backend or fallback to local
-async function createGroup(name) {
+async function createGroup(name, goal = '', tags = []) {
   if (!name) return null;
   if (typeof fetch !== 'undefined' && window && window.currentUser) {
     try {
       const res = await fetch(`${serverUrl}/community/groups`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, creatorId: window.currentUser })
+  body: JSON.stringify({ name, creatorId: window.currentUser, goal, tags })
 });
       const g = await res.json();
       groups.push(g);
@@ -31,7 +31,7 @@ async function createGroup(name) {
     }
   }
   // fallback local group creation
-  const g = { id: Date.now(), name, members: [], posts: [] };
+  const g = { id: Date.now(), name, goal, tags, members: [], posts: [] };
   groups.push(g);
   saveGroups();
   return g;
@@ -55,6 +55,32 @@ async function fetchGroups(userId) {
     console.warn('fetchGroups failed', e);
   }
   return groups;
+}
+
+async function searchGroups(opts = {}) {
+  const params = new URLSearchParams();
+  if (opts.goal) params.set('goal', opts.goal);
+  if (opts.tag) params.set('tag', opts.tag);
+  if (opts.search) params.set('search', opts.search);
+  try {
+    const res = await fetch(`${serverUrl}/community/groups?${params.toString()}`, { method: 'GET' });
+    if (res.ok) {
+      groups = await res.json();
+      saveGroups();
+    }
+  } catch (e) {
+    console.warn('searchGroups failed', e);
+  }
+  return groups;
+}
+
+function filterGroups(list, opts = {}) {
+  return list.filter(g => {
+    if (opts.goal && !(g.goal || '').toLowerCase().includes(opts.goal.toLowerCase())) return false;
+    if (opts.tag && !(g.tags || []).some(t => t.toLowerCase().includes(opts.tag.toLowerCase()))) return false;
+    if (opts.search && !g.name.toLowerCase().includes(opts.search.toLowerCase())) return false;
+    return true;
+  });
 }
 
 async function fetchPosts(groupId) {
@@ -141,6 +167,13 @@ async function fetchProgress(groupId) {
 
 function loadGroups() {
   return fetchGroups(window.currentUser).then(renderGroups);
+}
+
+function doGroupSearch() {
+  const search = document.getElementById('groupSearchInput').value;
+  const goal = document.getElementById('goalFilter').value;
+  const tag = document.getElementById('tagFilter').value;
+  searchGroups({ search, goal, tag }).then(renderGroups);
 }
 
 // Add post locally and via backend
@@ -257,7 +290,10 @@ function shareProgramInput(id, dataStr) {
 function showCreateGroup() {
   const name = prompt('Group name?');
   if (!name) return;
-  createGroup(name).then(() => renderGroups(groups));
+  const goal = prompt('Group goal? (optional)') || '';
+  const tagsStr = prompt('Tags? (comma separated)') || '';
+  const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+  createGroup(name, goal, tags).then(() => renderGroups(groups));
 }
 
 if (typeof window !== 'undefined') {
@@ -267,9 +303,10 @@ if (typeof window !== 'undefined') {
   window.shareProgramInput = shareProgramInput;
   window.inviteUserToGroup = inviteUserToGroup;
   window.shareProgramToGroup = shareProgramToGroup;
+  window.doGroupSearch = doGroupSearch;
 }
 
 // allow tests to import functions
 if (typeof module !== 'undefined') {
-  module.exports = { calculateLeaderboard };
+  module.exports = { calculateLeaderboard, filterGroups };
 }
