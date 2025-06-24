@@ -2875,10 +2875,6 @@ function renderExerciseProgress() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
   const progressMap = {};
 
-function renderExerciseProgress() {
-  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const progressMap = {};
-
   // gather last two entries for each exercise
   workouts.sort((a, b) => a.date.localeCompare(b.date));
   workouts.forEach(w => {
