@@ -531,9 +531,23 @@
 .highlight-past{background-color:#FFE0B2;}
 .highlight-today{background-color:#FF7043;}
 /* Progress Tab layout */
-.progress-charts { width: 65%; float: left; }
-.calendar-container { width: 30%; float: right; min-height: 300px; margin-left: 5%; }
-#progressTab:after { content: ""; display: block; clear: both; }
+.progress-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 300px;
+  gap: 1rem;
+}
+.progress-nav button {
+  display: block;
+  margin-bottom: .5rem;
+  width: 100%;
+}
+.progress-chart,
+.progress-calendar {
+  background: #fff;
+  padding: 1rem;
+  border-radius: .5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -838,29 +852,20 @@
 
   <div id="progressTab" class="tab-content">
     <h2>Progress Overview</h2>
-    <div class="progress-charts">
-    <div class="chart-section">
-      <button id="workoutChartBtn" onclick="toggleWorkoutChart()" style="margin-bottom:10px;">Hide Workout Progress</button>
-      <canvas id="workoutChart" style="max-width:100%;"></canvas>
-    </div>
-    <div class="chart-section" style="margin-top:20px;">
-      <button id="cardioChartBtn" onclick="toggleCardioChart()" style="margin-bottom:10px;">Hide Cardio Progress</button>
-      <canvas id="cardioChart" style="max-width:100%;"></canvas>
-    </div>
-    <div class="chart-section" style="margin-top:20px;">
-      <button id="weightChartBtn" onclick="toggleWeightChart()" style="margin-bottom:10px;">Hide Bodyweight Progress</button>
-      <canvas id="weightChart" style="max-width:100%;"></canvas>
-    </div>
-    <div class="chart-section" style="margin-top:20px;">
-      <button id="exerciseProgressBtn" onclick="toggleExerciseProgress()" style="margin-bottom:10px;">Hide Exercise Progress</button>
-      <div id="exerciseProgressContainer"></div>
-    </div>
-    <canvas id="workoutChart" style="max-width:100%;"></canvas>
-    <canvas id="cardioChart" style="max-width:100%; margin-top:20px;"></canvas>
-    <canvas id="weightChart" style="max-width:100%; margin-top:20px;"></canvas>
-    </div>
-    <div id="calendarContainer" class="calendar-container">
-      <!-- calendar will render here -->
+    <div class="progress-layout">
+      <nav class="progress-nav">
+        <button onclick="showWorkoutProgress()">Workout</button>
+        <button onclick="showCardioProgress()">Cardio</button>
+        <button onclick="showBodyweightProgress()">Bodyweight</button>
+        <button onclick="showExerciseProgress()">Exercise</button>
+      </nav>
+      <section class="progress-chart">
+        <canvas id="progressCanvas"></canvas>
+        <div id="exerciseProgress" style="display:none;"></div>
+      </section>
+      <aside class="progress-calendar">
+        <div id="progressCalendar"></div>
+      </aside>
     </div>
   </div>
 
@@ -1422,7 +1427,7 @@ function renderWorkouts() {
 
   renderWorkoutHistory();
   if (document.getElementById('progressTab').classList.contains('active')) {
-    renderProgressCharts();
+    showWorkoutProgress();
   }
 
   window.renderWorkouts = renderWorkouts;
@@ -2781,7 +2786,7 @@ function renderWeights() {
     body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.weight}</td><td>${entry.calories ?? '-'}</td><td>${entry.cardio ?? '-'}</td><td><button onclick="removeWeightEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
   if (document.getElementById('progressTab').classList.contains('active')) {
-    renderProgressCharts();
+    showWorkoutProgress();
   }
 }
 
@@ -2839,7 +2844,7 @@ function renderCardio() {
     body.innerHTML += `<tr><td>${entry.date}</td><td>${entry.type}</td><td>${entry.duration}</td><td>${entry.distance || '-'}</td><td>${entry.calories || '-'}</td><td>${entry.notes}</td><td><button onclick="removeCardioEntry(${index})" class="remove-btn">❌</button></td></tr>`;
   });
   if (document.getElementById('progressTab').classList.contains('active')) {
-    renderProgressCharts();
+    showWorkoutProgress();
   }
 }
 
@@ -2851,39 +2856,24 @@ function removeCardioEntry(index) {
   updateMacroUI();
 }
 
-let workoutChart, cardioChart, weightChart;
+let progressChart;
 
-function toggleWorkoutChart() {
-  const chart = document.getElementById('workoutChart');
-  const btn = document.getElementById('workoutChartBtn');
-  const hidden = chart.style.display === 'none';
-  chart.style.display = hidden ? 'block' : 'none';
-  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Workout Progress';
+function renderLineChart(labels, label, data) {
+  const ctx = document.getElementById('progressCanvas').getContext('2d');
+  if (progressChart) progressChart.destroy();
+  progressChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label, data, tension: .4 }]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
 }
 
-function toggleCardioChart() {
-  const chart = document.getElementById('cardioChart');
-  const btn = document.getElementById('cardioChartBtn');
-  const hidden = chart.style.display === 'none';
-  chart.style.display = hidden ? 'block' : 'none';
-  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Cardio Progress';
-}
-
-function toggleWeightChart() {
-  const chart = document.getElementById('weightChart');
-  const btn = document.getElementById('weightChartBtn');
-  const hidden = chart.style.display === 'none';
-  chart.style.display = hidden ? 'block' : 'none';
-  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Bodyweight Progress';
-}
-
-function toggleExerciseProgress() {
-  const container = document.getElementById('exerciseProgressContainer');
-  const btn = document.getElementById('exerciseProgressBtn');
-  const hidden = container.style.display === 'none';
-  container.style.display = hidden ? 'block' : 'none';
-  btn.textContent = (hidden ? 'Hide' : 'Show') + ' Exercise Progress';
-}
+function renderExerciseProgress() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const progressMap = {};
 
 function renderExerciseProgress() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
@@ -2901,7 +2891,7 @@ function renderExerciseProgress() {
     });
   });
 
-  const container = document.getElementById('exerciseProgressContainer');
+  const container = document.getElementById('exerciseProgress');
   container.innerHTML = '';
 
   Object.entries(progressMap).forEach(([name, entries]) => {
@@ -2918,55 +2908,51 @@ function renderExerciseProgress() {
   });
 }
 
-function renderProgressCharts() {
+async function fetchWorkoutHistory() {
   const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
-  const workoutData = workouts.map(w => ({
-    date: w.date,
-    volume: calculateWorkoutVolume(w)
-  })).sort((a,b)=>a.date.localeCompare(b.date));
-  const wDates = workoutData.map(d=>d.date);
-  const wVols = workoutData.map(d=>d.volume);
+  return workouts.map(w => ({ date: w.date, volume: calculateWorkoutVolume(w) }));
+}
 
+async function fetchCardioHistory() {
   const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
-  cardio.sort((a,b)=>a.date.localeCompare(b.date));
-  const cDates = cardio.map(e=>e.date);
-  const cDur = cardio.map(e=>e.duration);
+  return cardio.map(c => ({ date: c.date, duration: c.duration }));
+}
 
+async function fetchBodyweightHistory() {
   const weights = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
-  weights.sort((a,b)=>a.date.localeCompare(b.date));
-  const bwDates = weights.map(e=>e.date);
-  const bw = weights.map(e=>e.weight);
-  const start = bw[0] || 0;
-  const change = bw.map(v=>v - start);
+  return weights.map(w => ({ date: w.date, weight: w.weight }));
+}
 
-  if (workoutChart) workoutChart.destroy();
-  if (cardioChart) cardioChart.destroy();
-  if (weightChart) weightChart.destroy();
+async function showWorkoutProgress() {
+  const history = await fetchWorkoutHistory();
+  const dates = history.map(h => h.date);
+  const vols = history.map(h => h.volume);
+  document.getElementById('exerciseProgress').style.display = 'none';
+  document.getElementById('progressCanvas').style.display = 'block';
+  renderLineChart(dates, 'Total Volume', vols);
+}
 
-  const ctx1 = document.getElementById('workoutChart').getContext('2d');
-  workoutChart = new Chart(ctx1, {
-    type: 'line',
-    data: { labels: wDates, datasets: [{ label: 'Volume', data: wVols, borderColor: 'blue', fill:false }] },
-    options: { scales: { y: { beginAtZero: true } } }
-  });
+async function showCardioProgress() {
+  const history = await fetchCardioHistory();
+  const dates = history.map(h => h.date);
+  const mins = history.map(h => h.duration);
+  document.getElementById('exerciseProgress').style.display = 'none';
+  document.getElementById('progressCanvas').style.display = 'block';
+  renderLineChart(dates, 'Cardio Minutes', mins);
+}
 
-  const ctx2 = document.getElementById('cardioChart').getContext('2d');
-  cardioChart = new Chart(ctx2, {
-    type: 'line',
-    data: { labels: cDates, datasets: [{ label: 'Duration (min)', data: cDur, borderColor: 'green', fill:false }] },
-    options: { scales: { y: { beginAtZero: true } } }
-  });
+async function showBodyweightProgress() {
+  const history = await fetchBodyweightHistory();
+  const dates = history.map(h => h.date);
+  const weights = history.map(h => h.weight);
+  document.getElementById('exerciseProgress').style.display = 'none';
+  document.getElementById('progressCanvas').style.display = 'block';
+  renderLineChart(dates, 'Bodyweight', weights);
+}
 
-  const ctx3 = document.getElementById('weightChart').getContext('2d');
-  weightChart = new Chart(ctx3, {
-    type: 'line',
-    data: { labels: bwDates, datasets: [
-      { label: 'Weight', data: bw, borderColor: 'orange', fill:false },
-      { label: 'Change', data: change, borderColor: 'red', fill:false }
-    ] },
-    options: { scales: { y: { beginAtZero: false } } }
-  });
-
+function showExerciseProgress() {
+  document.getElementById('progressCanvas').style.display = 'none';
+  document.getElementById('exerciseProgress').style.display = 'block';
   renderExerciseProgress();
 }
 
@@ -3592,11 +3578,10 @@ window.loadTodayProgram = loadTodayProgram;
 window.toggleTemplateBuilder = toggleTemplateBuilder;
 window.addExerciseToTemplate = addExerciseToTemplate;
 window.saveSimpleTemplate = saveSimpleTemplate;
-window.renderProgressCharts = renderProgressCharts;
-window.toggleWorkoutChart = toggleWorkoutChart;
-window.toggleCardioChart = toggleCardioChart;
-window.toggleWeightChart = toggleWeightChart;
-window.toggleExerciseProgress = toggleExerciseProgress;
+window.showWorkoutProgress = showWorkoutProgress;
+window.showCardioProgress = showCardioProgress;
+window.showBodyweightProgress = showBodyweightProgress;
+window.showExerciseProgress = showExerciseProgress;
 window.renderExerciseProgress = renderExerciseProgress;
 window.goToDate = goToDate;
 
@@ -3644,17 +3629,21 @@ window.closeMacroSettings = closeMacroSettings;
 
 </script>
 
-    <!-- include a lightweight calendar library -->
-    <link rel="stylesheet" href="https://unpkg.com/fullcalendar@5.11.3/main.min.css" />
-    <script src="https://unpkg.com/fullcalendar@5.11.3/main.min.js"></script>
+    <!-- include Litepicker for progress calendar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css" />
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendarContainer');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          height: 'auto'
+      document.addEventListener('DOMContentLoaded', async function() {
+        const picker = new Litepicker({
+          element: document.getElementById('progressCalendar'),
+          inlineMode: true
         });
-        calendar.render();
+        if (picker.setHighlightedDays) {
+          const hist = await fetchWorkoutHistory();
+          const dates = hist.map(h => h.date);
+          picker.setHighlightedDays(dates);
+        }
+        showWorkoutProgress();
       });
     </script>
 
