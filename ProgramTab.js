@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "https://esm.sh/react@18";
 import { createRoot } from "https://esm.sh/react-dom@18/client";
-
-const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const loadPrograms = () => JSON.parse(localStorage.getItem('programs') || '[]');
-const savePrograms = (programs) => localStorage.setItem('programs', JSON.stringify(programs));
-
-function CalendarPreview({ startDate, frequency, onSelect }) {
+const savePrograms = programs => localStorage.setItem('programs', JSON.stringify(programs));
+function CalendarPreview({
+  startDate,
+  frequency,
+  onSelect
+}) {
   const start = startDate ? new Date(startDate) : new Date();
   const weeks = [];
   for (let w = 0; w < 4; w++) {
@@ -17,30 +19,15 @@ function CalendarPreview({ startDate, frequency, onSelect }) {
     }
     weeks.push(days);
   }
-
-  return React.createElement(
-    'table',
-    { className: 'calendar-preview' },
-    weeks.map((week, wi) =>
-      React.createElement(
-        'tr',
-        { key: wi },
-        week.map((day, di) =>
-          React.createElement(
-            'td',
-            {
-              key: di,
-              onClick: () => onSelect(day),
-            },
-            day.getDate()
-          )
-        )
-      )
-    )
-  );
+  return React.createElement('table', {
+    className: 'calendar-preview'
+  }, weeks.map((week, wi) => React.createElement('tr', {
+    key: wi
+  }, week.map((day, di) => React.createElement('td', {
+    key: di,
+    onClick: () => onSelect(day)
+  }, day.getDate())))));
 }
-
-
 export default function ProgramTab() {
   const [programs, setPrograms] = useState(loadPrograms());
   const [showDrawer, setShowDrawer] = useState(false);
@@ -54,251 +41,322 @@ export default function ProgramTab() {
     frequency: [],
     progressionType: 'linear',
     progressionSettings: {
-      linear:{ increment:2.5, unit:'kg', interval:'workout' },
-      undulating:{ light:60, medium:75, heavy:90 },
-      block:{ blockLength:3, loadPercent:85, deloadPercent:60 }
+      linear: {
+        increment: 2.5,
+        unit: 'kg',
+        interval: 'workout'
+      },
+      undulating: {
+        light: 60,
+        medium: 75,
+        heavy: 90
+      },
+      block: {
+        blockLength: 3,
+        loadPercent: 85,
+        deloadPercent: 60
+      }
     },
     days: []
   });
-
   const handleFreqToggle = day => {
     setProgram(prev => {
-      let freq = prev.frequency.includes(day)
-        ? prev.frequency.filter(d=>d!==day)
-        : [...prev.frequency, day];
+      let freq = prev.frequency.includes(day) ? prev.frequency.filter(d => d !== day) : [...prev.frequency, day];
       // update days list
-      let days = prev.days.filter(d=>freq.includes(d.original));
-      freq.forEach(d=>{
-        if(!days.find(x=>x.original===d)) {
-          days.push({name:d, original:d, order:days.length+1});
+      let days = prev.days.filter(d => freq.includes(d.original));
+      freq.forEach(d => {
+        if (!days.find(x => x.original === d)) {
+          days.push({
+            name: d,
+            original: d,
+            order: days.length + 1
+          });
         }
       });
-      return {...prev, frequency:freq, days};
+      return {
+        ...prev,
+        frequency: freq,
+        days
+      };
     });
   };
-
   const renameDay = (idx, name) => {
-    setProgram(prev=>{
-      const days=[...prev.days];
-      days[idx]={...days[idx], name};
-      return {...prev, days};
+    setProgram(prev => {
+      const days = [...prev.days];
+      days[idx] = {
+        ...days[idx],
+        name
+      };
+      return {
+        ...prev,
+        days
+      };
     });
   };
-
   const handleDrop = idx => {
-    setProgram(prev=>{
-      const days=[...prev.days];
-      const [itm]=days.splice(dragIndex,1);
-      days.splice(idx,0,itm);
-      return {...prev, days:days.map((d,i)=>({...d, order:i+1}))};
+    setProgram(prev => {
+      const days = [...prev.days];
+      const [itm] = days.splice(dragIndex, 1);
+      days.splice(idx, 0, itm);
+      return {
+        ...prev,
+        days: days.map((d, i) => ({
+          ...d,
+          order: i + 1
+        }))
+      };
     });
   };
-
   const save = async () => {
-    const payload={
-      name:program.name,
-      startDate:program.startDate,
-      frequency:program.frequency,
-      progressionType:program.progressionType,
-      progressionSettings:program.progressionSettings[program.progressionType],
-      days:program.days.map((d,i)=>({name:d.name, order:i+1}))
+    const payload = {
+      name: program.name,
+      startDate: program.startDate,
+      frequency: program.frequency,
+      progressionType: program.progressionType,
+      progressionSettings: program.progressionSettings[program.progressionType],
+      days: program.days.map((d, i) => ({
+        name: d.name,
+        order: i + 1
+      }))
     };
-    const res = await fetch('/createProgram',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const res = await fetch('/createProgram', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
     const json = await res.json();
-    if(json.id){
-      const newPrograms=[...programs,{...payload,id:json.id}];
+    if (json.id) {
+      const newPrograms = [...programs, {
+        ...payload,
+        id: json.id
+      }];
       setPrograms(newPrograms);
       savePrograms(newPrograms);
       setShowDrawer(false);
     }
   };
-
-  const doShare = async (username) => {
-    if(!shareId) return;
-    await fetch('/shareProgram',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({programId:shareId,recipientUsername:username})});
-    setShowShare(false);
-  };
-
-  return (
-    <div className="program-tab-react">
-      <button onClick={()=>setShowDrawer(true)}>New Program</button>
-      <div className="program-list">
-        {programs.map(p=>(
-          <div key={p.id} className="program-row">
-            {p.name}
-            <button onClick={()=>{setShareId(p.id);setShowShare(true);}}>Share Program</button>
-          </div>
-        ))}
-      </div>
-
-      {showDrawer && (
-        <div className="drawer">
-          <h3>Create Program</h3>
-          <label>
-            Name <input value={program.name} onChange={e=>setProgram({...program,name:e.target.value})}/>
-          </label>
-          <label>
-            Start Date <input type="date" value={program.startDate} onChange={e=>setProgram({...program,startDate:e.target.value})}/>
-          </label>
-          <div>
-            Frequency:
-            {DAYS.map(d=>(
-              <label key={d} style={{marginRight:'6px'}}>
-                <input type="checkbox" checked={program.frequency.includes(d)} onChange={()=>handleFreqToggle(d)}/> {d}
-              </label>
-            ))}
-          </div>
-          <div>
-            Progression Type:
-            {['linear','undulating','block'].map(t=>(
-              <label key={t} style={{marginRight:'10px'}}>
-                <input type="radio" name="progType" value={t} checked={program.progressionType===t} onChange={()=>setProgram({...program,progressionType:t})}/> {t}
-              </label>
-            ))}
-          </div>
-          {program.progressionType==='linear' && (
-            <div>
-              <label title="Amount to add each interval">Increment <input type="number" value={program.progressionSettings.linear.increment} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,linear:{...program.progressionSettings.linear,increment:Number(e.target.value)}}})}/></label>
-              <select value={program.progressionSettings.linear.unit} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,linear:{...program.progressionSettings.linear,unit:e.target.value}}})}><option value="kg">kg</option><option value="lbs">lbs</option></select>
-              <select value={program.progressionSettings.linear.interval} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,linear:{...program.progressionSettings.linear,interval:e.target.value}}})}><option value="workout">per workout</option><option value="week">per week</option></select>
-            </div>
-          )}
-          {program.progressionType==='undulating' && (
-            <div>
-              <table>
-                <thead><tr><th>Day</th><th>% Intensity</th></tr></thead>
-                <tbody>
-                  {['Light','Medium','Heavy'].map(k=>(
-                    <tr key={k}><td>{k}</td><td><input type="number" value={program.progressionSettings.undulating[k.toLowerCase()]} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,undulating:{...program.progressionSettings.undulating,[k.toLowerCase()]:Number(e.target.value)}}})}/></td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {program.progressionType==='block' && (
-            <div>
-              <label>Block Length (weeks) <input type="number" value={program.progressionSettings.block.blockLength} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,block:{...program.progressionSettings.block,blockLength:Number(e.target.value)}}})}/></label>
-              <label>Load % <input type="number" value={program.progressionSettings.block.loadPercent} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,block:{...program.progressionSettings.block,loadPercent:Number(e.target.value)}}})}/></label>
-              <label>Deload % <input type="number" value={program.progressionSettings.block.deloadPercent} onChange={e=>setProgram({...program,progressionSettings:{...program.progressionSettings,block:{...program.progressionSettings.block,deloadPercent:Number(e.target.value)}}})}/></label>
-            </div>
-          )}
-
-          <button onClick={()=>setShowAdvanced(!showAdvanced)}>Advanced Progression Rules</button>
-          {showAdvanced && (
-            <div className="advanced">Type specific details above.</div>
-          )}
-
-          <div className="day-order">
-            {program.days.map((d,idx)=>(
-              <div
-                key={idx}
-                className="day-card"
-                draggable
-                onDragStart={()=>setDragIndex(idx)}
-                onDragOver={e=>e.preventDefault()}
-                onDrop={()=>handleDrop(idx)}
-              >
-                <input value={d.name} onChange={e=>renameDay(idx,e.target.value)} />
-              </div>
-            ))}
-          </div>
-          <CalendarPreview startDate={program.startDate} frequency={program.frequency} onSelect={(day)=>{
-            const idx=program.days.findIndex(d=>d.original===day);
-            if(idx>=0){
-              document.getElementsByClassName('day-card')[idx]?.scrollIntoView({behavior:'smooth'});
-            }
-          }}/>
-          <div style={{marginTop:'10px'}}>
-            <button onClick={save}>Save Program</button>
-            <button onClick={()=>{setShareId(null);setShowShare(true);}}>Share Program</button>
-            <button onClick={()=>setShowDrawer(false)}>Close</button>
-          </div>
-        </div>
-      )}
-
-      {showShare && (
-        <div className="share-modal">
-          <input id="shareUser" placeholder="Username" />
-          <button onClick={()=>{const user=document.getElementById('shareUser').value;doShare(user);}}>Send</button>
-          <button onClick={()=>setShowShare(false)}>Cancel</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const root = createRoot(document.getElementById('programTabReactRoot'));
-root.render(<ProgramTab />);
-
-import React, { useEffect, useState } from 'react';
-
-// Simple local storage helpers
-const loadPrograms = () => JSON.parse(localStorage.getItem('programs') || '[]');
-const savePrograms = (programs) => localStorage.setItem('programs', JSON.stringify(programs));
-
-export default function ProgramTab() {
-  const [templates, setTemplates] = useState([]);
-  const [programs, setPrograms] = useState(loadPrograms());
-  const [showShare, setShowShare] = useState(false);
-
-  useEffect(() => {
-    // fetch templates from localStorage for now
-    const tpl = JSON.parse(localStorage.getItem('programTemplates') || '[]');
-    setTemplates(tpl);
-  }, []);
-
-  const createProgram = async (data) => {
-    const res = await fetch('/createProgram', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const json = await res.json();
-    if (json.id) {
-      const newPrograms = [...programs, { ...data, id: json.id }];
-      setPrograms(newPrograms);
-      savePrograms(newPrograms);
-    }
-  };
-
-  const shareProgram = async (programId, recipientUsername) => {
+  const doShare = async username => {
+    if (!shareId) return;
     await fetch('/shareProgram', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ programId, recipientUsername })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        programId: shareId,
+        recipientUsername: username
+      })
     });
+    setShowShare(false);
   };
-
-  // Render placeholders for complex UI pieces
-  return (
-    <div id="programTabReact">
-      <h2>Programs</h2>
-      {/* Template library placeholder */}
-      <div className="template-library">Template Library Dropdown TODO</div>
-
-      {/* Program editor placeholder */}
-      <div className="program-editor">Program Editor TODO</div>
-
-      {/* Progression settings placeholder */}
-      <div className="progression-settings">Progression Settings TODO</div>
-
-      {/* Calendar view placeholder */}
-      <div className="calendar-view">Calendar & Timeline TODO</div>
-
-      {/* Share modal */}
-      {showShare && (
-        <div className="share-modal">
-          <input id="shareUser" placeholder="Username" />
-          <button onClick={() => {
-            const user = document.getElementById('shareUser').value;
-            if (user) shareProgram(null, user);
-            setShowShare(false);
-          }}>Share</button>
-        </div>
-      )}
-
-      {/* Analytics placeholder */}
-      <div className="program-analytics">Program Analytics TODO</div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "program-tab-react"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDrawer(true)
+  }, "New Program"), /*#__PURE__*/React.createElement("div", {
+    className: "program-list"
+  }, programs.map(p => /*#__PURE__*/React.createElement("div", {
+    key: p.id,
+    className: "program-row"
+  }, p.name, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setShareId(p.id);
+      setShowShare(true);
+    }
+  }, "Share Program")))), showDrawer && /*#__PURE__*/React.createElement("div", {
+    className: "drawer"
+  }, /*#__PURE__*/React.createElement("h3", null, "Create Program"), /*#__PURE__*/React.createElement("label", null, "Name ", /*#__PURE__*/React.createElement("input", {
+    value: program.name,
+    onChange: e => setProgram({
+      ...program,
+      name: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("label", null, "Start Date ", /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: program.startDate,
+    onChange: e => setProgram({
+      ...program,
+      startDate: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", null, "Frequency:", DAYS.map(d => /*#__PURE__*/React.createElement("label", {
+    key: d,
+    style: {
+      marginRight: '6px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: program.frequency.includes(d),
+    onChange: () => handleFreqToggle(d)
+  }), " ", d))), /*#__PURE__*/React.createElement("div", null, "Progression Type:", ['linear', 'undulating', 'block'].map(t => /*#__PURE__*/React.createElement("label", {
+    key: t,
+    style: {
+      marginRight: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "progType",
+    value: t,
+    checked: program.progressionType === t,
+    onChange: () => setProgram({
+      ...program,
+      progressionType: t
+    })
+  }), " ", t))), program.progressionType === 'linear' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    title: "Amount to add each interval"
+  }, "Increment ", /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: program.progressionSettings.linear.increment,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        linear: {
+          ...program.progressionSettings.linear,
+          increment: Number(e.target.value)
+        }
+      }
+    })
+  })), /*#__PURE__*/React.createElement("select", {
+    value: program.progressionSettings.linear.unit,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        linear: {
+          ...program.progressionSettings.linear,
+          unit: e.target.value
+        }
+      }
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "kg"
+  }, "kg"), /*#__PURE__*/React.createElement("option", {
+    value: "lbs"
+  }, "lbs")), /*#__PURE__*/React.createElement("select", {
+    value: program.progressionSettings.linear.interval,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        linear: {
+          ...program.progressionSettings.linear,
+          interval: e.target.value
+        }
+      }
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "workout"
+  }, "per workout"), /*#__PURE__*/React.createElement("option", {
+    value: "week"
+  }, "per week"))), program.progressionType === 'undulating' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Day"), /*#__PURE__*/React.createElement("th", null, "% Intensity"))), /*#__PURE__*/React.createElement("tbody", null, ['Light', 'Medium', 'Heavy'].map(k => /*#__PURE__*/React.createElement("tr", {
+    key: k
+  }, /*#__PURE__*/React.createElement("td", null, k), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: program.progressionSettings.undulating[k.toLowerCase()],
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        undulating: {
+          ...program.progressionSettings.undulating,
+          [k.toLowerCase()]: Number(e.target.value)
+        }
+      }
+    })
+  }))))))), program.progressionType === 'block' && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", null, "Block Length (weeks) ", /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: program.progressionSettings.block.blockLength,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        block: {
+          ...program.progressionSettings.block,
+          blockLength: Number(e.target.value)
+        }
+      }
+    })
+  })), /*#__PURE__*/React.createElement("label", null, "Load % ", /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: program.progressionSettings.block.loadPercent,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        block: {
+          ...program.progressionSettings.block,
+          loadPercent: Number(e.target.value)
+        }
+      }
+    })
+  })), /*#__PURE__*/React.createElement("label", null, "Deload % ", /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: program.progressionSettings.block.deloadPercent,
+    onChange: e => setProgram({
+      ...program,
+      progressionSettings: {
+        ...program.progressionSettings,
+        block: {
+          ...program.progressionSettings.block,
+          deloadPercent: Number(e.target.value)
+        }
+      }
+    })
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowAdvanced(!showAdvanced)
+  }, "Advanced Progression Rules"), showAdvanced && /*#__PURE__*/React.createElement("div", {
+    className: "advanced"
+  }, "Type specific details above."), /*#__PURE__*/React.createElement("div", {
+    className: "day-order"
+  }, program.days.map((d, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: "day-card",
+    draggable: true,
+    onDragStart: () => setDragIndex(idx),
+    onDragOver: e => e.preventDefault(),
+    onDrop: () => handleDrop(idx)
+  }, /*#__PURE__*/React.createElement("input", {
+    value: d.name,
+    onChange: e => renameDay(idx, e.target.value)
+  })))), /*#__PURE__*/React.createElement(CalendarPreview, {
+    startDate: program.startDate,
+    frequency: program.frequency,
+    onSelect: day => {
+      const idx = program.days.findIndex(d => d.original === day);
+      if (idx >= 0) {
+        document.getElementsByClassName('day-card')[idx]?.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '10px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: save
+  }, "Save Program"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setShareId(null);
+      setShowShare(true);
+    }
+  }, "Share Program"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDrawer(false)
+  }, "Close"))), showShare && /*#__PURE__*/React.createElement("div", {
+    className: "share-modal"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "shareUser",
+    placeholder: "Username"
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const user = document.getElementById('shareUser').value;
+      doShare(user);
+    }
+  }, "Send"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowShare(false)
+  }, "Cancel")));
 }
+const root = createRoot(document.getElementById('programTabReactRoot'));
+root.render(/*#__PURE__*/React.createElement(ProgramTab, null));
