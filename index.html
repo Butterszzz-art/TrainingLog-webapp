@@ -587,6 +587,7 @@
       <li><a href="#" data-tab="programTab">🗓️ Program</a></li>
       <li><a href="#" data-tab="communityTab">👥 Community</a></li>
       <li><a href="#" data-tab="progressTab">📈 Progress</a></li>
+      <li><a href="#" data-tab="gymFinderTab">🏋️ Gym Finder</a></li>
       <li><a href="#" data-tab="logHistoryTab">📜 Log History</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
     </ul>
@@ -752,6 +753,8 @@
   <h3 style="margin-top:20px;">Start Saved Program</h3>
   <select id="programSelect"></select>
   <button onclick="startProgram()">Start Program</button>
+<div id="volumeTargetSection"><h3>Weekly Volume Targets</h3><div id="volumeInputs"></div><button onclick="saveVolumeTargets()">Save Targets</button><div id="volumeProgress"></div></div>
+<div id="periodizationSection"><h3>Periodization Templates</h3><select id="splitType"><option value="ppl">Push/Pull/Legs</option><option value="bro">Bro Split</option><option value="upperLower">Upper/Lower</option></select><select id="progressionType"><option value="linear">Linear</option><option value="undulating">Undulating</option><option value="block">Block</option></select><button onclick="generatePeriodization()">Generate</button><div id="periodizationPreview"></div></div>
 </div>
 
 <div id="communityTab" class="tab-content">
@@ -877,6 +880,7 @@
     </div>
   </div>
 
+<div id="gymFinderTab" class="tab-content"><h2>Gym Finder</h2><div id="gymMap" style="height:300px;background:#eee;">Map Loading...</div><div id="equipmentTags"></div></div>
 <div id="logHistoryTab" class="tab-content">
   <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
@@ -913,6 +917,7 @@
 <script src="progressAnalytics.js"></script>
 <script src="progressGoals.js"></script>
 <script src="progressAI.js"></script>
+<script src="gamification.js"></script>
 <script>
 
 let currentUser = null;
