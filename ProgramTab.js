@@ -323,7 +323,7 @@ export default function ProgramTab() {
     }
   }, "Share Program"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowDrawer(false)
-  }, "Close"))), showShare && /*#__PURE__*/React.createElement("div", {
+  }, "Close")), showShare && /*#__PURE__*/React.createElement("div", {
     className: "share-modal"
   }, /*#__PURE__*/React.createElement("input", {
     id: "shareUser",
