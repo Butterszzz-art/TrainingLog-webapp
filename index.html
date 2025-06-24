@@ -858,14 +858,22 @@
         <button onclick="showCardioProgress()">Cardio</button>
         <button onclick="showBodyweightProgress()">Bodyweight</button>
         <button onclick="showExerciseProgress()">Exercise</button>
+        <input type="date" id="startRange" onchange="refreshProgress()">
+        <input type="date" id="endRange" onchange="refreshProgress()">
+        <button onclick="promptGoal()">Set Goal</button>
       </nav>
       <section class="progress-chart">
         <canvas id="progressCanvas"></canvas>
         <div id="exerciseProgress" style="display:none;"></div>
+        <div id="goalBar" style="margin-top:10px;"></div>
+        <div id="coachCorner" style="margin-top:10px;"></div>
       </section>
       <aside class="progress-calendar">
         <div id="progressCalendar"></div>
+        <div id="prPanel"></div>
+        <div id="milestoneBadges"></div>
       </aside>
+      <button onclick="exportCSV()">Export CSV</button>
     </div>
   </div>
 
@@ -900,6 +908,11 @@
 <script src="community.js"></script>
 <!-- Optional runtime configuration -->
 <script src="config.js"></script>
+<script src="progressUtils.js"></script>
+<script src="progressMilestones.js"></script>
+<script src="progressAnalytics.js"></script>
+<script src="progressGoals.js"></script>
+<script src="progressAI.js"></script>
 <script>
 
 let currentUser = null;
@@ -1310,6 +1323,12 @@ function addLogEntry() {
   });
 
   localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(workouts));
+  updatePRs(currentUser, { log: [{ exercise, weightsArray, repsArray }] }, calculateWorkoutVolume);
+  updateGoalProgress(currentUser, 'volume', calculateWorkoutVolume({ log: [{ weightsArray, repsArray }] }));
+  renderPRs();
+  renderMilestones();
+  renderGoalBar();
+  showCoachInsights();
   saveUserExercise(exercise);
   trackWorkoutDate(date);
   renderWorkouts();
@@ -2858,14 +2877,18 @@ function removeCardioEntry(index) {
 
 let progressChart;
 
-function renderLineChart(labels, label, data) {
+function renderLineChart(labels, label, data, trend, forecast) {
   const ctx = document.getElementById('progressCanvas').getContext('2d');
   if (progressChart) progressChart.destroy();
   progressChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
-      datasets: [{ label, data, tension: .4 }]
+      datasets: [
+        { label, data, tension: .4 },
+        trend ? { label: 'Trend', data: trend, borderDash: [5,5], borderColor: '#888', tension:.4, fill:false } : null,
+        forecast ? { label: 'Forecast', data: forecast, borderColor: '#f00', borderDash: [2,2], tension:.4, fill:false } : null
+      ].filter(Boolean)
     },
     options: { scales: { y: { beginAtZero: true } } }
   });
@@ -2909,6 +2932,18 @@ async function fetchWorkoutHistory() {
   return workouts.map(w => ({ date: w.date, volume: calculateWorkoutVolume(w) }));
 }
 
+function applyDateRange(history) {
+  const start = document.getElementById('startRange').value;
+  const end = document.getElementById('endRange').value;
+  if (!start && !end) return history;
+  return history.filter(h => {
+    const d = h.date;
+    if (start && d < start) return false;
+    if (end && d > end) return false;
+    return true;
+  });
+}
+
 async function fetchCardioHistory() {
   const cardio = JSON.parse(localStorage.getItem(`cardioLog_${currentUser}`)) || [];
   return cardio.map(c => ({ date: c.date, duration: c.duration }));
@@ -2921,35 +2956,124 @@ async function fetchBodyweightHistory() {
 
 async function showWorkoutProgress() {
   const history = await fetchWorkoutHistory();
-  const dates = history.map(h => h.date);
-  const vols = history.map(h => h.volume);
+  const filtered = applyDateRange(history);
+  const dates = filtered.map(h => h.date);
+  const vols = filtered.map(h => h.volume);
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
-  renderLineChart(dates, 'Total Volume', vols);
+  const trend = trendPoints(vols);
+  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(vols, 4));
+  renderLineChart(dates.concat(new Array(4).fill('')), 'Total Volume', vols.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
 async function showCardioProgress() {
   const history = await fetchCardioHistory();
-  const dates = history.map(h => h.date);
-  const mins = history.map(h => h.duration);
+  const filtered = applyDateRange(history);
+  const dates = filtered.map(h => h.date);
+  const mins = filtered.map(h => h.duration);
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
-  renderLineChart(dates, 'Cardio Minutes', mins);
+  const trend = trendPoints(mins);
+  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(mins, 4));
+  renderLineChart(dates.concat(new Array(4).fill('')), 'Cardio Minutes', mins.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
 async function showBodyweightProgress() {
   const history = await fetchBodyweightHistory();
-  const dates = history.map(h => h.date);
-  const weights = history.map(h => h.weight);
+  const filtered = applyDateRange(history);
+  const dates = filtered.map(h => h.date);
+  const weights = filtered.map(h => h.weight);
   document.getElementById('exerciseProgress').style.display = 'none';
   document.getElementById('progressCanvas').style.display = 'block';
-  renderLineChart(dates, 'Bodyweight', weights);
+  const trend = trendPoints(weights);
+  const forecast = Array(dates.length-1).fill(null).concat(forecastNext(weights, 4));
+  renderLineChart(dates.concat(new Array(4).fill('')), 'Bodyweight', weights.concat(new Array(4).fill(null)), trend.concat(new Array(4).fill(null)), forecast);
 }
 
 function showExerciseProgress() {
   document.getElementById('progressCanvas').style.display = 'none';
   document.getElementById('exerciseProgress').style.display = 'block';
   renderExerciseProgress();
+}
+
+function refreshProgress() {
+  if (document.getElementById('workoutTabBtn')?.classList.contains('active') || true) {
+    showWorkoutProgress();
+  }
+}
+
+function renderPRs() {
+  const prs = loadPRs(currentUser);
+  const panel = document.getElementById('prPanel');
+  if (!panel) return;
+  panel.innerHTML = '<h3>PRs</h3>';
+  Object.entries(prs).forEach(([ex, pr]) => {
+    const div = document.createElement('div');
+    div.textContent = `${ex}: 1RM ${pr.oneRM.toFixed(1)}, Vol ${pr.volume.toFixed(1)}`;
+    panel.appendChild(div);
+  });
+}
+
+function renderMilestones() {
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const milestones = checkMilestones(currentUser, workouts, calculateWorkoutVolume);
+  const cont = document.getElementById('milestoneBadges');
+  if (!cont) return;
+  cont.innerHTML = '';
+  milestones.forEach(m => {
+    const span = document.createElement('span');
+    span.textContent = m;
+    span.style.marginRight = '5px';
+    cont.appendChild(span);
+  });
+}
+
+function renderGoalBar() {
+  const goals = loadGoals(currentUser);
+  const bar = document.getElementById('goalBar');
+  if (!bar) return;
+  const g = goals['volume'];
+  if (!g) { bar.textContent = 'No goal set'; return; }
+  const pct = Math.min(100, (g.progress / g.target) * 100);
+  bar.innerHTML = `<div style="background:#eee;width:100%;height:10px;position:relative;"><div style="background:var(--primary);width:${pct}%;height:10px;"></div></div><small>${g.progress}/${g.target}</small>`;
+}
+
+function promptGoal() {
+  const target = parseFloat(prompt('Enter volume goal (kg):')); 
+  if (isNaN(target)) return; 
+  setGoal(currentUser, 'volume', target); 
+  renderGoalBar();
+}
+
+function showCoachInsights() {
+  const prs = loadPRs(currentUser);
+  const insights = simpleInsights(Object.fromEntries(Object.entries(prs).map(([k,v])=>[k,[v]])));
+  const corner = document.getElementById('coachCorner');
+  if (!corner) return;
+  corner.innerHTML = '';
+  insights.forEach(t => {
+    const div = document.createElement('div');
+    div.textContent = t;
+    div.style.border = '1px solid #ccc';
+    div.style.padding = '5px';
+    corner.appendChild(div);
+  });
+}
+
+function exportCSV() {
+  const history = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const rows = [['Date','Exercise','Sets','Reps','Weight']];
+  history.forEach(w => {
+    (w.log||[]).forEach(e => {
+      rows.push([w.date, e.exercise, e.sets, e.repsArray.join('|'), e.weightsArray.join('|')]);
+    });
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'workouts.csv';
+  a.click();
 }
 
 
@@ -3001,6 +3125,9 @@ function renderTrainingCalendar(month, year) {
   const trackedDates = getLocalStorage('workoutDates');
   const active = getActiveProgram();
   const programDates = active ? getProgramDayDates(active.startDate) : [];
+  const workouts = JSON.parse(localStorage.getItem(`workouts_${currentUser}`)) || [];
+  const volumeMap = {};
+  workouts.forEach(w => { volumeMap[w.date] = calculateWorkoutVolume(w); });
 
   cal.innerHTML = '';
 
@@ -3064,7 +3191,11 @@ function renderTrainingCalendar(month, year) {
     const str = current.toISOString().split('T')[0];
     const td = document.createElement('td');
     td.textContent = day;
-    if (trackedDates.includes(str)) td.classList.add("highlight-past");
+    const vol = volumeMap[str] || 0;
+    if (vol) {
+      const shade = Math.min(1, vol / 500);
+      td.style.backgroundColor = `rgba(0,128,0,${shade})`;
+    }
     if (programDates.includes(str)) td.classList.add("highlight-today");
     if (str === new Date().toISOString().split('T')[0]) td.style.border = '2px solid var(--primary)';
     td.onclick = () => goToDate(str);
@@ -3530,6 +3661,9 @@ function loadCrossfitTemplate() {
   // Show the first tab initially
   initTrainingCalendar();
   showTab("logTab");
+  renderPRs();
+  renderMilestones();
+  renderGoalBar();
 
 
 
@@ -3580,6 +3714,9 @@ window.showBodyweightProgress = showBodyweightProgress;
 window.showExerciseProgress = showExerciseProgress;
 window.renderExerciseProgress = renderExerciseProgress;
 window.goToDate = goToDate;
+window.refreshProgress = refreshProgress;
+window.promptGoal = promptGoal;
+window.exportCSV = exportCSV;
 
   function showToast(msg) {
     const toast = document.createElement('div');
