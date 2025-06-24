@@ -13,6 +13,8 @@ app.use(express.static(__dirname));
 const { calculateLeaderboard } = require('./community');
 
 const groups = [];
+const programs = [];
+const sharedPrograms = [];
 
 app.get('/config', (req, res) => {
   res.json({
@@ -63,6 +65,27 @@ app.post('/api/groups', (req, res) => {
   const group = { id: groups.length + 1, name, members: [] };
   groups.push(group);
   res.json(group);
+});
+
+// Program creation
+app.post('/createProgram', (req, res) => {
+  const program = req.body;
+  if (!program || !program.name) {
+    return res.status(400).json({ error: 'program name required' });
+  }
+  program.id = programs.length + 1;
+  programs.push(program);
+  res.json({ id: program.id });
+});
+
+// Program sharing
+app.post('/shareProgram', (req, res) => {
+  const { programId, recipientUsername } = req.body;
+  if (!programId || !recipientUsername) {
+    return res.status(400).json({ error: 'programId and recipientUsername required' });
+  }
+  sharedPrograms.push({ programId, recipientUsername });
+  res.json({ ok: true });
 });
 
 // Posts
