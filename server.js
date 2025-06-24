@@ -33,28 +33,46 @@ app.post('/login', (req, res) => {
 
 // Groups API
 app.get('/community/groups', (req, res) => {
-  const { userId } = req.query;
+  const { userId, goal, tag, search } = req.query;
+  let result = groups;
   if (userId) {
-    const filtered = groups.filter(g => (g.members || []).includes(userId));
-    return res.json(filtered);
+    result = result.filter(g => (g.members || []).includes(userId));
   }
-  res.json(groups);
+  if (goal) {
+    const gl = goal.toLowerCase();
+    result = result.filter(g => (g.goal || '').toLowerCase().includes(gl));
+  }
+  if (tag) {
+    const tg = tag.toLowerCase();
+    result = result.filter(g => (g.tags || []).some(t => t.toLowerCase().includes(tg)));
+  }
+  if (search) {
+    const s = search.toLowerCase();
+    result = result.filter(g => g.name.toLowerCase().includes(s));
+  }
+  res.json(result);
 });
 
 app.post('/community/groups', (req, res) => {
-  const { name, creatorId } = req.body;
+  const { name, creatorId, goal = '', tags = [] } = req.body;
   if (!name || !creatorId) {
     return res.status(400).json({ error: 'name and creatorId required' });
   }
   const group = {
     id: groups.length + 1,
     name,
+    goal,
+    tags: Array.isArray(tags) ? tags : [],
     members: [creatorId],
     sharedPrograms: [],
     progress: {},
     posts: [],
     programId: null
   };
+  groups.push(group);
+  res.json(group);
+});
+
 app.get('/api/groups', (req, res) => {
   res.json(groups);
 });

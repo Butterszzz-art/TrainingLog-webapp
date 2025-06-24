@@ -743,6 +743,12 @@
 
 <div id="communityTab" class="tab-content">
   <h2>Community</h2>
+  <div>
+    <input id="groupSearchInput" placeholder="Search groups">
+    <input id="goalFilter" placeholder="Goal">
+    <input id="tagFilter" placeholder="Tag">
+    <button onclick="doGroupSearch()">Search</button>
+  </div>
   <div id="groupList"></div>
   <button onclick="showCreateGroup()">Create Group</button>
   <button onclick="loadGroups()">Refresh Groups</button>
