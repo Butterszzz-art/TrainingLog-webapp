@@ -54,3 +54,5 @@ if (typeof window !== 'undefined') {
   window.savePRs = savePRs;
   window.updatePRs = updatePRs;
 }
+
+export { computeOneRepMax, loadPRs, savePRs, updatePRs };
