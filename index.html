@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pocket Coach</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="ProgramTab.css">
   <style>
     /* Center all tab headers on the page */
     .tab-content > h2,
@@ -512,7 +513,7 @@
 #resistance-inputs input,
 #resistance-inputs select{
   width:100%;
-  max-width:280px;
+  max-width:100%;
 }
 #training-calendar{
   width:100%;
@@ -603,12 +604,10 @@
 
 <div id="resistance-section">
   <div id="resistance-inputs">
+  <div class="inputs-grid">
   <input type="text" id="exercise" placeholder="Exercise" list="exerciseSuggestions" />
   <datalist id="exerciseSuggestions"></datalist>
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
-
-  <!-- Dynamically generated inputs will appear here -->
-  <div id="setInputsContainer"></div>
 
   <!-- Optional goals -->
   <input type="number" id="goal" placeholder="Target Weight Goal (kg/lbs)" />
@@ -619,6 +618,10 @@
     <option value="kg">kg</option>
     <option value="lbs">lbs</option>
   </select>
+  </div>
+
+  <!-- Dynamically generated inputs will appear here -->
+  <div id="setInputsContainer"></div>
 
   <!-- Date selector -->
   <input type="date" id="entryDate" class="calendar-widget slide-up" />
