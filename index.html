@@ -2927,8 +2927,15 @@ async function fetchBodyweightHistory() {
   return weights.map(w => ({ date: w.date, weight: w.weight }));
 }
 
-async function showWorkoutProgress() {
-  const history = await fetchWorkoutHistory();
+async function showWorkoutProgress(data) {
+  const workouts = Array.isArray(data?.workouts) ? data.workouts : [];
+  if (data && workouts.length === 0) {
+    // nothing to show
+    return;
+  }
+  const history = workouts.length
+    ? workouts.map(w => ({ date: w.date, volume: calculateWorkoutVolume(w) }))
+    : await fetchWorkoutHistory();
   const filtered = applyDateRange(history);
   const dates = filtered.map(h => h.date);
   const vols = filtered.map(h => h.volume);
