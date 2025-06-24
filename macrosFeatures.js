@@ -52,8 +52,18 @@ export function planWeek(meals) {
   return groceries;
 }
 
+export function toggleTargetForm() {
+  const main = document.getElementById('macrosMainContent');
+  const settings = document.getElementById('macrosSettingsContent');
+  main.style.display = main.style.display === 'none' ? 'block' : 'none';
+  settings.style.display = settings.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('adjustMacrosToggle').textContent =
+    settings.style.display === 'block' ? '⬅️ Back to Targets' : '⚙️ Adjust Macros';
+}
+
 if (typeof window !== 'undefined') {
   window.scanBarcode = scanBarcode;
   window.importRecipe = importRecipe;
   window.planWeek = planWeek;
+  window.toggleTargetForm = toggleTargetForm;
 }

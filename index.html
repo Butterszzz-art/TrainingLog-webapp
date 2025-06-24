@@ -6,6 +6,7 @@
   <title>Pocket Coach</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="ProgramTab.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     /* Center all tab headers on the page */
     .tab-content > h2,
@@ -797,6 +798,9 @@
     <button onclick="scanBarcode()" style="width:100%;font-size:1rem;">📷 Scan Barcode</button>
     <input id="recipeUrl" placeholder="Import recipe URL" style="width:100%;padding:6px;margin-top:10px;"/>
     <button onclick="importRecipe(recipeUrl.value).then(r=>console.log(r))" style="width:100%;font-size:1rem;">Import Recipe</button>
+    <button id="adjustMacrosToggle" class="btn" onclick="toggleTargetForm()">
+      ⚙️ Adjust Macros
+    </button>
   </div>
 
   <!-- Settings Mini Tab -->
