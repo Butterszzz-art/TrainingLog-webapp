@@ -778,27 +778,52 @@
   </button>
 
   <!-- Main Macros Content -->
-  <div id="macrosMainContent" style="max-width: 600px; margin: 0 auto; text-align: center;">
-    <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Targets</h2>
+  <div id="macrosMainContent" style="max-width: 600px; margin: 0 auto;">
+    <div id="targetsCard" class="card sticky">
+      <h2 style="font-size:1.5rem;">Targets <span id="offlineBadge" style="display:none;font-size:0.8rem;">🕒 Offline</span></h2>
+      <p style="font-size:1.1rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal (<span id="macroCalsNet">0</span> net)</p>
+      <progress id="calsBar" value="0" max="100" style="width:100%;height:20px;margin-bottom:6px;"></progress>
+      <div class="quick-add"><input id="qaCals" type="number" value="100"><button onclick="quickAdd('cals')">+</button></div>
 
-    <p style="font-size: 1.3rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal (<span id="macroCalsNet">0</span> net)</p>
-    <progress id="calsBar" value="0" max="100" style="width: 100%; height: 20px; margin-bottom: 20px;"></progress>
+      <p style="font-size:1rem;">Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
+      <progress id="proteinBar" value="0" max="100" style="width:100%;height:15px;margin-bottom:6px;"></progress>
+      <div class="quick-add"><input id="qaProtein" type="number" value="10"><button onclick="quickAdd('protein')">+</button></div>
 
-    <p style="font-size: 1.2rem;">Protein: <span id="macroProteinProgress">0</span> / <span id="macroProteinTarget">0</span> g</p>
-    <progress id="proteinBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 20px;"></progress>
+      <p style="font-size:1rem;">Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
+      <progress id="carbBar" value="0" max="100" style="width:100%;height:15px;margin-bottom:6px;"></progress>
+      <div class="quick-add"><input id="qaCarbs" type="number" value="10"><button onclick="quickAdd('carbs')">+</button></div>
 
-    <p style="font-size: 1.2rem;">Carbs: <span id="macroCarbsProgress">0</span> / <span id="macroCarbsTarget">0</span> g</p>
-    <progress id="carbBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 20px;"></progress>
+      <p style="font-size:1rem;">Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
+      <progress id="fatBar" value="0" max="100" style="width:100%;height:15px;margin-bottom:6px;"></progress>
+      <div class="quick-add"><input id="qaFat" type="number" value="5"><button onclick="quickAdd('fat')">+</button></div>
 
-    <p style="font-size: 1.2rem;">Fat: <span id="macroFatProgress">0</span> / <span id="macroFatTarget">0</span> g</p>
-    <progress id="fatBar" value="0" max="100" style="width: 100%; height: 15px; margin-bottom: 30px;"></progress>
+      <div id="sparkContainer" style="display:flex;justify-content:space-around;margin-top:8px;">
+        <canvas id="calSpark" width="120" height="40"></canvas>
+        <canvas id="proteinSpark" width="120" height="40"></canvas>
+      </div>
+    </div>
 
-    <div id="macroMealContainer"></div>
-    <button id="macroMeal" style="width: 100%; font-size: 1.1rem; padding: 12px;">➕ Add Meal</button>
-    <button onclick="scanBarcode()" style="width:100%;font-size:1rem;">📷 Scan Barcode</button>
-    <input id="recipeUrl" placeholder="Import recipe URL" style="width:100%;padding:6px;margin-top:10px;"/>
-    <button onclick="importRecipe(recipeUrl.value).then(r=>console.log(r))" style="width:100%;font-size:1rem;">Import Recipe</button>
-    <button id="adjustMacrosToggle" class="btn" onclick="toggleTargetForm()">
+    <div id="heatmap" class="heatmap"></div>
+
+    <details id="mealsCard" class="card" style="margin-top:10px;">
+      <summary>Meals <button onclick="scanBarcode()" class="icon-btn">📷</button></summary>
+      <div style="margin-top:10px;">
+        <div style="margin-bottom:10px;">
+          <select id="favSelect" onchange="logFavorite(this.value)">
+            <option value="">Favorites</option>
+          </select>
+        </div>
+        <div style="display:flex;margin-bottom:10px;">
+          <input id="recipeUrl" placeholder="Import recipe URL" style="flex:1;padding:6px;"/>
+          <button onclick="fetchRecipe()" style="margin-left:6px;">Fetch</button>
+        </div>
+        <div id="macroMealContainer"></div>
+      </div>
+    </details>
+
+    <button id="addMealFab" class="fab" onclick="addMacroMeal()">＋</button>
+
+    <button id="adjustMacrosToggle" class="btn" onclick="toggleTargetForm()" style="margin-top:20px;">
       ⚙️ Adjust Macros
     </button>
   </div>
@@ -1140,6 +1165,12 @@ function showTab(tabName) {
   requestAnimationFrame(() => {
     tab.classList.add('active');
   });
+
+  if(tabName === 'macroTab' && window.renderSparklines){
+    renderSparklines();
+    renderHeatmap();
+    updateOfflineBadge();
+  }
 }
 
 
