@@ -335,7 +335,7 @@ export default function ProgramTab() {
     }
   }, "Send"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowShare(false)
-  }, "Cancel"));
+  }, "Cancel")));
 }
 const root = createRoot(document.getElementById('programTabReactRoot'));
 root.render(/*#__PURE__*/React.createElement(ProgramTab, null));
