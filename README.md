@@ -7,6 +7,12 @@ updates. A small leaderboard helper ranks members based on provided
 consistency and improvement scores. These features are purely
 client-side placeholders.
 
+Recent updates added an offline action queue and a theme selector with
+two dark themes. Auto-generated workout suggestions now pre-populate set
+inputs based on your last session and a simple progression analysis will
+recommend deload weeks when plateaus are detected. Additional helper
+modules expose periodization and meal planning utilities.
+
 ## Community API
 
 When running the Express server, a small set of community endpoints is
