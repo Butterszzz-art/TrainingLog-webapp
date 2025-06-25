@@ -97,9 +97,7 @@
       color: var(--text-color);
       border: none;
       cursor: pointer;
-      font-size: 16px;
-      min-width: 48px;
-      min-height: 48px;
+      font-size: 15px;
       box-shadow: var(--shadow);
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
@@ -566,94 +564,6 @@
   border-radius: .5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,.1);
 }
-
-/* Bottom navigation bar */
-.bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: var(--card-bg);
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
-  z-index: 1000;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.bottom-nav button {
-  flex: 1;
-  background: none;
-  border: none;
-  color: var(--text-color);
-  font-size: 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 48px;
-  min-height: 48px;
-}
-.bottom-nav button span {
-  font-size: 12px;
-  line-height: 1;
-}
-.bottom-nav button.active {
-  color: var(--primary);
-}
-
-#restTimerSection {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  body {
-    padding-bottom: 72px;
-    font-size: 16px;
-  }
-  h2 {
-    font-size: 20px;
-  }
-  .side-menu {
-    display: none;
-  }
-  #appContainer.shifted {
-    margin-left: 0;
-  }
-  .progress-layout {
-    grid-template-columns: 1fr;
-  }
-  #resistance-section {
-    grid-template-columns: 1fr;
-  }
-  .inputs-grid {
-    grid-template-columns: 1fr;
-  }
-  #fabContainer {
-    bottom: 76px;
-    right: 20px;
-    left: auto;
-    transform: none;
-  }
-  #menuToggle {
-    top: calc(16px + env(safe-area-inset-top));
-  }
-  .bottom-nav {
-    display: flex;
-  }
-  input, select, textarea {
-    max-width: calc(100vw - 32px);
-  }
-  #restTimerSection {
-    flex-direction: column;
-    align-items: stretch;
-    margin-bottom: 16px;
-  }
-}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -707,7 +617,7 @@
   
   <h2>Resistance Exercise Log</h2>
 
-<div id="resistance-section" class="card">
+<div id="resistance-section">
   <div id="resistance-inputs">
   <div class="inputs-grid">
   <input type="text" id="exercise" placeholder="Exercise" list="exerciseSuggestions" />
@@ -769,8 +679,13 @@
         <span class="label">Save</span>
       </button>
       <button class="fab-item" onclick="loadSavedTemplate()">
+        <span class="icon">📂</span>
+        <span class="label">Load</span>
+      </button>
+    </div>
+  </div>
 </div>
-<div id="training-calendar" class="slide-up card"></div>
+<div id="training-calendar" class="slide-up"></div>
 </div>
   
   <!-- Logs will render below this -->
@@ -780,13 +695,6 @@
 
 
   </div>
-  <nav id="bottomNav" class="bottom-nav">
-    <button data-tab="logTab">🏋️<span>Training</span></button>
-    <button data-tab="macroTab">🍎<span>Macros</span></button>
-    <button data-tab="progressTab">📈<span>Progress</span></button>
-    <button data-tab="communityTab">👥<span>Community</span></button>
-    <button data-tab="programTab">🗓️<span>Programs</span></button>
-  </nav>
 
   <div id="weightTab" class="tab-content">
     <h2>Bodyweight Tracker</h2>
@@ -972,7 +880,12 @@
       </select>
       <button onclick="calculateMacroTargets()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Calculate Targets</button>
       <button onclick="console.log(planWeek([]))" style="width:100%;font-size:1rem;margin-top:10px;">Plan Week</button>
+    </div>
   </div>
+</div>
+
+
+
   <div id="progressTab" class="tab-content">
     <h2>Progress Overview</h2>
     <div class="progress-layout">
@@ -1251,10 +1164,6 @@ function showTab(tabName) {
   tab.style.display = 'block';
   requestAnimationFrame(() => {
     tab.classList.add('active');
-  });
-
-  document.querySelectorAll('#bottomNav button').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
   });
 
   if(tabName === 'macroTab' && window.renderSparklines){
@@ -3830,13 +3739,6 @@ function loadCrossfitTemplate() {
       const tabName = link.getAttribute("data-tab");
       showTab(tabName);
       toggleSidebar(false);
-    });
-  });
-
-  document.querySelectorAll('#bottomNav button[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabName = btn.getAttribute('data-tab');
-      showTab(tabName);
     });
   });
 
