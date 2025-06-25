@@ -614,7 +614,11 @@
 <div id="progressReminder"></div>
 
 <div id="logTab" class="tab-content">
-  
+  <div class="mobile-panel-toggle">
+    <button data-target="logPanel" class="active">Log</button>
+    <button data-target="calendarPanel">Calendar</button>
+  </div>
+  <div id="logPanel" class="panel active">
   <h2>Resistance Exercise Log</h2>
 
 <div id="resistance-section">
@@ -684,19 +688,25 @@
       </button>
     </div>
   </div>
-</div>
-<div id="training-calendar" class="slide-up"></div>
-</div>
-  
-  <!-- Logs will render below this -->
-  <div id="workoutsContainer" style="margin-top: 20px;"></div>
+    <!-- Logs will render below this -->
+    <div id="workoutsContainer" style="margin-top: 20px;"></div>
+    </div>
+    <div id="calendarPanel" class="panel">
+      <div id="training-calendar" class="slide-up"></div>
+    </div>
 
-</div>
+
+  </div>
 
 
   </div>
 
   <div id="weightTab" class="tab-content">
+    <div class="mobile-panel-toggle">
+      <button data-target="weightLogPanel" class="active">Log</button>
+      <button data-target="weightChartPanel">Chart</button>
+    </div>
+    <div id="weightLogPanel" class="panel active">
     <h2>Bodyweight Tracker</h2>
     <input type="number" id="currentWeightInput" placeholder="Current Weight (kg)">
     <button onclick="addWeightEntry()">Add Weight</button>
@@ -718,10 +728,19 @@
       <thead><tr><th>Scenario</th><th>Estimated Calories</th></tr></thead>
       <tbody id="calorieEstimateTable"></tbody>
     </table>
+    </div>
+    <div id="weightChartPanel" class="panel">
+      <div id="weightChartPanelContent"></div>
+    </div>
   </div>
   
 <div id="crossfitTab" class="tab-content">
-  
+  <div class="mobile-panel-toggle">
+    <button data-target="cfEntryPanel" class="active">Entry</button>
+    <button data-target="cfHistoryPanel">History</button>
+  </div>
+  <div id="cfEntryPanel" class="panel active">
+
   <h2>CrossFit Workout Tracker</h2>
 
   <input type="text" id="cfWorkoutName" placeholder="Workout Name (e.g., Murph)">
@@ -735,14 +754,28 @@
   <button onclick="addCrossfitExercise()">➕ Add Exercise</button>
 
   <button style="margin-top:20px;" onclick="saveCrossfitWorkout()">Save CrossFit Workout</button>
-
+  </div>
+  <div id="cfHistoryPanel" class="panel">
   <h3 style="margin-top:30px;">Saved CrossFit Workouts</h3>
   <div id="cfWorkoutsContainer"></div>
+  </div>
 </div>
 
-<div id="programTab" class="tab-content"><div id="programTabReactRoot"></div></div>
+<div id="programTab" class="tab-content">
+  <div class="mobile-panel-toggle">
+    <button data-target="programBuilderPanel" class="active">Builder</button>
+    <button data-target="programListPanel">Programs</button>
+  </div>
+  <div id="programBuilderPanel" class="panel active"><div id="programTabReactRoot"></div></div>
+  <div id="programListPanel" class="panel"></div>
+</div>
 
 <div id="communityTab" class="tab-content">
+  <div class="mobile-panel-toggle">
+    <button data-target="groupsPanel" class="active">Groups</button>
+    <button data-target="postsPanel">Posts</button>
+  </div>
+  <div id="groupsPanel" class="panel active">
   <h2>Community</h2>
   <div>
     <input id="groupSearchInput" placeholder="Search groups">
@@ -754,9 +787,16 @@
   <button onclick="showCreateGroup()">Create Group</button>
   <button onclick="loadGroups()">Refresh Groups</button>
   <div id="groupDetail" style="display:none;"></div>
+  </div>
+  <div id="postsPanel" class="panel"></div>
 </div>
 
   <div id="cardioTab" class="tab-content">
+    <div class="mobile-panel-toggle">
+      <button data-target="cardioFormPanel" class="active">Log</button>
+      <button data-target="cardioHistoryPanel">History</button>
+    </div>
+    <div id="cardioFormPanel" class="panel active">
     <h2>Cardio Tracker</h2>
     <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
     <input type="number" id="cardioDuration" placeholder="Duration (min)">
@@ -765,13 +805,20 @@
     <input type="text" id="cardioNotes" placeholder="Notes (optional)">
     <button onclick="addCardioEntry()">Add Cardio</button>
     <button onclick="completeCardioSession()">Complete Cardio Session</button>
-    <table>
-      <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Calories</th><th>Notes</th><th>Remove</th></tr></thead>
-      <tbody id="cardioBody"></tbody>
-    </table>
+    </div>
+    <div id="cardioHistoryPanel" class="panel">
+      <table>
+        <thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Calories</th><th>Notes</th><th>Remove</th></tr></thead>
+        <tbody id="cardioBody"></tbody>
+      </table>
+    </div>
   </div>
 
- <div id="macroTab" class="tab-content" style="position: relative; padding: 20px;">
+<div id="macroTab" class="tab-content" style="position: relative; padding: 20px;">
+  <div class="mobile-panel-toggle">
+    <button data-target="macroTargetsPanel" class="active">Targets</button>
+    <button data-target="macroMealsPanel">Meals</button>
+  </div>
   <!-- Settings Button, top right, only shown on Macros tab -->
 <button id="macrosSettingsBtn" onclick="openMacroSettings()" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">>
     ⚙️ Settings
@@ -779,6 +826,7 @@
 
   <!-- Main Macros Content -->
   <div id="macrosMainContent" style="max-width: 600px; margin: 0 auto;">
+    <div id="macroTargetsPanel" class="panel active">
     <div id="targetsCard" class="card sticky">
       <h2 style="font-size:1.5rem;">Targets <span id="offlineBadge" style="display:none;font-size:0.8rem;">🕒 Offline</span></h2>
       <p style="font-size:1.1rem;">Energy: <span id="macroCalsProgress">0</span> / <span id="macroCalsTarget">0</span> kcal (<span id="macroCalsNet">0</span> net)</p>
@@ -804,7 +852,9 @@
     </div>
 
     <div id="heatmap" class="heatmap"></div>
+    </div>
 
+    <div id="macroMealsPanel" class="panel">
     <details id="mealsCard" class="card" style="margin-top:10px;">
       <summary>Meals <button onclick="scanBarcode()" class="icon-btn">📷</button></summary>
       <div style="margin-top:10px;">
@@ -826,6 +876,7 @@
     <button id="adjustMacrosToggle" class="btn" onclick="toggleTargetForm()" style="margin-top:20px;">
       ⚙️ Adjust Macros
     </button>
+    </div>
   </div>
 
   <!-- Settings Mini Tab -->
@@ -887,8 +938,13 @@
 
 
   <div id="progressTab" class="tab-content">
+    <div class="mobile-panel-toggle">
+      <button data-target="progressTogglePanel" class="active">Options</button>
+      <button data-target="progressChartsPanel">Charts</button>
+    </div>
     <h2>Progress Overview</h2>
     <div class="progress-layout">
+      <div id="progressTogglePanel" class="panel active">
       <nav class="progress-nav">
         <button onclick="showWorkoutProgress()">Workout</button>
         <button onclick="showCardioProgress()">Cardio</button>
@@ -898,6 +954,8 @@
         <input type="date" id="endRange" onchange="refreshProgress()">
         <button onclick="promptGoal()">Set Goal</button>
       </nav>
+      </div>
+      <div id="progressChartsPanel" class="panel">
       <section class="progress-chart">
         <canvas id="progressCanvas"></canvas>
         <div id="exerciseProgress" style="display:none;"></div>
@@ -914,16 +972,24 @@
   </div>
 
 <div id="logHistoryTab" class="tab-content">
+  <div class="mobile-panel-toggle">
+    <button data-target="historyWorkoutPanel" class="active">Workouts</button>
+    <button data-target="historyMacroPanel">Macros</button>
+  </div>
   <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
     <button onclick="showHistoryMiniTab('workout')">Workout History</button>
     <button onclick="showHistoryMiniTab('macro')">Macro History</button>
   </div>
-  <div id="workoutHistoryMiniTab">
-    <div id="logHistoryContainer"></div>
+  <div id="historyWorkoutPanel" class="panel active">
+    <div id="workoutHistoryMiniTab">
+      <div id="logHistoryContainer"></div>
+    </div>
   </div>
-  <div id="macroHistoryMiniTab" style="display:none;">
-    <div id="macroHistoryContainer"></div>
+  <div id="historyMacroPanel" class="panel">
+    <div id="macroHistoryMiniTab" style="display:none;">
+      <div id="macroHistoryContainer"></div>
+    </div>
   </div>
 </div>
   </div>
@@ -3748,6 +3814,7 @@ function loadCrossfitTemplate() {
   renderPRs();
   renderMilestones();
   renderGoalBar();
+  initMobilePanels();
 
 
 
@@ -3819,6 +3886,26 @@ window.exportCSV = exportCSV;
   }
 
   window.showToast = showToast;
+
+  function initMobilePanels() {
+    document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
+      bar.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const tab = btn.closest('.tab-content');
+          if (!tab) return;
+          tab.querySelectorAll('.panel').forEach(p => {
+            p.classList.toggle('active', p.id === target);
+          });
+          bar.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+    });
+  }
+
+  window.initMobilePanels = initMobilePanels;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
