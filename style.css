@@ -64,3 +64,72 @@
   height:12px;
   background:#eee;
 }
+
+/* ——— MOBILE UI OVERRIDES ——— */
+@media (max-width: 768px) {
+  /* Hide desktop sidebar & show a mobile nav toggle if you have one */
+  .side-menu {
+    display: none !important;
+  }
+  .mobile-nav {
+    display: flex !important;
+  }
+
+  /* Stack resistance form and calendar full width */
+  #resistance-form,
+  #calendar {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto 20px !important;
+    float: none !important;
+    padding: 0 16px !important;
+  }
+
+  /* Increase form element tap targets */
+  #resistance-form input,
+  #resistance-form select,
+  #resistance-form button,
+  #calendar button {
+    width: 100% !important;
+    font-size: 1.1rem !important;
+    padding: 12px !important;
+    box-sizing: border-box;
+  }
+
+  /* Nudge FAB up so it doesn’t cover list buttons */
+  #fab {
+    bottom: 80px !important;
+    right: 20px !important;
+  }
+
+  /* Ensure tab-content has breathing room */
+  .tab-content {
+    padding: 16px !important;
+  }
+
+  /* Collapse any multi-column tables */
+  table, thead, tbody, th, td, tr {
+    display: block !important;
+    width: 100% !important;
+  }
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  tr {
+    margin-bottom: 16px !important;
+  }
+  td {
+    padding: 8px 4px !important;
+    text-align: right !important;
+    position: relative;
+  }
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+}
