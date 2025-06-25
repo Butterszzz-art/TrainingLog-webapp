@@ -68,9 +68,6 @@
 /* ——— MOBILE UI OVERRIDES ——— */
 @media (max-width: 768px) {
   /* Hide desktop sidebar & show a mobile nav toggle if you have one */
-  .side-menu {
-    display: none !important;
-  }
   .mobile-nav {
     display: flex !important;
   }
@@ -155,5 +152,38 @@
   }
   .tab-content .panel.active {
     display: block;
+  }
+}
+@media (max-width: 768px) {
+  .mobile-panel-toggle {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2000;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tab-header {
+    padding-top: 3rem;
+  }
+  .tab-content input,
+  .tab-content select,
+  .tab-content button {
+    min-width: 90%;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem auto;
+    display: block;
+  }
+  .side-menu {
+    width: 100% !important;
+    left: -100%;
+    transition: left 0.3s ease;
+  }
+  .side-menu.open {
+    left: 0 !important;
+  }
+  .menu-toggle {
+    z-index: 2100;
   }
 }
