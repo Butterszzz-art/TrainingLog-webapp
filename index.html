@@ -1027,6 +1027,9 @@ let savedUser = localStorage.getItem("fitnessAppUser");
 let activeSection = null;
 let activeTab = null;
 
+// Base URL for backend API, populated from optional config.js
+let serverUrl = window.SERVER_URL || '';
+
 let airtableToken = '';
 let airtableBaseId = '';
 
