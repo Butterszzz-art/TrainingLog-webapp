@@ -3821,6 +3821,16 @@ function loadCrossfitTemplate() {
   placeMobileToggles();
     document.querySelectorAll(".mobile-panel-button").forEach(btn=>{btn.addEventListener("click",()=>{document.querySelectorAll(".calendar-panel, .log-panel").forEach(p=>p.classList.remove("expanded"));const which=btn.dataset.panel+"-panel";document.querySelector("."+which)?.classList.toggle("expanded");});});
 
+  document.querySelectorAll('.mobile-panel-button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('.calendar-panel, .log-panel')
+        .forEach((p) => p.classList.remove('expanded'));
+      const which = `${btn.dataset.panel}-panel`;
+      document.querySelector(`.${which}`)?.classList.toggle('expanded');
+    });
+  });
+
 
 
 

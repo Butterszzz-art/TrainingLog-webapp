@@ -19,6 +19,11 @@
   z-index: 1;
 }
 
+/* Mobile header hidden on larger screens */
+.mobile-header {
+  display: none;
+}
+
 .quick-add {
   display:flex;
   justify-content:flex-end;
