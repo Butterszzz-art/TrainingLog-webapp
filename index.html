@@ -571,6 +571,11 @@
 
  
 <body>
+  <div class="mobile-header">
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <button class="mobile-panel-button" data-panel="log">Log</button>
+    <button class="mobile-panel-button" data-panel="calendar">Calendar</button>
+  </div>
 
 <div id="loginContainer" class="section active" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
   <h2>Login to Pocket Coach</h2>
@@ -586,10 +591,7 @@
   <button onclick="openSection('pocketFinance')">PocketFinance</button>
 </div>
 
-<div id="pocketFitContainer" class="section" style="display:none;">
-  
-  <!-- Hamburger button -->
-  <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+<div id="pocketFitContainer" class="section app-container" style="display:none;">
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
@@ -618,7 +620,7 @@
     <button data-target="logPanel" class="active">Log</button>
     <button data-target="calendarPanel">Calendar</button>
   </div>
-  <div id="logPanel" class="panel active">
+  <div id="logPanel" class="panel log-panel active">
   <h2 class="tab-header">Resistance Exercise Log</h2>
 
 <div id="resistance-section">
@@ -691,7 +693,7 @@
     <!-- Logs will render below this -->
     <div id="workoutsContainer" style="margin-top: 20px;"></div>
     </div>
-    <div id="calendarPanel" class="panel">
+    <div id="calendarPanel" class="panel calendar-panel">
       <div id="training-calendar" class="slide-up"></div>
     </div>
 
@@ -3817,6 +3819,16 @@ function loadCrossfitTemplate() {
   renderGoalBar();
   initMobilePanels();
   placeMobileToggles();
+
+  document.querySelectorAll('.mobile-panel-button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document
+        .querySelectorAll('.calendar-panel, .log-panel')
+        .forEach((p) => p.classList.remove('expanded'));
+      const which = `${btn.dataset.panel}-panel`;
+      document.querySelector(`.${which}`)?.classList.toggle('expanded');
+    });
+  });
 
 
 
