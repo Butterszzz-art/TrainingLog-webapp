@@ -571,11 +571,6 @@
 
  
 <body>
-  <div class="mobile-header">
-    <button id="menuToggle" class="menu-toggle">☰</button>
-    <button class="mobile-panel-button" data-panel="log">Log</button>
-    <button class="mobile-panel-button" data-panel="calendar">Calendar</button>
-  </div>
 
 <div id="loginContainer" class="section active" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
   <h2>Login to Pocket Coach</h2>
@@ -591,7 +586,10 @@
   <button onclick="openSection('pocketFinance')">PocketFinance</button>
 </div>
 
-<div id="pocketFitContainer" class="section app-container" style="display:none;">
+<div id="pocketFitContainer" class="section" style="display:none;">
+  
+  <!-- Hamburger button -->
+  <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
   <!-- Sidebar -->
   <nav id="sideMenu" class="side-menu">
@@ -620,8 +618,8 @@
     <button data-target="logPanel" class="active">Log</button>
     <button data-target="calendarPanel">Calendar</button>
   </div>
-  <div id="logPanel" class="panel log-panel active">
-  <h2 class="tab-header">Resistance Exercise Log</h2>
+  <div id="logPanel" class="panel active">
+  <h2>Resistance Exercise Log</h2>
 
 <div id="resistance-section">
   <div id="resistance-inputs">
@@ -693,7 +691,7 @@
     <!-- Logs will render below this -->
     <div id="workoutsContainer" style="margin-top: 20px;"></div>
     </div>
-    <div id="calendarPanel" class="panel calendar-panel">
+    <div id="calendarPanel" class="panel">
       <div id="training-calendar" class="slide-up"></div>
     </div>
 
@@ -709,7 +707,7 @@
       <button data-target="weightChartPanel">Chart</button>
     </div>
     <div id="weightLogPanel" class="panel active">
-    <h2 class="tab-header">Bodyweight Tracker</h2>
+    <h2>Bodyweight Tracker</h2>
     <input type="number" id="currentWeightInput" placeholder="Current Weight (kg)">
     <button onclick="addWeightEntry()">Add Weight</button>
     <input type="number" id="avgCalories" placeholder="Average Daily Calories" />
@@ -743,7 +741,7 @@
   </div>
   <div id="cfEntryPanel" class="panel active">
 
-  <h2 class="tab-header">CrossFit Workout Tracker</h2>
+  <h2>CrossFit Workout Tracker</h2>
 
   <input type="text" id="cfWorkoutName" placeholder="Workout Name (e.g., Murph)">
   <input type="number" id="cfMinutes" placeholder="Time (Minutes)">
@@ -778,7 +776,7 @@
     <button data-target="postsPanel">Posts</button>
   </div>
   <div id="groupsPanel" class="panel active">
-  <h2 class="tab-header">Community</h2>
+  <h2>Community</h2>
   <div>
     <input id="groupSearchInput" placeholder="Search groups">
     <input id="goalFilter" placeholder="Goal">
@@ -799,7 +797,7 @@
       <button data-target="cardioHistoryPanel">History</button>
     </div>
     <div id="cardioFormPanel" class="panel active">
-    <h2 class="tab-header">Cardio Tracker</h2>
+    <h2>Cardio Tracker</h2>
     <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
     <input type="number" id="cardioDuration" placeholder="Duration (min)">
     <input type="number" id="cardioDistance" placeholder="Distance (km)">
@@ -944,7 +942,7 @@
       <button data-target="progressTogglePanel" class="active">Options</button>
       <button data-target="progressChartsPanel">Charts</button>
     </div>
-    <h2 class="tab-header">Progress Overview</h2>
+    <h2>Progress Overview</h2>
     <div class="progress-layout">
       <div id="progressTogglePanel" class="panel active">
       <nav class="progress-nav">
@@ -978,7 +976,7 @@
     <button data-target="historyWorkoutPanel" class="active">Workouts</button>
     <button data-target="historyMacroPanel">Macros</button>
   </div>
-  <h2 class="tab-header">Log History</h2>
+  <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
     <button onclick="showHistoryMiniTab('workout')">Workout History</button>
     <button onclick="showHistoryMiniTab('macro')">Macro History</button>
@@ -1028,7 +1026,6 @@ let currentUser = null;
 let savedUser = localStorage.getItem("fitnessAppUser");
 let activeSection = null;
 let activeTab = null;
-
 
 let airtableToken = '';
 let airtableBaseId = '';
@@ -3818,18 +3815,6 @@ function loadCrossfitTemplate() {
   renderMilestones();
   renderGoalBar();
   initMobilePanels();
-  placeMobileToggles();
-    document.querySelectorAll(".mobile-panel-button").forEach(btn=>{btn.addEventListener("click",()=>{document.querySelectorAll(".calendar-panel, .log-panel").forEach(p=>p.classList.remove("expanded"));const which=btn.dataset.panel+"-panel";document.querySelector("."+which)?.classList.toggle("expanded");});});
-
-  document.querySelectorAll('.mobile-panel-button').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document
-        .querySelectorAll('.calendar-panel, .log-panel')
-        .forEach((p) => p.classList.remove('expanded'));
-      const which = `${btn.dataset.panel}-panel`;
-      document.querySelector(`.${which}`)?.classList.toggle('expanded');
-    });
-  });
 
 
 
@@ -3920,16 +3905,7 @@ window.exportCSV = exportCSV;
     });
   }
 
-  function placeMobileToggles() {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      const toggle = tab.querySelector('.mobile-panel-toggle');
-      const header = tab.querySelector('.tab-header') || tab.querySelector('h2');
-      if (toggle && header) header.appendChild(toggle);
-    });
-  }
-
   window.initMobilePanels = initMobilePanels;
-  window.placeMobileToggles = placeMobileToggles;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
