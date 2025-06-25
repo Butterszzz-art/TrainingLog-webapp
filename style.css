@@ -133,3 +133,27 @@
     text-transform: uppercase;
   }
 }
+
+.mobile-panel-toggle {
+  display: none;
+  margin-bottom: 10px;
+  gap: 6px;
+}
+.mobile-panel-toggle button.active {
+  font-weight: bold;
+}
+.panel {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-panel-toggle {
+    display: flex;
+  }
+  .tab-content .panel {
+    display: none;
+  }
+  .tab-content .panel.active {
+    display: block;
+  }
+}
