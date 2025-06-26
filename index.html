@@ -3889,6 +3889,8 @@ window.exportCSV = exportCSV;
 
   function initMobilePanels() {
     document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
+      const tab = bar.closest('.tab-content');
+      if (tab && tab.id === 'logTab') return; // disable panel toggles on Training Log
       bar.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.dataset.target;
