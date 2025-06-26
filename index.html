@@ -3812,16 +3812,8 @@ function loadCrossfitTemplate() {
   renderPRs();
   renderMilestones();
   renderGoalBar();
-  initMobilePanels();
 
-
-
-
-
-    
-    
 }); // closing DOMContentLoaded
-
 
 window.openSection = openSection;
 window.openDashboard = openDashboard;
@@ -3884,6 +3876,7 @@ window.exportCSV = exportCSV;
   }
 
   window.showToast = showToast;
+
 
   function initMobilePanels() {
     document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
