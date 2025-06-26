@@ -250,7 +250,7 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .tab-content.active {
-      display: block;
+      display: block !important;
       opacity: 1;
       transform: scale(1);
     }
@@ -1221,13 +1221,11 @@ await fetchUserMacroTargets(currentUser); // define this function below
 function showTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
-    tab.style.display = 'none';
   });
 
   const tab = document.getElementById(tabName);
   if (!tab) return;
 
-  tab.style.display = 'block';
   requestAnimationFrame(() => {
     tab.classList.add('active');
   });
