@@ -250,7 +250,7 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .tab-content.active {
-      display: block;
+      display: block !important;
       opacity: 1;
       transform: scale(1);
     }
@@ -1221,13 +1221,11 @@ await fetchUserMacroTargets(currentUser); // define this function below
 function showTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
-    tab.style.display = 'none';
   });
 
   const tab = document.getElementById(tabName);
   if (!tab) return;
 
-  tab.style.display = 'block';
   requestAnimationFrame(() => {
     tab.classList.add('active');
   });
@@ -3879,6 +3877,28 @@ window.exportCSV = exportCSV;
 
   window.showToast = showToast;
 
+
+  function initMobilePanels() {
+    document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
+      const tab = bar.closest('.tab-content');
+      if (tab && tab.id === 'logTab') return; // disable panel toggles on Training Log
+      bar.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const tab = btn.closest('.tab-content');
+          if (!tab) return;
+          tab.querySelectorAll('.panel').forEach(p => {
+            p.classList.toggle('active', p.id === target);
+          });
+          bar.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+    });
+  }
+
+  window.initMobilePanels = initMobilePanels;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
