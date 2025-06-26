@@ -3814,16 +3814,8 @@ function loadCrossfitTemplate() {
   renderPRs();
   renderMilestones();
   renderGoalBar();
-  initMobilePanels();
 
-
-
-
-
-    
-    
 }); // closing DOMContentLoaded
-
 
 window.openSection = openSection;
 window.openDashboard = openDashboard;
@@ -3887,25 +3879,6 @@ window.exportCSV = exportCSV;
 
   window.showToast = showToast;
 
-  function initMobilePanels() {
-    document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
-      bar.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.dataset.target;
-          const tab = btn.closest('.tab-content');
-          if (!tab) return;
-          tab.querySelectorAll('.panel').forEach(p => {
-            p.classList.toggle('active', p.id === target);
-          });
-          bar.querySelectorAll('button').forEach(b => {
-            b.classList.toggle('active', b === btn);
-          });
-        });
-      });
-    });
-  }
-
-  window.initMobilePanels = initMobilePanels;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
