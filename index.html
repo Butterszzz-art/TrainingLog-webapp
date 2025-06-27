@@ -1183,21 +1183,57 @@ await fetchUserMacroTargets(currentUser); // define this function below
 }
   
 function showTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(tab => {
-    tab.classList.remove('active');
-  });
-
   const tab = document.getElementById(tabName);
   if (!tab) return;
 
-  requestAnimationFrame(() => {
-    tab.classList.add('active');
-  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
 
-  if(tabName === 'macroTab' && window.renderSparklines){
-    renderSparklines();
-    renderHeatmap();
-    updateOfflineBadge();
+  if (typeof animateTabSwitch === 'function') {
+    animateTabSwitch(tab);
+  } else {
+    tab.style.display = 'block';
+    requestAnimationFrame(() => tab.classList.add('active'));
+    activeTab = tab;
+  }
+
+  const settingsBtn = document.getElementById('macrosSettingsBtn');
+  if (settingsBtn) {
+    settingsBtn.style.display = tabName === 'macroTab' ? 'block' : 'none';
+  }
+
+  switch (tabName) {
+    case 'macroTab':
+      if (window.renderSparklines) {
+        renderSparklines();
+        renderHeatmap();
+        updateOfflineBadge();
+      }
+      break;
+    case 'logTab':
+      if (window.renderWorkouts) renderWorkouts();
+      break;
+    case 'weightTab':
+      renderWeights();
+      break;
+    case 'cardioTab':
+      renderCardio();
+      break;
+    case 'crossfitTab':
+      renderCrossfitWorkouts();
+      break;
+    case 'programTab':
+      loadProgramTemplates();
+      loadProgramDropdown();
+      break;
+    case 'communityTab':
+      if (window.loadGroups) loadGroups();
+      break;
+    case 'progressTab':
+      showWorkoutProgress();
+      break;
+    case 'logHistoryTab':
+      showHistoryMiniTab('workout');
+      break;
   }
 }
 
