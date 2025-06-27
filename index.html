@@ -48,7 +48,7 @@
     body {
       font-family: 'Poppins', sans-serif;
       background-color: var(--bg-color);
-      color: #000;
+      color: var(--text-color);
       padding: 20px;
       margin: 0;
       width: 100vw;
@@ -114,7 +114,7 @@
       font-size: 14px;
       background: var(--card-bg);
       box-shadow: var(--shadow);
-      color: #000;
+      color: var(--text-color);
     }
     th, td {
       padding: 10px;
@@ -244,13 +244,13 @@
       box-shadow: var(--shadow);
       border-radius: 10px;
       margin-bottom: 20px;
-      color: #000;
+      color: var(--text-color);
       opacity: 0;
       transform: scale(0.9);
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .tab-content.active {
-      display: block;
+      display: block !important;
       opacity: 1;
       transform: scale(1);
     }
@@ -572,7 +572,7 @@
  
 <body>
 
-<div id="loginContainer" class="section active" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:#000;">
+<div id="loginContainer" class="section active" style="max-width:400px;margin:40px auto;background:var(--card-bg);padding:20px;box-shadow:var(--shadow);border-radius:10px;color:var(--text-color);">
   <h2>Login to Pocket Coach</h2>
   <input type="text" id="username" placeholder="Enter Username" />
   <input type="password" id="password" placeholder="Enter Password" />
@@ -1185,13 +1185,11 @@ await fetchUserMacroTargets(currentUser); // define this function below
 function showTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.remove('active');
-    tab.style.display = 'none';
   });
 
   const tab = document.getElementById(tabName);
   if (!tab) return;
 
-  tab.style.display = 'block';
   requestAnimationFrame(() => {
     tab.classList.add('active');
   });
@@ -3843,6 +3841,29 @@ window.exportCSV = exportCSV;
 
   window.showToast = showToast;
 
+
+
+  function initMobilePanels() {
+    document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
+      const tab = bar.closest('.tab-content');
+      if (tab && tab.id === 'logTab') return; // disable panel toggles on Training Log
+      bar.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const tab = btn.closest('.tab-content');
+          if (!tab) return;
+          tab.querySelectorAll('.panel').forEach(p => {
+            p.classList.toggle('active', p.id === target);
+          });
+          bar.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+    });
+  }
+
+  window.initMobilePanels = initMobilePanels;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
