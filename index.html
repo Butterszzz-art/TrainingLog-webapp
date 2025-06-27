@@ -614,10 +614,6 @@
 <div id="progressReminder"></div>
 
 <div id="logTab" class="tab-content">
-  <div class="mobile-panel-toggle">
-    <button data-target="logPanel" class="active">Log</button>
-    <button data-target="calendarPanel">Calendar</button>
-  </div>
   <div id="logPanel" class="panel active">
   <h2>Resistance Exercise Log</h2>
 
@@ -702,10 +698,6 @@
   </div>
 
   <div id="weightTab" class="tab-content">
-    <div class="mobile-panel-toggle">
-      <button data-target="weightLogPanel" class="active">Log</button>
-      <button data-target="weightChartPanel">Chart</button>
-    </div>
     <div id="weightLogPanel" class="panel active">
     <h2>Bodyweight Tracker</h2>
     <input type="number" id="currentWeightInput" placeholder="Current Weight (kg)">
@@ -735,10 +727,6 @@
   </div>
   
 <div id="crossfitTab" class="tab-content">
-  <div class="mobile-panel-toggle">
-    <button data-target="cfEntryPanel" class="active">Entry</button>
-    <button data-target="cfHistoryPanel">History</button>
-  </div>
   <div id="cfEntryPanel" class="panel active">
 
   <h2>CrossFit Workout Tracker</h2>
@@ -762,19 +750,11 @@
 </div>
 
 <div id="programTab" class="tab-content">
-  <div class="mobile-panel-toggle">
-    <button data-target="programBuilderPanel" class="active">Builder</button>
-    <button data-target="programListPanel">Programs</button>
-  </div>
   <div id="programBuilderPanel" class="panel active"><div id="programTabReactRoot"></div></div>
   <div id="programListPanel" class="panel"></div>
 </div>
 
 <div id="communityTab" class="tab-content">
-  <div class="mobile-panel-toggle">
-    <button data-target="groupsPanel" class="active">Groups</button>
-    <button data-target="postsPanel">Posts</button>
-  </div>
   <div id="groupsPanel" class="panel active">
   <h2>Community</h2>
   <div>
@@ -792,10 +772,6 @@
 </div>
 
   <div id="cardioTab" class="tab-content">
-    <div class="mobile-panel-toggle">
-      <button data-target="cardioFormPanel" class="active">Log</button>
-      <button data-target="cardioHistoryPanel">History</button>
-    </div>
     <div id="cardioFormPanel" class="panel active">
     <h2>Cardio Tracker</h2>
     <input type="text" id="cardioType" placeholder="Type (e.g. Running)">
@@ -815,10 +791,6 @@
   </div>
 
 <div id="macroTab" class="tab-content" style="position: relative; padding: 20px;">
-  <div class="mobile-panel-toggle">
-    <button data-target="macroTargetsPanel" class="active">Targets</button>
-    <button data-target="macroMealsPanel">Meals</button>
-  </div>
   <!-- Settings Button, top right, only shown on Macros tab -->
 <button id="macrosSettingsBtn" onclick="openMacroSettings()" style="position: absolute; top: 8px; right: 8px; display: none; font-size: 0.8rem; padding: 4px 8px;">>
     ⚙️ Settings
@@ -938,10 +910,6 @@
 
 
   <div id="progressTab" class="tab-content">
-    <div class="mobile-panel-toggle">
-      <button data-target="progressTogglePanel" class="active">Options</button>
-      <button data-target="progressChartsPanel">Charts</button>
-    </div>
     <h2>Progress Overview</h2>
     <div class="progress-layout">
       <div id="progressTogglePanel" class="panel active">
@@ -972,10 +940,6 @@
   </div>
 
 <div id="logHistoryTab" class="tab-content">
-  <div class="mobile-panel-toggle">
-    <button data-target="historyWorkoutPanel" class="active">Workouts</button>
-    <button data-target="historyMacroPanel">Macros</button>
-  </div>
   <h2>Log History</h2>
   <div id="historyNav" style="margin-bottom:10px;">
     <button onclick="showHistoryMiniTab('workout')">Workout History</button>
@@ -3814,16 +3778,8 @@ function loadCrossfitTemplate() {
   renderPRs();
   renderMilestones();
   renderGoalBar();
-  initMobilePanels();
 
-
-
-
-
-    
-    
 }); // closing DOMContentLoaded
-
 
 window.openSection = openSection;
 window.openDashboard = openDashboard;
@@ -3887,25 +3843,6 @@ window.exportCSV = exportCSV;
 
   window.showToast = showToast;
 
-  function initMobilePanels() {
-    document.querySelectorAll('.mobile-panel-toggle').forEach(bar => {
-      bar.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.dataset.target;
-          const tab = btn.closest('.tab-content');
-          if (!tab) return;
-          tab.querySelectorAll('.panel').forEach(p => {
-            p.classList.toggle('active', p.id === target);
-          });
-          bar.querySelectorAll('button').forEach(b => {
-            b.classList.toggle('active', b === btn);
-          });
-        });
-      });
-    });
-  }
-
-  window.initMobilePanels = initMobilePanels;
 
   function applyTheme(theme) {
     document.body.classList.remove('theme-dark', 'theme-neon', 'theme-light');
