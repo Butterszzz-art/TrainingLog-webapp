@@ -595,16 +595,16 @@
   <nav id="sideMenu" class="side-menu">
     <div class="menu-title">PocketFit (<span id="userDisplay"></span>)</div>
     <ul>
-      <li><a href="#" data-tab="logTab">📋 Training Log</a></li>
+      <li><a href="#" data-target="logTab">📋 Training Log</a></li>
       <li><a href="#" onclick="openDashboard()">🏠 Dashboard</a></li>
-      <li><a href="#" data-tab="weightTab">⚖️ Bodyweight</a></li>
-      <li><a href="#" data-tab="cardioTab">🏃 Cardio</a></li>
-      <li><a href="#" data-tab="macroTab">🍽️ Macros</a></li>
-      <li><a href="#" data-tab="crossfitTab">💪 CrossFit</a></li>
-      <li><a href="#" data-tab="programTab">🗓️ Programs</a></li>
-      <li><a href="#" data-tab="communityTab">👥 Community</a></li>
-      <li><a href="#" data-tab="progressTab">📈 Progress</a></li>
-      <li><a href="#" data-tab="logHistoryTab">📜 Log History</a></li>
+      <li><a href="#" data-target="weightTab">⚖️ Bodyweight</a></li>
+      <li><a href="#" data-target="cardioTab">🏃 Cardio</a></li>
+      <li><a href="#" data-target="macroTab">🍽️ Macros</a></li>
+      <li><a href="#" data-target="crossfitTab">💪 CrossFit</a></li>
+      <li><a href="#" data-target="programTab">🗓️ Programs</a></li>
+      <li><a href="#" data-target="communityTab">👥 Community</a></li>
+      <li><a href="#" data-target="progressTab">📈 Progress</a></li>
+      <li><a href="#" data-target="logHistoryTab">📜 Log History</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
     </ul>
   </nav>
@@ -1183,18 +1183,14 @@ await fetchUserMacroTargets(currentUser); // define this function below
 }
   
 function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   const tab = document.getElementById(tabName);
   if (!tab) return;
-
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-
+  tab.classList.add('active');
   if (typeof animateTabSwitch === 'function') {
     animateTabSwitch(tab);
-  } else {
-    tab.style.display = 'block';
-    requestAnimationFrame(() => tab.classList.add('active'));
-    activeTab = tab;
   }
+  activeTab = tab;
 
   const settingsBtn = document.getElementById('macrosSettingsBtn');
   if (settingsBtn) {
@@ -3797,10 +3793,10 @@ function loadCrossfitTemplate() {
     }
   });
 
-  sideMenu.querySelectorAll("a[data-tab]").forEach((link) => {
+  sideMenu.querySelectorAll("a[data-target]").forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const tabName = link.getAttribute("data-tab");
+      const tabName = link.getAttribute("data-target");
       showTab(tabName);
       toggleSidebar(false);
     });
