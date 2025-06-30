@@ -2795,11 +2795,12 @@ function logout() {
 }
 function animateSwitch(newEl) {
   console.log('animateSwitch called for', newEl.id);
-  if (activeSection && activeSection !== newEl) {
-    activeSection.classList.add('fade-out');
+  const previous = activeSection;
+  if (previous && previous !== newEl) {
+    previous.classList.add('fade-out');
     setTimeout(() => {
-      activeSection.style.display = 'none';
-      activeSection.classList.remove('fade-out', 'active');
+      previous.style.display = 'none';
+      previous.classList.remove('fade-out', 'active');
     }, 400);
   }
   newEl.style.display = 'block';
@@ -2818,11 +2819,12 @@ function animateSwitch(newEl) {
 }
 
 function animateTabSwitch(newTab) {
-  if (activeTab && activeTab !== newTab) {
-    activeTab.classList.add('fade-out');
+  const previous = activeTab;
+  if (previous && previous !== newTab) {
+    previous.classList.add('fade-out');
     setTimeout(() => {
-      activeTab.style.display = 'none';
-      activeTab.classList.remove('fade-out', 'active');
+      previous.style.display = 'none';
+      previous.classList.remove('fade-out', 'active');
     }, 300);
   }
   newTab.style.display = 'block';
