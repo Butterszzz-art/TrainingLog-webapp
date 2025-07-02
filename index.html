@@ -605,6 +605,7 @@
       <li><a href="#" data-target="communityTab">👥 Community</a></li>
       <li><a href="#" data-target="progressTab">📈 Progress</a></li>
       <li><a href="#" data-target="logHistoryTab">📜 Log History</a></li>
+      <li class="coach-only"><a href="#" data-tab="coachingTab">🏆 Coaching</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
       <li class="coach-only"><a href="#" data-tab="settingsTab">⚙️ Settings</a></li>
     </ul>
@@ -957,6 +958,43 @@
       <div id="macroHistoryContainer"></div>
     </div>
   </div>
+</div>
+
+<div id="coachingTab" class="tab-content coach-only">
+  <h2>Coach Dashboard</h2>
+  <section>
+    <h3>1. Client & Roster Management</h3>
+    <ul>
+      <li><strong>Clients Dashboard:</strong> Search, sort & filter clients.</li>
+      <li><strong>Profile Pages:</strong> Stats, goals, bio & history.</li>
+      <li><strong>Role-Based Access:</strong> Trainer vs. client views.</li>
+    </ul>
+  </section>
+  <section>
+    <h3>2. Program Assignment & Scheduling</h3>
+    <ul>
+      <li><strong>Assign Programs:</strong> Push templates to client calendars.</li>
+      <li><strong>Calendar Sync & Reminders:</strong> Email/SMS before sessions.</li>
+      <li><strong>Session Booking:</strong> Clients request/cancel sessions.</li>
+    </ul>
+  </section>
+  <section>
+    <h3>3. In-App Messaging & Check-Ins</h3>
+    <ul>
+      <li><strong>Secure Chat:</strong> 1-on-1 messaging with attachments.</li>
+      <li><strong>Progress Check-Ins:</strong> Photos, soreness logs.</li>
+      <li><strong>Group Broadcasts:</strong> Coach → all clients.</li>
+    </ul>
+  </section>
+  <section>
+    <h3>4. Advanced Analytics & Reporting</h3>
+    <ul>
+      <li><strong>High-Level Metrics:</strong> Roster adherence & trends.</li>
+      <li><strong>Client Reports:</strong> PDF/CSV summaries.</li>
+      <li><strong>Leaderboards:</strong> Volume & improvement rankings.</li>
+    </ul>
+  </section>
+  <!-- Continue similarly for items 5–10 -->
 </div>
 
 <div id="settingsTab" class="tab-content">
@@ -2794,13 +2832,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('trainerModeToggle');
   if (toggle) toggle.checked = saved;
   updateNavForTrainer(saved);
-  if (toggle) {
-    toggle.addEventListener('change', e => {
-      localStorage.setItem('trainerMode', JSON.stringify(e.target.checked));
-      updateNavForTrainer(e.target.checked);
-    });
-  }
-});
+    if (toggle) {
+      toggle.addEventListener('change', e => {
+        localStorage.setItem('trainerMode', JSON.stringify(e.target.checked));
+        updateNavForTrainer(e.target.checked);
+        if (e.target.checked) showTab('coachingTab');
+      });
+    }
+  });
 
 
   // Toggle FAB menu
