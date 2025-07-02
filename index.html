@@ -605,9 +605,9 @@
       <li><a href="#" data-target="communityTab">👥 Community</a></li>
       <li><a href="#" data-target="progressTab">📈 Progress</a></li>
       <li><a href="#" data-target="logHistoryTab">📜 Log History</a></li>
-      <li class="coach-only"><a href="#" data-tab="coachingTab">🏆 Coaching</a></li>
+      <li class="coach-only"><a href="#" data-target="coachingTab">🏆 Coaching</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
-      <li><a href="#" data-tab="settingsTab">⚙️ Settings</a></li>
+      <li><a href="#" data-target="settingsTab">⚙️ Settings</a></li>
     </ul>
   </nav>
 
@@ -1003,6 +1003,21 @@
     <input type="checkbox" id="trainerModeToggle" />
     Enable Trainer Mode
   </label>
+
+  <div id="calorieCalcSection" style="margin-top:20px;">
+    <h3>Calculate Calories</h3>
+    <input type="number" id="calcWeight" placeholder="Weight (lbs)" style="width:100%;padding:8px;margin-bottom:10px;">
+    <input type="number" id="calcHeight" placeholder="Height (in)" style="width:100%;padding:8px;margin-bottom:10px;">
+    <select id="calcActivity" style="width:100%;padding:8px;margin-bottom:10px;">
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly Active</option>
+      <option value="1.55">Moderately Active</option>
+      <option value="1.725">Very Active</option>
+      <option value="1.9">Extremely Active</option>
+    </select>
+    <button onclick="calculateCaloriesEquation()" style="width:100%;font-size:1.1rem;padding:12px;">Calculate Calories</button>
+    <p id="calorieCalcResult" style="margin-top:10px;"></p>
+  </div>
 </div>
   </div>
 </div>
@@ -3032,6 +3047,20 @@ function estimateCalories() {
   `;
 }
 
+function calculateCaloriesEquation() {
+  const weight = +document.getElementById('calcWeight').value;
+  const height = +document.getElementById('calcHeight').value;
+  const activity = +document.getElementById('calcActivity').value;
+  if (!weight || !height) {
+    alert('Enter weight and height.');
+    return;
+  }
+  const age = 25;
+  const tdee = Math.round((10 * (weight * 0.453592) + 6.25 * (height * 2.54) - 5 * age + 5) * activity);
+  const resultEl = document.getElementById('calorieCalcResult');
+  if (resultEl) resultEl.textContent = `Estimated maintenance calories: ${tdee} kcal`;
+}
+
 // ===== CARDIO TRACKER =====
 function addCardioEntry() {
   const type = document.getElementById("cardioType").value.trim();
@@ -3924,6 +3953,7 @@ window.goToDate = goToDate;
 window.refreshProgress = refreshProgress;
 window.promptGoal = promptGoal;
 window.exportCSV = exportCSV;
+window.calculateCaloriesEquation = calculateCaloriesEquation;
 
   function showToast(msg) {
     const toast = document.createElement('div');
