@@ -68,3 +68,26 @@
 .coach-only {
   display: none;
 }
+
+/* center the <h2> titles in every tab pane */
+.tab-content h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* sidebar background is dark, force link/text to white */
+.side-menu,
+.side-menu .menu-title,
+.side-menu ul li a {
+  color: #fff !important;
+}
+/* also for any dark-themed headers/footers */
+header, .dark-bg, .coach-only {
+  color: #fff;
+}
+
+/* ensure dark mode containers display white text */
+.dark-mode,
+.dark-mode * {
+  color: #fff;
+}
