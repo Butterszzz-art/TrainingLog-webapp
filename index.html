@@ -606,8 +606,6 @@
       <li><a href="#" data-target="progressTab">📈 Progress</a></li>
       <li><a href="#" data-target="logHistoryTab">📜 Log History</a></li>
       <li class="coach-only"><a href="#" data-target="coachingTab">🏆 Coaching</a></li>
-      <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
-      <li><a href="#" data-target="settingsTab">⚙️ Settings</a></li>
       <li><a href="#" data-target="settingsTab">⚙️ Settings</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
     </ul>
@@ -3894,13 +3892,13 @@ function loadCrossfitTemplate() {
     }
   });
 
-  sideMenu.addEventListener("click", (e) => {
-    const link = e.target.closest("a[data-target]");
-    if (!link) return;
-    e.preventDefault();
-    const tabName = link.getAttribute("data-target");
-    showTab(tabName);
-    toggleSidebar(false);
+  sideMenu.querySelectorAll("a[data-target]").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tabName = link.getAttribute("data-target");
+      showTab(tabName);
+      toggleSidebar(false);
+    });
   });
 
   // Show the first tab initially
