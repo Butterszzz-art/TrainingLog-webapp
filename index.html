@@ -1294,6 +1294,16 @@ function showTab(tabName) {
     case 'logHistoryTab':
       showHistoryMiniTab('workout');
       break;
+    case 'settingsTab':
+      const theme = localStorage.getItem('theme') || 'light';
+      if (typeof applyTheme === 'function') applyTheme(theme);
+      const themeSel = document.getElementById('themeSelect');
+      if (themeSel) themeSel.value = theme;
+      const trainerToggle = document.getElementById('trainerModeToggle');
+      if (trainerToggle) {
+        trainerToggle.checked = JSON.parse(localStorage.getItem('trainerMode') || 'false');
+      }
+      break;
   }
 }
 
