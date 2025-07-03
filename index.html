@@ -848,7 +848,7 @@
 
     <button id="addMealFab" class="fab" onclick="addMacroMeal()">＋</button>
 
-    <button id="adjustMacrosToggle" class="btn" onclick="toggleTargetForm()" style="margin-top:20px;">
+    <button id="adjustMacrosToggle" class="btn" onclick="openMacroSettings()" style="margin-top:20px;">
       ⚙️ Adjust Macros
     </button>
     </div>
@@ -888,25 +888,6 @@
       <button onclick="saveSliderMacros()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Save Macros</button>
     </div>
 
-    <!-- Set Your Targets -->
-    <div id="macroCalcForm">
-      <h3>Set Your Macro Targets</h3>
-      <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-      <input type="number" id="macroHeight" placeholder="Height" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-      <select id="heightUnit" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-        <option value="in">in</option>
-        <option value="cm">cm</option>
-      </select>
-      <select id="macroActivity" style="width: 100%; padding: 8px; margin-bottom: 20px;">
-        <option value="1.2">Sedentary</option>
-        <option value="1.375">Lightly Active</option>
-        <option value="1.55">Moderately Active</option>
-        <option value="1.725">Very Active</option>
-        <option value="1.9">Extremely Active</option>
-      </select>
-      <button onclick="calculateMacroTargets()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Calculate Targets</button>
-      <button onclick="console.log(planWeek([]))" style="width:100%;font-size:1rem;margin-top:10px;">Plan Week</button>
-    </div>
   </div>
 </div>
 
@@ -1017,6 +998,26 @@
     </select>
     <button onclick="calculateCaloriesEquation()" style="width:100%;font-size:1.1rem;padding:12px;">Calculate Calories</button>
     <p id="calorieCalcResult" style="margin-top:10px;"></p>
+  </div>
+  <button id="macroSettingsBtn" onclick="toggleMacroCalcForm()" style="margin-top:20px;">Macro Settings</button>
+
+  <div id="macroCalcForm" style="display:none; margin-top:20px;">
+    <h3>Set Your Macro Targets</h3>
+    <input type="number" id="macroWeight" placeholder="Bodyweight (lbs)" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    <input type="number" id="macroHeight" placeholder="Height" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    <select id="heightUnit" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+      <option value="in">in</option>
+      <option value="cm">cm</option>
+    </select>
+    <select id="macroActivity" style="width: 100%; padding: 8px; margin-bottom: 20px;">
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly Active</option>
+      <option value="1.55">Moderately Active</option>
+      <option value="1.725">Very Active</option>
+      <option value="1.9">Extremely Active</option>
+    </select>
+    <button onclick="calculateMacroTargets()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Calculate Targets</button>
+    <button onclick="console.log(planWeek([]))" style="width:100%;font-size:1rem;margin-top:10px;">Plan Week</button>
   </div>
 </div>
   </div>
@@ -2283,7 +2284,8 @@ function calculateMacroTargets() {
 
   document.getElementById("calTarget").textContent = tdee;
   document.getElementById("macroCalcForm").style.display = "none";
-  document.getElementById("toggleTargetFormBtn").textContent = "▶️ Set Your Targets";
+  const msBtn = document.getElementById("macroSettingsBtn");
+  if (msBtn) msBtn.textContent = "Macro Settings";
   adjustMacros();
 }
 
@@ -2434,18 +2436,6 @@ function renderMacroTargets() {
   }
 }
 
-
-function toggleTargetForm() {
-  const form = document.getElementById("macroCalcForm");
-  const btn  = document.getElementById("toggleTargetFormBtn");
-  if (form.style.display === "none") {
-    form.style.display = "block";
-    btn.textContent = "🔽 Hide Targets Form";
-  } else {
-    form.style.display = "none";
-    btn.textContent = "▶️ Set Your Targets";
-  }
-}
 
 
 function enforceSliderCaps(changedId, p, f, c, limit) {
@@ -2835,6 +2825,20 @@ function closeMacroSettings() {
 // expose helpers for inline handlers
 window.openMacroSettings = openMacroSettings;
 window.closeMacroSettings = closeMacroSettings;
+
+function toggleMacroCalcForm() {
+  const form = document.getElementById('macroCalcForm');
+  const btn = document.getElementById('macroSettingsBtn');
+  if (!form || !btn) return;
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.textContent = '⬅️ Back';
+  } else {
+    form.style.display = 'none';
+    btn.textContent = 'Macro Settings';
+  }
+}
+window.toggleMacroCalcForm = toggleMacroCalcForm;
 
 function updateNavForTrainer(isTrainer) {
   document.querySelectorAll('.coach-only').forEach(el => {
