@@ -704,6 +704,7 @@
     <div id="weightLogPanel" class="panel active">
     <h2>Bodyweight Tracker</h2>
     <input type="number" id="currentWeightInput" placeholder="Current Weight (kg)">
+    <input type="date" id="weightDateInput">
     <button onclick="addWeightEntry()">Add Weight</button>
     <input type="number" id="avgCalories" placeholder="Average Daily Calories" />
     <button onclick="estimateCalories()">Estimate Calories</button>
@@ -3009,11 +3010,13 @@ function renderWorkoutHistory() {
 
 function addWeightEntry() {
   const weight = +document.getElementById("currentWeightInput").value;
-  const date = new Date().toISOString().split('T')[0];
+  const dateField = document.getElementById("weightDateInput");
+  const date = dateField.value || new Date().toISOString().split('T')[0];
   if (!weight) return alert("Enter weight");
   const log = JSON.parse(localStorage.getItem(`bodyweightLog_${currentUser}`)) || [];
   log.push({ weight, date, calories: null, cardio: null });
   localStorage.setItem(`bodyweightLog_${currentUser}`, JSON.stringify(log));
+  if (dateField) dateField.value = '';
   renderWeights();
 }
 
