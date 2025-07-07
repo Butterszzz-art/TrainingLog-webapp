@@ -1061,7 +1061,7 @@ let airtableBaseId = '';
 
 async function fetchAirtableConfig() {
   try {
-    const res = await fetch(`${serverUrl}/config`);
+    const res = await fetch(`${window.SERVER_URL}/config`);
     if (res.ok) {
       const cfg = await res.json();
       airtableToken = cfg.airtableToken;
@@ -1075,7 +1075,7 @@ async function fetchAirtableConfig() {
   if (!airtableToken || !airtableBaseId) {
     try {
       const mod = await import('./config.js');
-      if (mod.SERVER_URL) serverUrl = mod.SERVER_URL;
+      if (mod.SERVER_URL) window.SERVER_URL = mod.SERVER_URL;
       if (mod.airtableConfig) {
         airtableToken = mod.airtableConfig.airtableToken || airtableToken;
         airtableBaseId = mod.airtableConfig.airtableBaseId || airtableBaseId;
@@ -1085,9 +1085,9 @@ async function fetchAirtableConfig() {
     }
   }
 
-  if (serverUrl) {
+  if (window.SERVER_URL) {
     try {
-      const res = await fetch(`${serverUrl}/config`);
+      const res = await fetch(`${window.SERVER_URL}/config`);
       if (res.ok) {
         const cfg = await res.json();
         airtableToken = cfg.airtableToken;
@@ -1188,7 +1188,7 @@ async function startLogin() {
   }
 
   try {
-    const response = await fetch(`${serverUrl}/login`, {
+    const response = await fetch(`${window.SERVER_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -1333,7 +1333,7 @@ async function startSignup() {
   }
 
   try {
-    const response = await fetch(`${serverUrl}/signup`, {
+    const response = await fetch(`${window.SERVER_URL}/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -1800,7 +1800,7 @@ async function sendTemplate() {
   const templateData = JSON.parse(select.value);
 
   try {
-    const response = await fetch(`${serverUrl}/sendTemplate`, {
+    const response = await fetch(`${window.SERVER_URL}/sendTemplate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2019,7 +2019,7 @@ function completeWorkout() {
 
 async function saveWorkoutToBackend(workout) {
   const action = {
-    url: `${serverUrl}/saveWorkout`,
+    url: `${window.SERVER_URL}/saveWorkout`,
     options: {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2036,7 +2036,7 @@ async function saveWorkoutToBackend(workout) {
 
 async function loadWorkoutsFromBackend() {
   try {
-    const res = await fetch(`${serverUrl}/getWorkouts?username=${currentUser}`);
+    const res = await fetch(`${window.SERVER_URL}/getWorkouts?username=${currentUser}`);
     const data = await res.json();
     if (data.workouts) {
       localStorage.setItem(`workouts_${currentUser}`, JSON.stringify(data.workouts));

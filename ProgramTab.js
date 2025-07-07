@@ -121,7 +121,7 @@ export default function ProgramTab() {
         order: i + 1
       }))
     };
-    const res = await fetch('/createProgram', {
+    const res = await fetch(`${window.SERVER_URL}/createProgram`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -141,7 +141,7 @@ export default function ProgramTab() {
   };
   const doShare = async username => {
     if (!shareId) return;
-    await fetch('/shareProgram', {
+    await fetch(`${window.SERVER_URL}/shareProgram`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

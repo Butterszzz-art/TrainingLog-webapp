@@ -4,7 +4,8 @@ if (typeof localStorage !== 'undefined') {
   groups = JSON.parse(localStorage.getItem('communityGroups')) || [];
 }
 
-let serverUrl = 'https://traininglog-backend.onrender.com';
+const serverUrl = (typeof window !== 'undefined' && window.SERVER_URL) ||
+  'https://traininglog-backend.onrender.com';
 
 function saveGroups() {
   if (typeof localStorage !== 'undefined') {
@@ -17,7 +18,7 @@ async function createGroup(name, goal = '', tags = []) {
   if (!name) return null;
   if (typeof fetch !== 'undefined' && window && window.currentUser) {
     try {
-      const res = await fetch(`${serverUrl}/community/groups`, {
+      const res = await fetch(`${window.SERVER_URL}/community/groups`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ name, creatorId: window.currentUser, goal, tags })
@@ -44,7 +45,7 @@ function getGroups() {
 async function fetchGroups(userId) {
   if (!userId || typeof fetch === 'undefined') return getGroups();
   try {
-    const res = await fetch(`${serverUrl}/community/groups?userId=${encodeURIComponent(userId)}`, {
+    const res = await fetch(`${window.SERVER_URL}/community/groups?userId=${encodeURIComponent(userId)}`, {
       method: 'GET'
     });
     if (res.ok) {
@@ -63,7 +64,7 @@ async function searchGroups(opts = {}) {
   if (opts.tag) params.set('tag', opts.tag);
   if (opts.search) params.set('search', opts.search);
   try {
-    const res = await fetch(`${serverUrl}/community/groups?${params.toString()}`, { method: 'GET' });
+    const res = await fetch(`${window.SERVER_URL}/community/groups?${params.toString()}`, { method: 'GET' });
     if (res.ok) {
       groups = await res.json();
       saveGroups();
@@ -85,7 +86,7 @@ function filterGroups(list, opts = {}) {
 
 async function fetchPosts(groupId) {
   try {
-    const res = await fetch(`${serverUrl}/community/groups/${groupId}/posts`, {
+    const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/posts`, {
       method: 'GET'
     });
     if (res.ok) {
@@ -107,7 +108,7 @@ async function fetchPosts(groupId) {
 async function inviteUserToGroup(groupId, invitedUserId) {
   if (!invitedUserId || typeof fetch === 'undefined') return;
   try {
-    const res = await fetch(`${serverUrl}/community/groups/${groupId}/invite`, {
+    const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ invitedUserId })
@@ -134,7 +135,7 @@ async function inviteUserToGroup(groupId, invitedUserId) {
 async function shareProgramToGroup(groupId, programData) {
   if (!programData || typeof fetch === 'undefined' || !window.currentUser) return;
   try {
-    const res = await fetch(`${serverUrl}/community/groups/${groupId}/share`, {
+    const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/share`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ senderId: window.currentUser, programData })
@@ -154,7 +155,7 @@ async function shareProgramToGroup(groupId, programData) {
 
 async function fetchProgress(groupId) {
   try {
-    const res = await fetch(`${serverUrl}/community/groups/${groupId}/progress`, {
+    const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/progress`, {
       method: 'GET'
     });
     if (res.ok) return await res.json();
@@ -182,7 +183,7 @@ async function addPost(groupId, user, text) {
   if (!g) return;
   if (typeof fetch !== 'undefined') {
     try {
-      await fetch(`${serverUrl}/community/groups/${groupId}/posts`, {
+      await fetch(`${window.SERVER_URL}/community/groups/${groupId}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user, text })
