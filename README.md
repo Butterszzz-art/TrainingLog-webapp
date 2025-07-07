@@ -74,8 +74,8 @@ cp config.example.js config.js
 The file exports two constants:
 
 ```javascript
-export const SERVER_URL = 'http://localhost:3000';
-export const airtableConfig = {
+window.SERVER_URL = 'http://localhost:3000';
+window.airtableConfig = {
   airtableToken: 'yourToken',
   airtableBaseId: 'yourBase'
 };
@@ -84,7 +84,6 @@ export const airtableConfig = {
 Optionally, set `SERVER_URL` to point at the Express backend that exposes the
 `/config` route. When no backend is reachable, the page falls back to the
 values provided in `config.js`.
-Optionally, set `SERVER_URL` if you are running the Express backend that
-exposes the `/config` route. Leaving it blank will load the credentials directly
-from `config.js`.
+During development you can override `window.SERVER_URL` to use a local backend
+like `http://localhost:3000`.
 
