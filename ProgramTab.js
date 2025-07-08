@@ -123,6 +123,7 @@ export default function ProgramTab() {
     };
     const res = await fetch(`${window.SERVER_URL}/createProgram`, {
       method: 'POST',
+        credentials: "include",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -142,6 +143,7 @@ export default function ProgramTab() {
   const doShare = async username => {
     if (!shareId) return;
     await fetch(`${window.SERVER_URL}/shareProgram`, {
+        credentials: "include",
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

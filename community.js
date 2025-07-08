@@ -20,6 +20,7 @@ async function createGroup(name, goal = '', tags = []) {
     try {
       const res = await fetch(`${window.SERVER_URL}/community/groups`, {
   method: 'POST',
+  credentials: 'include',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ name, creatorId: window.currentUser, goal, tags })
 });
@@ -46,7 +47,8 @@ async function fetchGroups(userId) {
   if (!userId || typeof fetch === 'undefined') return getGroups();
   try {
     const res = await fetch(`${window.SERVER_URL}/community/groups?userId=${encodeURIComponent(userId)}`, {
-      method: 'GET'
+      method: 'GET',
+      credentials: 'include'
     });
     if (res.ok) {
       groups = await res.json();
@@ -64,7 +66,7 @@ async function searchGroups(opts = {}) {
   if (opts.tag) params.set('tag', opts.tag);
   if (opts.search) params.set('search', opts.search);
   try {
-    const res = await fetch(`${window.SERVER_URL}/community/groups?${params.toString()}`, { method: 'GET' });
+    const res = await fetch(`${window.SERVER_URL}/community/groups?${params.toString()}`, { method: 'GET', credentials: 'include' });
     if (res.ok) {
       groups = await res.json();
       saveGroups();
@@ -87,7 +89,8 @@ function filterGroups(list, opts = {}) {
 async function fetchPosts(groupId) {
   try {
     const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/posts`, {
-      method: 'GET'
+      method: 'GET',
+      credentials: 'include'
     });
     if (res.ok) {
       const posts = await res.json();
@@ -110,6 +113,7 @@ async function inviteUserToGroup(groupId, invitedUserId) {
   try {
     const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/invite`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ invitedUserId })
     });
@@ -137,6 +141,7 @@ async function shareProgramToGroup(groupId, programData) {
   try {
     const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/share`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ senderId: window.currentUser, programData })
     });
@@ -156,7 +161,8 @@ async function shareProgramToGroup(groupId, programData) {
 async function fetchProgress(groupId) {
   try {
     const res = await fetch(`${window.SERVER_URL}/community/groups/${groupId}/progress`, {
-      method: 'GET'
+      method: 'GET',
+      credentials: 'include'
     });
     if (res.ok) return await res.json();
   } catch (e) {
@@ -185,6 +191,7 @@ async function addPost(groupId, user, text) {
     try {
       await fetch(`${window.SERVER_URL}/community/groups/${groupId}/posts`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user, text })
       });
