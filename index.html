@@ -1303,7 +1303,7 @@ function showTab(tabName) {
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
-      credentials: "include"
+      credentials: "include",
     headers: { Authorization: `Bearer ${airtableToken}` }
   });
   const data = await response.json();
