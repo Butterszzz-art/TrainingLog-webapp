@@ -564,6 +564,43 @@
   border-radius: .5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,.1);
 }
+
+@media (max-width: 600px) {
+  /* 1. Calendar full-width at top */
+  #sideMenu, #menuToggle { display: none !important; }
+  #calendarContainer {
+    order: -1;
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+  /* 2. Stack primary inputs */
+  #logTab .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  #logTab input,
+  #logTab select {
+    width: 100% !important;
+  }
+  /* 3. Inline unit/date/template row */
+  #logTab .sub-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  #logTab .sub-row > * {
+    flex: 1;
+  }
+  /* 4. Rest timer at bottom */
+  #restTimerSection {
+    order: 99;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -621,7 +658,7 @@
 
 <div id="resistance-section">
   <div id="resistance-inputs">
-  <div class="inputs-grid">
+  <div class="inputs-grid form-row">
   <input type="text" id="exercise" placeholder="Exercise" list="exerciseSuggestions" />
   <datalist id="exerciseSuggestions"></datalist>
   <input type="number" id="sets" placeholder="Sets" oninput="generateSetInputs(this.value)" />
@@ -629,23 +666,21 @@
   <!-- Optional goals -->
   <input type="number" id="goal" placeholder="Target Weight Goal (kg/lbs)" />
   <input type="number" id="repGoal" placeholder="Target Rep Goal (optional)" />
+  </div>
 
-  <!-- Unit selector -->
-  <select id="weightUnit">
-    <option value="kg">kg</option>
-    <option value="lbs">lbs</option>
-  </select>
+  <div class="sub-row">
+    <select id="weightUnit">
+      <option value="kg">kg</option>
+      <option value="lbs">lbs</option>
+    </select>
+    <input type="date" id="entryDate" class="calendar-widget slide-up" />
+    <select id="templateSelect" onchange="loadSelectedTemplate()" style="margin-top: 10px;">
+      <option value="">Select Template...</option>
+    </select>
   </div>
 
   <!-- Dynamically generated inputs will appear here -->
   <div id="setInputsContainer"></div>
-
-  <!-- Date selector -->
-  <input type="date" id="entryDate" class="calendar-widget slide-up" />
-
-  <select id="templateSelect" onchange="loadSelectedTemplate()" style="margin-top: 10px;">
-  <option value="">Select Template...</option>
-</select>
 
 
   <div id="restTimerSection" style="margin-top:10px;">
@@ -689,7 +724,7 @@
     <!-- Logs will render below this -->
     <div id="workoutsContainer" style="margin-top: 20px;"></div>
     </div>
-    <div id="calendarPanel" class="panel">
+    <div id="calendarContainer" class="panel">
       <div id="training-calendar" class="slide-up"></div>
     </div>
 
