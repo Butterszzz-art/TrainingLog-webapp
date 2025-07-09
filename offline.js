@@ -29,3 +29,7 @@ if (typeof window !== 'undefined') {
   window.queueAction = queueAction;
   window.processQueue = processQueue;
 }
+
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js');
+}
