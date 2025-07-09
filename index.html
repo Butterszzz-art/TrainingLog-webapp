@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="ProgramTab.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="/manifest.json">
   <style>
     /* Center all tab headers on the page */
     .tab-content > h2,
@@ -4063,6 +4064,15 @@ window.closeMacroSettings = closeMacroSettings;
     </script>
 
     <script type="module" src="ProgramTab.js"></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () =>
+          navigator.serviceWorker.register('/service-worker.js')
+            .catch(err => console.error('SW failed:', err))
+        );
+      }
+    </script>
 
 
 </body>
