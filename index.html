@@ -1184,6 +1184,7 @@ async function startLogin() {
 
   if (!username || !password) {
     alert("Please fill in both username and password.");
+    setLoading(btn, false);
     return;
   }
 
@@ -1330,6 +1331,7 @@ async function startSignup() {
 
   if (!username || !password) {
     alert("Please fill in both username and password.");
+    setLoading(btn, false);
     return;
   }
 
