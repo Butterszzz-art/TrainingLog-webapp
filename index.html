@@ -1303,7 +1303,6 @@ function showTab(tabName) {
 async function fetchUserMacroTargets(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/MacroTargets?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
-      credentials: "include",
     headers: { Authorization: `Bearer ${airtableToken}` }
   });
   const data = await response.json();
@@ -1698,7 +1697,6 @@ async function saveTemplate(username, templateName, templateData) {
   try {
     const response = await fetch(url, {
       method: 'POST',
-        credentials: "include",
       headers: {
         Authorization: `Bearer ${airtableToken}`,
         'Content-Type': 'application/json'
@@ -1727,7 +1725,6 @@ async function saveTemplate(username, templateName, templateData) {
 async function fetchTemplates(username) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${templatesTableName}?filterByFormula={Username}='${username}'`;
   const response = await fetch(url, {
-    credentials: "include",
     headers: { Authorization: `Bearer ${airtableToken}` }
   });
   const data = await response.json();
@@ -2499,7 +2496,6 @@ async function saveToAirtable(username, target) {
   try {
     const r = await fetch(url, {
       method: "POST",
-        credentials: "include",
       headers: {
         Authorization: `Bearer ${airtableToken}`,
         "Content-Type": "application/json"
@@ -2722,7 +2718,6 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   try {
     const response = await fetch(url, {
       method: "POST",
-        credentials: "include",
       headers: {
         Authorization: `Bearer ${airtableToken}`,
         "Content-Type": "application/json"
@@ -2762,7 +2757,6 @@ async function saveDailyMacroLog(username, date, meals, totals) {
   try {
     const response = await fetch(url, {
       method: "POST",
-        credentials: "include",
       headers: {
         Authorization: `Bearer ${airtableToken}`,
         "Content-Type": "application/json"
@@ -3594,7 +3588,6 @@ async function createUser(username, password) {
   const url = `https://api.airtable.com/v0/${airtableBaseId}/${usersTableName}`;
   await fetch(url, {
     method: 'POST',
-      credentials: "include",
     headers: {
       Authorization: `Bearer ${airtableToken}`,
       'Content-Type': 'application/json'
@@ -3610,7 +3603,6 @@ async function fetchDailyLogs(username) {
 
   try {
     const response = await fetch(url, {
-        credentials: "include",
       headers: { Authorization: `Bearer ${airtableToken}` }
     });
     const data = await response.json();
