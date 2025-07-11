@@ -87,13 +87,3 @@ values provided in `config.js`.
 During development you can override `window.SERVER_URL` to use a local backend
 like `http://localhost:3000`.
 
-
-## Monorepo Structure
-
-This repository uses **Yarn workspaces** to manage a small monorepo. The layout is:
-
-- `web/` – existing web application and Express server
-- `mobile/` – React Native app (placeholder in this environment)
-- `packages/common/` – shared JavaScript utilities used by both apps
-
-Workspaces are defined in the root `package.json`. The React Native bundler is configured to watch the `packages/common` directory so modules can be shared across platforms.
