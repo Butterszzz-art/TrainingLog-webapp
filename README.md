@@ -97,3 +97,12 @@ This repository uses **Yarn workspaces** to manage a small monorepo. The layout 
 - `packages/common/` – shared JavaScript utilities used by both apps
 
 Workspaces are defined in the root `package.json`. The React Native bundler is configured to watch the `packages/common` directory so modules can be shared across platforms.
+
+## GitHub Pages
+
+The static front-end lives in the `web` directory. A workflow in
+`.github/workflows/pages.yml` publishes this folder to GitHub Pages
+whenever changes land on `main`. Make sure the repository's Pages
+settings are configured to use **GitHub Actions** so the site is served
+from `/web`.
+
