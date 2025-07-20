@@ -91,3 +91,13 @@ header, .dark-bg, .coach-only {
 .dark-mode * {
   color: #fff;
 }
+.lifestyle-nav {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+.lifestyle-nav button {
+  flex: 1;
+  padding: 6px;
+  margin: 0 2px;
+}

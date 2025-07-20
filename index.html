@@ -608,6 +608,7 @@
       <li><a href="#" data-target="communityTab">👥 Community</a></li>
       <li><a href="#" data-target="progressTab">📈 Progress</a></li>
       <li><a href="#" data-target="logHistoryTab">📜 Log History</a></li>
+      <li><a href="#" data-target="lifestyleTab">🌱 Lifestyle</a></li>
       <li class="coach-only"><a href="#" data-target="coachingTab">🏆 Coaching</a></li>
       <li><a href="#" data-target="settingsTab">⚙️ Settings</a></li>
       <li><button id="sidebarLogoutBtn" onclick="logout()">Logout</button></li>
@@ -945,6 +946,43 @@
   </div>
 </div>
 
+<div id="lifestyleTab" class="tab-content">
+  <h2>Lifestyle</h2>
+  <nav id="lifestyleNav" class="lifestyle-nav">
+    <button data-target="dailySchedulePanel">Daily Schedule</button>
+    <button data-target="studyPanel">Study Sessions</button>
+    <button data-target="todoPanel">To-Do List</button>
+    <button data-target="habitsPanel">Habits</button>
+    <button data-target="goalsPanel">Goals</button>
+  </nav>
+  <div id="dailySchedulePanel" class="panel active">
+    <input type="date" id="scheduleDate">
+    <ul id="scheduleList"></ul>
+    <button class="fab" onclick="addScheduleItem()">+</button>
+  </div>
+  <div id="studyPanel" class="panel" style="display:none;">
+    <select id="studySubjectFilter"><option value="">All Subjects</option></select>
+    <input type="date" id="studyDateFilter">
+    <ul id="studyList"></ul>
+    <button class="fab" onclick="addStudySession()">+</button>
+  </div>
+  <div id="todoPanel" class="panel" style="display:none;">
+    <input id="todoCategoryFilter" placeholder="Category">
+    <ul id="todoList"></ul>
+    <button class="fab" onclick="addTodo()">+</button>
+  </div>
+  <div id="habitsPanel" class="panel" style="display:none;">
+    <input id="habitCategoryFilter" placeholder="Category">
+    <ul id="habitList"></ul>
+    <button class="fab" onclick="addHabit()">+</button>
+  </div>
+  <div id="goalsPanel" class="panel" style="display:none;">
+    <input id="goalCategoryFilter" placeholder="Category">
+    <ul id="goalList"></ul>
+    <button class="fab" onclick="addGoal()">+</button>
+  </div>
+</div>
+
 <div id="coachingTab" class="tab-content coach-only">
   <h2>Coach Dashboard</h2>
   <section>
@@ -1052,6 +1090,7 @@
 <script type="module" src="autoProgression.js"></script>
 <script type="module" src="periodization.js"></script>
 <script type="module" src="macrosFeatures.js"></script>
+<script src="lifestyle.js"></script>
 <script>
 
 let currentUser = null;
@@ -1288,6 +1327,9 @@ function showTab(tabName) {
       break;
     case 'logHistoryTab':
       showHistoryMiniTab('workout');
+      break;
+    case 'lifestyleTab':
+      initLifestyle();
       break;
     case 'settingsTab':
       const theme = localStorage.getItem('theme') || 'light';
@@ -3926,6 +3968,7 @@ function loadCrossfitTemplate() {
   renderPRs();
   renderMilestones();
   renderGoalBar();
+  initLifestyle();
 
 }); // closing DOMContentLoaded
 
