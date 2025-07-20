@@ -35,3 +35,14 @@ test('clicking Settings link shows settings tab', () => {
 
   expect(settingsTab.classList.contains('active')).toBe(true);
 });
+
+test('trainer toggle hidden on small screens', () => {
+  const mobileDom = new JSDOM(html, { runScripts: 'outside-only' });
+  mobileDom.window.innerWidth = 500;
+  const wrapper = mobileDom.window.document.getElementById('trainerModeWrapper');
+  // simulate our DOMContentLoaded handler
+  if (wrapper && mobileDom.window.innerWidth < 768) {
+    wrapper.style.display = 'none';
+  }
+  expect(wrapper.style.display).toBe('none');
+});

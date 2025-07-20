@@ -984,7 +984,7 @@
 
 <div id="settingsTab" class="tab-content">
   <h2>Settings</h2>
-  <label>
+  <label id="trainerModeWrapper">
     <input type="checkbox" id="trainerModeToggle" />
     Enable Trainer Mode
   </label>
@@ -2858,6 +2858,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const saved = JSON.parse(localStorage.getItem('trainerMode') || 'false');
   const toggle = document.getElementById('trainerModeToggle');
   if (toggle) toggle.checked = saved;
+  const wrapper = document.getElementById('trainerModeWrapper');
+  if (wrapper && window.innerWidth < 768) {
+    wrapper.style.display = 'none';
+  }
   updateNavForTrainer(saved);
     if (toggle) {
       toggle.addEventListener('change', e => {
